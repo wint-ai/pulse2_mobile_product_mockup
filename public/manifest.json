@@ -1,0 +1,15 @@
+{
+  "name": "Pulse 2.0",
+  "short_name": "Pulse",
+  "start_url": "/pulse2_mobile_product_sandbox/",
+  "display": "standalone",
+  "background_color": "#12086F",
+  "theme_color": "#0B95F8",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

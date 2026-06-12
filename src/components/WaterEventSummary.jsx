@@ -1,0 +1,271 @@
+// Water Event Summary widget — compact list-row form used on the Alerts tab.
+// Reference design lives at:
+//   public/reviews/water-event-widget.html § "1 · Water Event Summary widget"
+//
+// Anatomy:
+//   [icon] System name              [Apr 28 · 06:11]
+//          Street address           [3h 11m]
+//   [level pill] [state pill] [valve pill]        [avatars]
+//
+// One per system. Top accent stripe colour-codes the lifecycle at a glance.
+
+import { useTheme } from '../context/ThemeContext';
+import { getSystemById } from '../data/systems';
+import { getTag, getTags } from '../data/tagsStore';
+import { getIgnoredInfo } from '../data/ignoredIncidents';
+
+function MIcon({ name, size = 18, color, fill, style = {} }) {
+  return (
+    <span className="material-symbols-outlined"
+      style={{ fontSize: size, color, fontVariationSettings: fill ? "'FILL' 1" : "'FILL' 0", lineHeight: 1, ...style }}
+    >{name}</span>
+  );
+}
+
+const AVATAR_COLORS = ['#D14F75', '#6BA52A', '#04ADEF', '#E5A100', '#9B59B6'];
+function initials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function fmtDuration(ms) {
+  if (ms < 0) ms = 0;
+  const min = Math.floor(ms / 60000);
+  if (min < 60) return `${min}m`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  if (h < 24) return m ? `${h}h ${m}m` : `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
+
+function fmtDateShort(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
+}
+
+export default function WaterEventSummary({ event, onClick, highlight }) {
+  const { theme } = useTheme();
+  const sys = event.system ? getSystemById(event.system) : null;
+  const isHigh = event.type === 'leak-high';
+  const isLow  = event.type === 'leak-low';
+  if (!isHigh && !isLow) return null;
+
+  const isResolved = !!event.resolved && !event.ignored;
+  const isIgnored  = !!event.ignored;
+
+  // Variant A category palette (locked in Event Timeline PRD). Same dot
+  // anatomy across the app: 32 px circle, 2 px coloured ring, 10% tinted fill,
+  // category-coloured icon inside. Resolved events KEEP their category color
+  // and add a small green ✓ badge in the bottom-right of the dot — same spec
+  // as the Timeline so users see the same alert the same way in both places.
+  //   High Flow #DB4670 · Low Flow #F05C25 · Ignored #9DA3AE
+  const ringColor = isIgnored ? '#9DA3AE'
+                  : isHigh ? '#DB4670'
+                  : '#F05C25';
+  const iconBg = isIgnored ? 'rgba(20,21,26,0.06)'
+              : isHigh ? 'rgba(219,70,112,0.10)'
+              : 'rgba(240,92,37,0.10)';
+  const iconColor = ringColor;
+
+  // Pills
+  const levelLabel = isHigh ? 'High Flow' : 'Low Flow';
+  // Pill colors match the Variant A ring color for the same category.
+  const levelPillStyle = isHigh
+    ? { background: 'rgba(219,70,112,0.12)', color: '#DB4670' }
+    : { background: 'rgba(240,92,37,0.12)',  color: '#F05C25' };
+
+  // Heuristic state derivation
+  const stateLabel = isIgnored ? 'Ignored'
+                  : isResolved ? 'Resolved'
+                  : (sys?.valve === 'closed' ? 'Shut-Off' : 'Warning');
+  const statePillStyle = (() => {
+    if (isIgnored)  return { background: 'rgba(20,21,26,0.06)', color: '#717684' };
+    if (isResolved) return { background: 'rgba(92,158,26,0.14)', color: '#2F6112' };
+    if (sys?.valve === 'closed') return { background: 'rgba(20,21,26,0.06)', color: theme.text };
+    return { background: 'rgba(229,161,0,0.18)', color: '#8C5A0F' };
+  })();
+
+  // Valve pill (hide for resolved/ignored — already implied)
+  const valvePillEl = (() => {
+    if (isResolved || isIgnored) return null;
+    if (sys?.valve === 'open') return { label: 'Open', style: { background: 'rgba(4,173,239,0.14)', color: '#036AB5' } };
+    if (sys?.valve === 'closed') return { label: 'Closed', style: { background: 'rgba(113,118,132,0.14)', color: theme.textSecondary } };
+    if (sys?.valve === 'error')  return { label: 'Valve error', style: { background: 'rgba(219,70,112,0.12)', color: '#DB4670' } };
+    return null;
+  })();
+
+  // Time block
+  const absTime = fmtDateShort(event.timestamp);
+  const relTime = event.timestamp ? fmtDuration(Date.now() - new Date(event.timestamp).getTime()) : '';
+
+  // Avatars (cap 3)
+  const contacts = sys?.contacts || [];
+  const visibleContacts = contacts.slice(0, 3);
+  const moreCount = Math.max(0, contacts.length - 3);
+
+  // Highlight helper for search
+  function hl(text) {
+    if (!highlight || !text) return text;
+    const idx = String(text).toLowerCase().indexOf(String(highlight).toLowerCase());
+    if (idx < 0) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <mark style={{ background: 'rgba(229,161,0,0.30)', color: 'inherit', padding: 0 }}>{text.slice(idx, idx + highlight.length)}</mark>
+        {text.slice(idx + highlight.length)}
+      </>
+    );
+  }
+
+  return (
+    <div onClick={onClick} style={{
+      background: theme.card,
+      border: `1px solid ${theme.cardBorderColor || '#E5E8EE'}`,
+      borderRadius: 14,
+      boxShadow: '0 1px 3px rgba(20,21,26,0.05)',
+      marginBottom: 8,
+      cursor: 'pointer',
+      overflow: 'hidden',
+      opacity: isIgnored ? 0.7 : 1,
+      filter: isIgnored ? 'grayscale(20%)' : 'none',
+    }}>
+      {/* Top row: icon + name/address + time. Variant A dot (32 px circle,
+          2 px coloured ring, 10% tinted fill) replaces the previous 36 px
+          rounded-square + top stripe combo. */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '32px 1fr auto',
+        gap: 10,
+        padding: '11px 12px 4px',
+        alignItems: 'center',
+      }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%',
+          background: iconBg,
+          border: `2px solid ${ringColor}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          position: 'relative',
+        }}>
+          <MIcon name="water_drop" size={18} color={iconColor} fill />
+          {/* Resolved badge — same spec as the Event Timeline ✓ badge so an
+              ended water event reads the same in both surfaces. */}
+          {isResolved && (
+            <div style={{
+              position: 'absolute', right: -4, bottom: -4,
+              width: 14, height: 14, borderRadius: '50%',
+              background: '#5C9E1A',
+              border: `2px solid ${theme.card || '#fff'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ color: '#fff', fontSize: 9, fontWeight: 900, lineHeight: 1 }}>✓</span>
+            </div>
+          )}
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <div style={{
+            fontSize: 14, fontWeight: 700, color: theme.text,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>{hl(event.systemName || sys?.name || '—')}</div>
+          <div style={{
+            fontSize: 12, color: theme.textTertiary, marginTop: 1,
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>{hl(sys?.address || event.path || '')}</div>
+        </div>
+        <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2, flexShrink: 0 }}>
+          <div style={{ fontSize: 11, color: theme.textTertiary, whiteSpace: 'nowrap' }}>{absTime}</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: theme.textSecondary, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>{relTime}</div>
+        </div>
+      </div>
+
+      {/* Meta row: pills + avatars */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '8px 12px 11px', gap: 10,
+      }}>
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+          <span style={{
+            ...pillBase, ...levelPillStyle,
+          }}>{levelLabel}</span>
+          <span style={{
+            ...pillBase, ...statePillStyle,
+          }}>{stateLabel}</span>
+          {valvePillEl && (
+            <span style={{
+              ...pillBase, ...valvePillEl.style,
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+            }}>
+              <MIcon name="valve" size={13} color={valvePillEl.style.color} />
+              {valvePillEl.label}
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          {visibleContacts.map((c, i) => (
+            <div key={i} style={{
+              width: 22, height: 22, borderRadius: '50%',
+              background: AVATAR_COLORS[i % AVATAR_COLORS.length],
+              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700,
+              border: `1.5px solid ${theme.card || '#fff'}`,
+              marginLeft: i === 0 ? 0 : -6,
+            }}>{initials(c.name)}</div>
+          ))}
+          {moreCount > 0 && (
+            <div style={{
+              width: 22, height: 22, borderRadius: '50%',
+              background: theme.textTertiary || '#717684',
+              color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700,
+              border: `1.5px solid ${theme.card || '#fff'}`,
+              marginLeft: -6,
+            }}>+{moreCount}</div>
+          )}
+        </div>
+      </div>
+
+      {/* Tag sub-line — only on closed events (resolved or ignored).
+          PRD 15 § 4.2.1. Display-only; tap-to-edit lives on the system page
+          Activity tab. Tags are keyed by event.id (per-event), so different
+          closed events on the same system can carry different tags. */}
+      {(isResolved || isIgnored) && (() => {
+        const eventTags = event.id ? getTags(event.id) : [];
+        const isTagged = eventTags.length > 0;
+        const labels = eventTags.map(t => t.chip === 'Other' && t.chipOther ? t.chipOther : (t.chip || t.chipOther || '')).filter(Boolean);
+        return (
+          <div style={{
+            padding: '6px 12px 11px',
+            borderTop: `1px dashed ${theme.divider || '#E8ECF0'}`,
+            marginTop: -4,
+          }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              fontSize: 11.5, lineHeight: 1.4,
+              color: isTagged ? '#036AB5' : (theme.textTertiary || '#717684'),
+              fontStyle: isTagged ? 'normal' : 'italic',
+              fontWeight: isTagged ? 600 : 500,
+            }}>
+              <MIcon
+                name={isTagged ? 'label' : 'add'}
+                size={13}
+                color={isTagged ? '#036AB5' : (theme.textTertiary || '#717684')}
+                fill={isTagged}
+              />
+              {isTagged ? `Tagged: ${labels.join(', ')}` : 'Not tagged yet'}
+            </div>
+          </div>
+        );
+      })()}
+    </div>
+  );
+}
+
+const pillBase = {
+  display: 'inline-block',
+  padding: '3px 9px',
+  borderRadius: 999,
+  fontSize: 11,
+  fontWeight: 700,
+  lineHeight: 1.25,
+  whiteSpace: 'nowrap',
+};

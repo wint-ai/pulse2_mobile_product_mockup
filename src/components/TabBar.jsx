@@ -1,0 +1,128 @@
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
+import { useUserContext } from '../context/UserContext';
+
+const HOME_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+  </svg>
+);
+const HOME_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M3 12L12 3l9 9M5 10v9h5v-5h4v5h5v-9"/>
+  </svg>
+);
+const EVENTS_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 3a1 1 0 110 2 1 1 0 010-2zm0 4a4 4 0 110 8 4 4 0 010-8z"/>
+  </svg>
+);
+const EVENTS_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <rect x="3" y="3" width="18" height="18" rx="2"/>
+    <path d="M8 7h8M8 12h5M8 17h3"/>
+  </svg>
+);
+const SYSTEMS_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+  </svg>
+);
+const SYSTEMS_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M4 6h16M4 12h16M4 18h16"/>
+  </svg>
+);
+const MORE_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="5" r="2.5"/>
+    <circle cx="12" cy="12" r="2.5"/>
+    <circle cx="12" cy="19" r="2.5"/>
+  </svg>
+);
+const MORE_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <circle cx="12" cy="5" r="2"/>
+    <circle cx="12" cy="12" r="2"/>
+    <circle cx="12" cy="19" r="2"/>
+  </svg>
+);
+
+const TABS_FULL = [
+  { key: 'home',    label: 'Home',    path: '/',        filled: HOME_ICON_FILLED,    stroke: HOME_ICON_STROKE },
+  { key: 'events',  label: 'Alerts',  path: '/alerts',  filled: EVENTS_ICON_FILLED,  stroke: EVENTS_ICON_STROKE },
+  { key: 'account', label: 'More',    path: '/account', filled: MORE_ICON_FILLED,    stroke: MORE_ICON_STROKE },
+];
+
+const TABS_TENANT = [
+  { key: 'home',    label: 'Home',    path: '/tenant',  filled: HOME_ICON_FILLED,    stroke: HOME_ICON_STROKE },
+  { key: 'events',  label: 'Alerts',  path: '/alerts',  filled: EVENTS_ICON_FILLED,  stroke: EVENTS_ICON_STROKE },
+  { key: 'account', label: 'More',    path: '/account', filled: MORE_ICON_FILLED,    stroke: MORE_ICON_STROKE },
+];
+
+export default function TabBar({ activeTab }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { theme } = useTheme();
+  const userCtx = useUserContext() || {};
+  const { persona, visibleSystems = [], clearSelectedScope } = userCtx;
+  const isTenant = persona?.tabMode === 'tenant';
+
+  // For single-system tenants, Home tab points directly to their system
+  const tenantTabs = isTenant && visibleSystems.length === 1
+    ? [
+        { key: 'home', label: 'Home', path: `/system/${visibleSystems[0].id}`, filled: HOME_ICON_FILLED, stroke: HOME_ICON_STROKE },
+        { key: 'events', label: 'Alerts', path: '/alerts', filled: EVENTS_ICON_FILLED, stroke: EVENTS_ICON_STROKE },
+        { key: 'account', label: 'More', path: '/account', filled: MORE_ICON_FILLED, stroke: MORE_ICON_STROKE },
+      ]
+    : TABS_TENANT;
+
+  const tabs = isTenant ? tenantTabs : TABS_FULL;
+
+  return (
+    <div
+      style={{
+        background: theme.tabBarBg,
+        borderTop: theme.tabBarBorder,
+        ...(theme.glass ? { backdropFilter: theme.glassBlur, WebkitBackdropFilter: theme.glassBlur } : {}),
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        padding: '8px 0 14px',
+        flexShrink: 0,
+      }}
+    >
+      {tabs.map(tab => {
+        const isActive = activeTab ? activeTab === tab.key : location.pathname === tab.path;
+        return (
+          <button
+            key={tab.key}
+            onClick={() => {
+              // Bug fix 2026-06-08: tapping a bottom tab clears any drilled-in
+              // scope (e.g. user was on System Detail or a drilled-into location
+              // and tapped "Alerts" — the prior scope shouldn't carry over).
+              // Tap-from-tab = "show me everything in this section".
+              if (clearSelectedScope) clearSelectedScope();
+              navigate(tab.path);
+            }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 3,
+              cursor: 'pointer',
+              padding: '0 6px',
+              border: 'none',
+              background: 'none',
+              fontFamily: 'inherit',
+              color: isActive ? theme.accent : theme.tabInactive,
+            }}
+          >
+            {isActive ? tab.filled : tab.stroke}
+            <span style={{ fontSize: 12, fontWeight: isActive ? 600 : 400 }}>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

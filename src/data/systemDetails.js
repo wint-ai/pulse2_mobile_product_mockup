@@ -1,0 +1,176 @@
+// System details: topology, device info, meter, active policy, insights
+// Modelled after the desktop pulse2_product_sandbox
+
+// ── Insights per system (seeded, deterministic) ─────────────────────────────
+
+const INSIGHT_TEMPLATES = [
+  { title: 'Night-time flow',   unit: 'L/h' },
+  { title: 'Background flow',   unit: 'L/h' },
+  { title: 'Usage decreased',   unit: '%' },
+  { title: 'Usage increased',   unit: '%' },
+  { title: 'Consumption spike', unit: '%' },
+  { title: 'Continuous flow',   unit: 'L/h' },
+];
+
+function hash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function seeded(seed) {
+  let t = seed + 0x6D2B79F5;
+  return () => {
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function generateInsights(systemId) {
+  const rand = seeded(hash(systemId) + 42);
+  const count = Math.floor(rand() * 3); // 0–2 insights
+  if (count === 0) return [];
+  const insights = [];
+  const used = new Set();
+  for (let i = 0; i < count; i++) {
+    let idx;
+    do { idx = Math.floor(rand() * INSIGHT_TEMPLATES.length); } while (used.has(idx));
+    used.add(idx);
+    const tpl = INSIGHT_TEMPLATES[idx];
+    const value = tpl.unit === 'L/h'
+      ? (2 + rand() * 26).toFixed(1)
+      : Math.round(8 + rand() * 50);
+    const day = Math.floor(1 + rand() * 25);
+    insights.push({
+      title: tpl.title,
+      value: tpl.unit === '%' ? `+${value}%` : `${value} ${tpl.unit}`,
+      detectedAt: `Mar ${day}, 2026`,
+    });
+  }
+  return insights;
+}
+
+// ── System topology / device details ────────────────────────────────────────
+
+const SYSTEM_DETAILS_MAP = {
+  // Suffolk Construction – Tower One
+  ct1: { topology: 'Water Line - Cooling Tower', deviceType: 'VMA', meter: 'Arad Octave 4"', valve: 'Toine 4"', status: 'online' },
+  ct2: { topology: 'Water Line - Cooling Tower', deviceType: 'VMA', meter: 'Arad Octave 4"', valve: 'Toine 4"', status: 'online' },
+  msl: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Arad Octave 4"', valve: 'Toine 4"', status: 'online' },
+  dcw: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Neptune T-10 3/4"', valve: 'Apollo 70-100 1"', status: 'online' },
+  dhw1: { topology: 'Water Line - General Line', deviceType: 'Flowless', meter: null, valve: null, status: 'online' },
+  // Parking
+  sp: { topology: 'No Piping Monitored', deviceType: 'Flowless', meter: null, valve: null, status: 'online' },
+  irr: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Arad Octave 3/4"', valve: 'Toine 3/4"', status: 'online' },
+  // Heathrow
+  t5msl: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Arad Octave 4"', valve: 'Toine 4"', status: 'online' },
+  t5ct: { topology: 'Water Line - Cooling Tower', deviceType: 'VMA', meter: 'Arad Octave 4"', valve: 'Toine 4"', status: 'online' },
+  t5dcw: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Neptune T-10 3/4"', valve: 'Apollo 70-100 1"', status: 'online' },
+  t5fire: { topology: 'Water Line - Fire Protection', deviceType: 'VMA', meter: 'Arad Octave 2"', valve: 'Toine 2"', status: 'online' },
+  shc: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Arad Octave 3/4"', valve: 'Toine 3/4"', status: 'online' },
+  bhs: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Arad Octave 1"', valve: 'Toine 1"', status: 'online' },
+  ctt2: { topology: 'Water Line - Cooling Tower', deviceType: 'VMA', meter: 'Arad Octave 4"', valve: 'Toine 4"', status: 'online' },
+  t2dcw: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Neptune T-10 3/4"', valve: 'Apollo 70-100 1"', status: 'online' },
+  t2fire: { topology: 'Water Line - Fire Protection', deviceType: 'VMA', meter: 'Arad Octave 2"', valve: 'Toine 2"', status: 'online' },
+  csf: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Arad Octave 3/4"', valve: 'Toine 3/4"', status: 'online' },
+  f11a: { topology: 'Water Line - General Line', deviceType: 'VMA', meter: 'Neptune T-10 3/4"', valve: null, status: 'online' },
+};
+
+function getDefaultDetails(systemId) {
+  return { topology: 'Water Line - Single Apartment', deviceType: 'VMA', meter: 'Arad Octave 3/4"', valve: 'Toine 3/4"', status: 'online' };
+}
+
+// ── Active policy per system ────────────────────────────────────────────────
+
+// Policy types: working hours vs non-working hours
+// Working hours: Fixed detection, auto shut-off OFF
+// Non-working hours: Adaptive detection, auto shut-off ON
+// Leak detection is always ON
+
+// Policy schema (locked 2026-06-03):
+//   • name              — 'Working hours' | 'Weekend'
+//   • schedule          — display string like '8:00 AM – 5:00 PM'
+//   • autoShutoff       — 'Enabled' | 'Disabled' | 'N/A'
+//   • alert             — 'Active'  | 'Inactive'
+//   • defaultValveState — 'Open'    | 'Closed' | 'N/A'
+//   • detection         — 'Adaptive'| 'Fixed'
+//
+// activeUntil + leakDetection kept for back-compat with older callers; new UI
+// uses the fields above.
+
+// Some systems have no valve — auto shutoff / valve state collapse to 'N/A'.
+const NO_VALVE_SYSTEMS = new Set(['dhw1', 'sp', 'f11a']);
+
+function buildPolicy(kind, hasValve) {
+  if (kind === 'working') {
+    return {
+      name: 'Working hours',
+      schedule: '8:00 AM – 5:00 PM',
+      autoShutoff: hasValve ? 'Disabled' : 'N/A',
+      alert: 'Active',
+      defaultValveState: hasValve ? 'Open' : 'N/A',
+      detection: 'Adaptive',
+      // back-compat
+      leakDetection: 'On',
+    };
+  }
+  // weekend / non-working
+  return {
+    name: 'Weekend',
+    schedule: '5:00 PM – Mon 8:00 AM',
+    autoShutoff: hasValve ? 'Enabled' : 'N/A',
+    alert: 'Active',
+    defaultValveState: hasValve ? 'Closed' : 'N/A',
+    detection: 'Adaptive',
+    leakDetection: 'On',
+  };
+}
+
+function getPolicyForSystem(systemId) {
+  const hour = new Date().getHours();
+  const isWorkingHours = hour >= 8 && hour < 18;
+
+  const now = new Date();
+  let activeUntil;
+  if (isWorkingHours) {
+    activeUntil = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 18, 0);
+  } else if (hour >= 18) {
+    activeUntil = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 8, 0);
+  } else {
+    activeUntil = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 8, 0);
+  }
+
+  const hasValve = !NO_VALVE_SYSTEMS.has(systemId);
+  const policy = buildPolicy(isWorkingHours ? 'working' : 'weekend', hasValve);
+  return { ...policy, activeUntil: activeUntil.toISOString() };
+}
+
+function getNextPolicyForSystem(systemId) {
+  const hour = new Date().getHours();
+  const isWorkingHours = hour >= 8 && hour < 18;
+  const hasValve = !NO_VALVE_SYSTEMS.has(systemId);
+  // Next is the opposite of current.
+  return buildPolicy(isWorkingHours ? 'weekend' : 'working', hasValve);
+}
+
+// ── Exports ─────────────────────────────────────────────────────────────────
+
+export function getSystemInsights(systemId) {
+  return generateInsights(systemId);
+}
+
+export function getSystemTopology(systemId) {
+  return SYSTEM_DETAILS_MAP[systemId] || getDefaultDetails(systemId);
+}
+
+export function getActivePolicy(systemId) {
+  return getPolicyForSystem(systemId);
+}
+
+export function getNextPolicy(systemId) {
+  return getNextPolicyForSystem(systemId);
+}
