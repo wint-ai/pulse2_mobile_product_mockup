@@ -216,7 +216,7 @@ export default function EventsScreen() {
     { key: 'water', label: 'Water',  color: '#DB4670' },
     { key: 'valve', label: 'Valve',  color: '#036AB5' },
     { key: 'power', label: 'Power',  color: '#B5651A' },
-    { key: 'conn',  label: 'Comm',   color: '#717684' },
+    { key: 'conn',  label: 'Comms',  color: '#717684' },
   ];
 
   // ── Header data — mirrors the Home screen so both top bars look identical ──
@@ -321,28 +321,22 @@ export default function EventsScreen() {
           </div>
         </div>
 
-        {/* Tabs - brand-blue active on light bg. */}
+        {/* Tabs - brand-blue active on light bg. No count badges on either
+            tab (PRD 05 lock 2026-06-13). The only count surface on this page
+            is the header sub-line ({N} systems . {M} need attention). */}
         <div style={{ display: 'flex' }}>
           {[
-            { key: 'active', label: 'Active', count: totalActiveAlertsCount },
-            { key: 'history', label: 'History', count: null },
+            { key: 'active', label: 'Active' },
+            { key: 'history', label: 'History' },
           ].map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
               flex: 1, padding: '9px 0', border: 'none', background: 'none',
               fontFamily: 'inherit', cursor: 'pointer', fontSize: 15, fontWeight: activeTab === tab.key ? 700 : 600,
               color: activeTab === tab.key ? '#0B95F8' : '#717684',
               borderBottom: activeTab === tab.key ? '2px solid #0B95F8' : '2px solid transparent',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {tab.label}
-              {tab.count != null && tab.count > 0 && (
-                <span style={{
-                  fontSize: 13, fontWeight: 700, borderRadius: 8, minWidth: 18, height: 18,
-                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px',
-                  background: activeTab === tab.key && tab.key === 'active' ? '#DB4670' : '#E2E6EB',
-                  color: activeTab === tab.key && tab.key === 'active' ? '#fff' : '#4A4F5A',
-                }}>{tab.count}</span>
-              )}
             </button>
           ))}
         </div>

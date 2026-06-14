@@ -820,7 +820,17 @@ export default function HomeUnified() {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { visibleSystems = [], exploreSystems = [], exploring, selectedScope, setSelectedScope, clearSelectedScope } = useUserContext() || {};
-  const activeSystems = exploreSystems;
+  // Home reflects the user's ASSIGNED scope only — never explore-all.
+  // Per PRD 03 § Scope behavior + decision #6: a Wint admin with Explore
+  // All on can see 20,000+ systems across customers; aggregating Water
+  // Events / Health / Status Overview at that scale isn't actionable.
+  // Explore All is for the systems-discovery surfaces (search, drilldown),
+  // not Home. Locked 2026-06-13.
+  // eslint-disable-next-line no-unused-vars
+  const _exploreSystems = exploreSystems;
+  // eslint-disable-next-line no-unused-vars
+  const _exploring = exploring;
+  const activeSystems = visibleSystems;
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeTab, _setActiveTab] = useState(_persistedHomeTab);

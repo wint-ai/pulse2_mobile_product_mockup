@@ -33,7 +33,7 @@ const FILTERS = [
   { key: 'water', label: 'Water', color: C_HIGH  },
   { key: 'valve', label: 'Valve', color: C_VALVE },
   { key: 'power', label: 'Power', color: C_POWER },
-  { key: 'conn',  label: 'Comm',  color: C_CONN  },
+  { key: 'conn',  label: 'Comms', color: C_CONN  },
 ];
 
 // Months / parse helper — mock timestamps are "MMM D, HH:MM" strings,

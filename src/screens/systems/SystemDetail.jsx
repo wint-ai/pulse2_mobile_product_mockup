@@ -5,14 +5,10 @@ import NavigationDrawer from '../../components/NavigationDrawer';
 import SystemInfoTab from './SystemInfoTab';
 import ActivityTab from './ActivityTab';
 import ConsumptionTab from './ConsumptionTab';
-import { getSystemById, getSystemTz } from '../../data/systems';
-import { getConsumption } from '../../data/consumption';
-import { getActivePolicy, getNextPolicy, getSystemTopology } from '../../data/systemDetails';
+import { getSystemById } from '../../data/systems';
+import { getActivePolicy, getNextPolicy } from '../../data/systemDetails';
 import TenantOverview from './TenantOverview';
-import { getActiveIncident, getLeakState } from '../../data/incidents';
-import { computeActiveEvents } from '../../data/events';
-import { parseEventInstant, formatLastSeen } from '../../utils/format';
-import LeakSummary from '../../components/LeakSummary';
+import { formatLastSeen } from '../../utils/format';
 import WaterEventDetailsWidget from '../../components/WaterEventDetailsWidget';
 import TagBottomSheet from '../../components/TagBottomSheet';
 import { getTags, addTag, removeTagAt } from '../../data/tagsStore';
@@ -34,379 +30,23 @@ function MIcon({ name, size = 18, color, fill, style = {} }) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   VALVE STATUS CARD (dual valve — Supply + Return for closed loops)
+   LEGACY-COMPONENTS PURGE (2026-06-13)
+   ════════════════════════════════════════════════════════════════════════
+   Removed in this pass:
+     - AllClear       (banner with "All Clear" framing - misleading when the
+                       Health widget below showed issues; Water Event widget
+                       now owns the empty state)
+     - StatusPills    (Comm + Power pill row - never rendered in OverviewTab;
+                       Protection Status surfaces both dimensions instead)
+     - AlertBanner    (legacy non-water alert banner - functionally dead in
+                       OverviewTab; Water Event widget + Protection Status
+                       handle the surfaces)
+     - WaterToday     (compact consumption chart - replaced by ConsumptionTab
+                       on the System tab body)
+     - _LegacyHomeAwayToggle (replaced by HomeAwayWidget in round 6)
+   Tests that exercised the removed components (systemPageOverlay.dom.test.jsx)
+   were dropped in the same pass.
    ════════════════════════════════════════════════════════════════════════ */
-
-// ValveStatusCard for dual-valve systems — TODO: enable when dual-valve data is available
-
-/* ════════════════════════════════════════════════════════════════════════════
-   STATUS PILLS (Comm + Power) — icon-in-container pattern
-   ════════════════════════════════════════════════════════════════════════ */
-
-export function StatusPills({ sys, theme }) {
-  const powerLabel = { ac: 'AC', 'ac-lost': 'AC Lost', battery: 'Battery' };
-  const commColor = sys.comm === 'online' ? '#A1D246' : '#DB4670';
-  const powerColor = sys.power === 'ac' ? '#A1D246' : sys.power === 'battery' ? '#F05C25' : '#DB4670';
-
-  return (
-    <div style={{ display: 'flex', gap: 8, marginBottom: 10, padding: '0 14px' }}>
-      <div style={{ flex: 1, background: theme.card, borderRadius: 10, padding: '12px 14px', border: theme.cardBorder, display: 'flex', alignItems: 'center' }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, marginRight: 12, flexShrink: 0, background: commColor + '14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <MIcon name="wifi" size={16} color={commColor} />
-        </div>
-        <div>
-          <div style={{ fontSize: 12, color: theme.textMuted }}>Comm</div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{sys.comm === 'online' ? 'Online' : 'Offline'}</div>
-        </div>
-      </div>
-      {sys.comm === 'online' && sys.power && (
-        <div style={{ flex: 1, background: theme.card, borderRadius: 10, padding: '12px 14px', border: theme.cardBorder, display: 'flex', alignItems: 'center' }}>
-          <div style={{ width: 32, height: 32, borderRadius: 8, marginRight: 12, flexShrink: 0, background: powerColor + '14', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <MIcon name="bolt" size={16} color={powerColor} />
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: theme.textMuted }}>Power</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{powerLabel[sys.power] || sys.power}</div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   ALERT BANNER (non-water alert path; "All Clear" component removed 2026-06-13)
-   ════════════════════════════════════════════════════════════════════════ */
-
-// Note: the legacy AllClear banner was removed 2026-06-13. "All Clear" framing
-// implied a global system state and contradicted any active health issue
-// surfaced by the Health widget below. The Water Event widget handles its own
-// empty state ("No active Water Events") and reports only on its dimension.
-
-const TYPE_LABELS = { 'leak-high': 'High Flow', 'leak-low': 'Low Flow', 'valve-error': 'Valve Error', 'power-lost': 'Power Lost', 'offline': 'Offline' };
-
-export function AlertBanner({ sys, navigate, theme }) {
-  const alert = sys.alert;
-  if (!alert) return null;
-
-  // Valve errors and power-lost already shown in Protection Status
-  if (alert.type === 'valve-error' || alert.type === 'power-lost' || alert.type === 'offline') return null;
-
-  const isLeak = alert.type === 'leak-high' || alert.type === 'leak-low';
-  if (!isLeak) return null;
-
-  // Pull the matching event for full timestamp + durationSec.
-  // Use the same source as /alerts (computeActiveEvents derives from systems + incidents) to keep parity.
-  const event = computeActiveEvents().find(e => e.system === sys.id);
-  const incident = getActiveIncident(sys.id);
-  const policy = getActivePolicy(sys.id);
-  const leakLevel = alert.type === 'leak-high' ? 'high' : 'low';
-  const leakState = getLeakState(incident);
-  const hasValve = sys.valve !== null && sys.valve !== undefined;
-  const autoShutoff = !hasValve
-    ? null
-    : policy?.autoShutoff === 'On' ? 'Enabled'
-    : policy?.autoShutoff === 'Off' ? 'Disabled'
-    : null;
-
-  const systemTz = getSystemTz(sys);
-  return (
-    <div style={{ marginBottom: 10 }}>
-      <LeakSummary
-        level={leakLevel}
-        state={leakState}
-        instant={parseEventInstant(event?.timestamp, systemTz)}
-        systemTz={systemTz}
-        flowRate={alert.flowRate}
-        autoShutoff={autoShutoff}
-        valveState={sys.valve ?? null}
-        detectionMode={policy?.detection || null}
-        onClick={() => navigate(`/alert/${sys.id}`)}
-      />
-      <div
-        onClick={() => navigate(`/alert/${sys.id}`)}
-        style={{ fontSize: 14, color: theme.accent, fontWeight: 600, cursor: 'pointer', padding: '8px 14px 0' }}
-      >View details &rarr;</div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   HOME / AWAY widget moved to src/components/HomeAwayWidget.jsx (round 6).
-   The legacy HomeAwayToggle below is dead code; never called. Kept temporarily
-   for git blame continuity until the next cleanup pass.
-   ════════════════════════════════════════════════════════════════════════ */
-
-// eslint-disable-next-line no-unused-vars
-function _LegacyHomeAwayToggle({ theme }) {
-  const [mode, setMode] = useState('home');
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [pendingMode, setPendingMode] = useState(null);
-
-  const handleSwitch = (newMode) => {
-    if (newMode === mode) return;
-    setPendingMode(newMode);
-    setShowConfirm(true);
-  };
-
-  const confirmSwitch = () => {
-    setMode(pendingMode);
-    setShowConfirm(false);
-    setPendingMode(null);
-  };
-
-  const confirmText = pendingMode === 'away'
-    ? 'When set to Away, water will be automatically shut off if a leak is detected.'
-    : 'When set to Home, water will only be shut off if auto shut-off is enabled by the user.';
-
-  return (
-    <>
-      <div style={{ background: theme.card, borderRadius: 10, padding: '12px 14px', marginBottom: 10, border: theme.cardBorder }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '.4px' }}>Mode</div>
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {[
-            { key: 'home', icon: '\uD83C\uDFE0', label: 'Home' },
-            { key: 'away', icon: '\u2708\uFE0F', label: 'Away' },
-          ].map(opt => (
-            <div key={opt.key} onClick={() => handleSwitch(opt.key)} style={{
-              flex: 1, padding: '10px 10px', borderRadius: 8, textAlign: 'center', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              background: mode === opt.key ? (opt.key === 'home' ? 'rgba(161,210,70,0.12)' : 'rgba(4,173,239,0.12)') : theme.headerBg,
-              border: mode === opt.key ? (opt.key === 'home' ? '1.5px solid rgba(161,210,70,0.3)' : '1.5px solid rgba(4,173,239,0.3)') : '1.5px solid transparent',
-              transition: 'all 0.2s ease',
-            }}>
-              <span style={{ fontSize: 16 }}>{opt.icon}</span>
-              <span style={{ fontSize: 15, fontWeight: 600, color: mode === opt.key ? theme.text : theme.textTertiary }}>{opt.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Confirmation */}
-      {showConfirm && (
-        <div onClick={() => setShowConfirm(false)} style={{ position: 'absolute', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: theme.modalBg, borderRadius: '20px 20px 0 0', padding: '8px 20px 28px', boxShadow: '0 -4px 24px rgba(0,0,0,0.2)' }}>
-            <div style={{ width: 36, height: 4, background: theme.textDimmest, borderRadius: 2, margin: '0 auto 16px' }} />
-            <div style={{ fontSize: 18, fontWeight: 700, color: theme.text, textAlign: 'center', marginBottom: 6 }}>
-              Switch to {pendingMode === 'away' ? 'Away' : 'Home'}?
-            </div>
-            <div style={{ fontSize: 15, color: theme.textTertiary, textAlign: 'center', marginBottom: 24, lineHeight: 1.5 }}>
-              {confirmText}
-            </div>
-            <button onClick={confirmSwitch} style={{
-              width: '100%', padding: '15px 0', borderRadius: 14, border: 'none',
-              fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
-              background: pendingMode === 'away' ? '#04ADEF' : '#A1D246', marginBottom: 10,
-            }}>
-              Yes, Switch to {pendingMode === 'away' ? 'Away' : 'Home'}
-            </button>
-            <button onClick={() => setShowConfirm(false)} style={{
-              width: '100%', padding: '13px 0', borderRadius: 14,
-              border: theme.cardBorder, background: theme.card,
-              fontSize: 15, fontWeight: 600, color: theme.textSecondary, cursor: 'pointer', fontFamily: 'inherit',
-            }}>Cancel</button>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════════════════════
-   WATER TODAY — compact chart
-   ════════════════════════════════════════════════════════════════════════ */
-
-function WaterToday({ sys, theme }) {
-  const [compareMode, setCompareMode] = useState(true);
-  const [tappedIdx, setTappedIdx] = useState(null);
-
-  // Consumption stays visible when the system is offline - historical
-  // data is cloud-aggregated, not real-time from the device.
-  // Confirmed rule (Rami 2026-06-06).
-  const data = getConsumption(sys.id, sys.name);
-
-  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-  // Build monthly totals: "YYYY-MM" → liters
-  const monthlyTotals = {};
-  for (const d of data.daily) {
-    const dt = new Date(d.date);
-    const key = `${dt.getFullYear()}-${String(dt.getMonth()).padStart(2, '0')}`;
-    monthlyTotals[key] = (monthlyTotals[key] || 0) + d.liters;
-  }
-
-  // Build last 12 months as YoY pairs (this year + last year)
-  const today = new Date(2026, 3, 12);
-  const groups = [];
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-    const yearKey = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, '0')}`;
-    const prevYearKey = `${d.getFullYear() - 1}-${String(d.getMonth()).padStart(2, '0')}`;
-    groups.push({
-      label: MONTH_NAMES[d.getMonth()],
-      year: d.getFullYear(),
-      thisYear: monthlyTotals[yearKey] || 0,
-      lastYear: monthlyTotals[prevYearKey] || 0,
-    });
-  }
-  const allValues = compareMode
-    ? groups.flatMap(g => [g.thisYear, g.lastYear])
-    : groups.map(g => g.thisYear);
-  const maxVal = Math.max(...allValues, 1);
-  const yTicks = [1, 0.75, 0.5, 0.25, 0];
-  const fmtNum = (n) => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}K`;
-    return Math.round(n).toString();
-  };
-  const tapped = tappedIdx != null ? groups[tappedIdx] : null;
-  const currentMonth = groups[groups.length - 1];
-  const yoyDiff = currentMonth.lastYear > 0
-    ? Math.round(((currentMonth.thisYear - currentMonth.lastYear) / currentMonth.lastYear) * 100)
-    : 0;
-
-  const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
-  const yoyColor = yoyDiff > 0 ? '#DB4670' : yoyDiff < 0 ? '#5C9E1A' : theme.textTertiary;
-  const thisYearColor = '#04ADEF';
-  const lastYearColor = dk ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.18)';
-
-  return (
-    <div style={{ background: theme.card, borderRadius: 10, padding: '14px', marginBottom: 10, border: theme.cardBorder }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 700, color: theme.textMuted, textTransform: 'uppercase', letterSpacing: '.4px' }}>This Month</div>
-          <div style={{ fontSize: 24, fontWeight: 700, color: theme.text, marginTop: 2 }}>{currentMonth.thisYear.toLocaleString()}<span style={{ fontSize: 15, fontWeight: 500, color: theme.textTertiary }}>L</span></div>
-        </div>
-        {compareMode && currentMonth.lastYear > 0 && (
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: 12, color: theme.textMuted }}>vs same month last year</div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: yoyColor }}>
-              {yoyDiff > 0 ? '↑' : yoyDiff < 0 ? '↓' : ''} {Math.abs(yoyDiff)}%
-            </div>
-          </div>
-        )}
-      </div>
-      {/* Legend + Compare toggle switch */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <div style={{ width: 10, height: 10, background: thisYearColor, borderRadius: 2 }} />
-            <span style={{ fontSize: 11, color: theme.textTertiary }}>{today.getFullYear()}</span>
-          </div>
-          {compareMode && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: 10, height: 10, background: lastYearColor, borderRadius: 2 }} />
-              <span style={{ fontSize: 11, color: theme.textTertiary }}>{today.getFullYear() - 1}</span>
-            </div>
-          )}
-        </div>
-        <div onClick={() => { setCompareMode(c => !c); setTappedIdx(null); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', userSelect: 'none' }}>
-          <span style={{ fontSize: 11, fontWeight: 600, color: theme.textTertiary }}>Compare</span>
-          <div style={{
-            width: 30, height: 18, borderRadius: 9, position: 'relative',
-            background: compareMode ? thisYearColor : (dk ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'),
-            transition: 'background 0.2s',
-          }}>
-            <div style={{
-              position: 'absolute', top: 2, left: compareMode ? 14 : 2,
-              width: 14, height: 14, borderRadius: '50%', background: '#fff',
-              transition: 'left 0.2s', boxShadow: '0 1px 2px rgba(0,0,0,0.2)',
-            }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Tooltip */}
-      <div style={{ minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 4 }}>
-        {tapped && (
-          <div style={{
-            background: '#1B2838', borderRadius: 8, padding: '6px 12px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.2)', display: 'flex', gap: 12, alignItems: 'center',
-          }}>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{tapped.label}</div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
-                {tapped.thisYear.toLocaleString()}<span style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)', marginLeft: 2 }}>L &middot; {tapped.year}</span>
-              </div>
-              {compareMode && tapped.lastYear > 0 && (
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)' }}>
-                  {tapped.lastYear.toLocaleString()}<span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginLeft: 2 }}>L &middot; {tapped.year - 1}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Chart with Y-axis */}
-      <div style={{ display: 'flex', gap: 6 }}>
-        {/* Y-axis labels */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: 90 }}>
-          {yTicks.map(t => (
-            <div key={t} style={{ fontSize: 9, color: theme.textMuted, textAlign: 'right', lineHeight: 1, minWidth: 24 }}>
-              {fmtNum(maxVal * t)}
-            </div>
-          ))}
-        </div>
-        {/* Chart area */}
-        <div style={{ flex: 1, position: 'relative' }}>
-          {/* Horizontal grid lines */}
-          <div style={{ position: 'absolute', inset: 0, height: 90, pointerEvents: 'none' }}>
-            {yTicks.map((t, i) => (
-              <div key={i} style={{
-                position: 'absolute', left: 0, right: 0,
-                top: `${(1 - t) * 100}%`,
-                height: 1, background: dk ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
-              }} />
-            ))}
-          </div>
-          {/* Bars */}
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 90, position: 'relative' }}>
-            {groups.map((g, i) => {
-              const isTapped = tappedIdx === i;
-              return (
-                <div key={i}
-                  onClick={() => setTappedIdx(isTapped ? null : i)}
-                  style={{
-                    flex: 1, height: '100%', display: 'flex', alignItems: 'flex-end',
-                    gap: 1, minWidth: 0, cursor: 'pointer',
-                    opacity: tappedIdx != null && !isTapped ? 0.5 : 1,
-                    transition: 'opacity 0.15s',
-                  }}>
-                  {compareMode && (
-                    <div style={{
-                      flex: 1, borderRadius: '2px 2px 0 0', minWidth: 0,
-                      height: `${(g.lastYear / maxVal) * 100}%`,
-                      background: lastYearColor,
-                      minHeight: g.lastYear > 0 ? 1 : 0,
-                    }} />
-                  )}
-                  <div style={{
-                    flex: 1, borderRadius: '2px 2px 0 0', minWidth: 0,
-                    height: `${(g.thisYear / maxVal) * 100}%`,
-                    background: thisYearColor,
-                    minHeight: g.thisYear > 0 ? 1 : 0,
-                  }} />
-                </div>
-              );
-            })}
-          </div>
-          {/* X-axis labels */}
-          <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-            {groups.map((g, i) => (
-              <div key={i} style={{ flex: 1, fontSize: 9, color: theme.textMuted, textAlign: 'center', minWidth: 0 }}>
-                {g.label}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ════════════════════════════════════════════════════════════════════════════
    ACTIVE POLICY CARD (Pro only)
@@ -823,10 +463,9 @@ function OverviewTab({ sys, navigate }) {
     return <TenantOverview sys={sys} navigate={navigate} />;
   }
 
-  // Water Event Details widget replaces the legacy AlertBanner for water events.
-  // The widget surfaces the full event + the inline action row (Tag / Ignore / On it),
-  // so the user no longer navigates to a separate alert page to handle the event.
-  const isWaterEvent = sys.alert?.type === 'leak-high' || sys.alert?.type === 'leak-low';
+  // Water Event Details widget surfaces the full event + the inline action
+  // row (Tag / Ignore / On it). Non-water alerts (valve / power / comm)
+  // surface via the Protection Status card below; no separate banner needed.
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', paddingTop: 10 }}>
@@ -839,7 +478,6 @@ function OverviewTab({ sys, navigate }) {
             was dropped 2026-06-13 -- the widget reports water only, not
             global system status. */}
         <WaterEventDetailsWidget sys={sys} />
-        {!isWaterEvent && <AlertBanner sys={sys} navigate={navigate} theme={theme} />}
         <ProtectionStatusCard sys={sys} theme={theme} />
         <ValveControlCard sys={sys} />
       </div>
