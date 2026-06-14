@@ -16,6 +16,7 @@ import { getCurrentActor } from '../../data/currentUser';
 import PipesHeader, { WINT_SKY_SYSTEM_BG, WINT_SKY_SYSTEM_BG_SIZE } from '../../components/PipesHeader';
 import OfflineStickyBanner from '../../components/OfflineStickyBanner';
 import ValveControlCard from '../../components/ValveControlCard';
+import CompactBreadcrumb from '../../components/CompactBreadcrumb';
 import { getAncestorScopes } from '../../utils/ancestorScopes';
 import { useTheme } from '../../context/ThemeContext';
 import { useUserContext } from '../../context/UserContext';
@@ -632,13 +633,11 @@ export default function SystemDetail() {
                     );
                   }
 
-                  // Compact two-crumb breadcrumb (locked 2026-06-13).
-                  // Replaces the full ancestor chain. Shows at most:
-                  //   "‹ My Systems  ·  {immediate parent name}"
+                  // Compact breadcrumb with ellipsis-collapsed middle.
                   // Visible-scope filtering preserved: only ancestors whose
                   // subtree is entirely within the user's visible scope are
                   // considered. Bug fix 2026-06-09: Mark Cohen scoped to
-                  // Tower One sees just "My Systems · Tower One", not the
+                  // Tower One sees just "My Systems > Tower One", not the
                   // full chain that bleeds outside his scope.
                   const visibleSystemIds = new Set(visibleSystems.map(s => s.id));
                   const allAncestors = getAncestorScopes(sys);
@@ -647,32 +646,12 @@ export default function SystemDetail() {
                     a.systemIds.length > 0 &&
                     a.systemIds.every(id => visibleSystemIds.has(id))
                   );
-                  const immediateParent = ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
                   return (
-                    <div style={{
-                      fontSize: 12, color: '#4A4F5A', lineHeight: 1.4, marginBottom: 2,
-                      display: 'flex', alignItems: 'center', gap: 8,
-                      minWidth: 0,
-                    }}>
-                      <span
-                        onClick={(e) => { e.stopPropagation(); setSelectedScope?.(null); navigate('/'); }}
-                        style={{ ...crumbStyle, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }}
-                        title="Back to all systems"
-                      >
-                        <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#036AB5' }}>chevron_left</span>
-                        My Systems
-                      </span>
-                      {immediateParent && (
-                        <>
-                          <span style={{ color: '#B8BCC4', flexShrink: 0 }}>·</span>
-                          <span
-                            onClick={(e) => { e.stopPropagation(); setSelectedScope?.(immediateParent); navigate('/'); }}
-                            style={{ ...crumbStyle, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                            title={immediateParent.name}
-                          >{immediateParent.name}</span>
-                        </>
-                      )}
-                    </div>
+                    <CompactBreadcrumb
+                      ancestors={ancestors}
+                      onClearScope={() => { setSelectedScope?.(null); navigate('/'); }}
+                      onSelectAncestor={(a) => { setSelectedScope?.(a); navigate('/'); }}
+                    />
                   );
                 })()}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>

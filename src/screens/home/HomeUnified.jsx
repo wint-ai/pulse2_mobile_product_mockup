@@ -8,6 +8,7 @@ import { useDataRefresh } from '../../utils/useDataRefresh';
 import StatusWidgetsMobile from '../../components/StatusWidgetsMobile';
 import PipesHeader, { WINT_SKY_HOME_BG, WINT_SKY_HOME_BG_SIZE } from '../../components/PipesHeader';
 import NavigationDrawer from '../../components/NavigationDrawer';
+import CompactBreadcrumb from '../../components/CompactBreadcrumb';
 import { getAncestorScopes } from '../../utils/ancestorScopes';
 import { useUserContext } from '../../context/UserContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -922,43 +923,19 @@ export default function HomeUnified() {
               <MIcon name="home_work" size={22} color="#036AB5" fill />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              {/* Compact two-crumb breadcrumb (locked 2026-06-13). Replaces
-                  the full-ancestor chain that wrapped to 2-3 lines on deep
-                  scopes. Shows at most two crumbs on one line:
-                    "‹ My Systems  ·  {immediate parent name}"
-                  The page title below remains the loudest "where am I"
-                  signal. For sibling jumps the drawer is the canonical
-                  surface. */}
+              {/* Compact breadcrumb with ellipsis-collapsed middle.
+                  Pattern locked 2026-06-13: "My Systems > [...] > {parent}"
+                  Tapping the [...] reveals the hidden middle ancestors in
+                  a small popover. */}
               {selectedScope && (() => {
                 const all = scopedSystems[0] ? getAncestorScopes(scopedSystems[0]) : [];
                 const ancestors = all.slice(0, selectedScope.ancestors.length);
-                const immediateParent = ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
-                const crumbStyle = { color: '#036AB5', textDecoration: 'underline', cursor: 'pointer' };
                 return (
-                  <div style={{
-                    fontSize: 12, color: '#4A4F5A', lineHeight: 1.4, marginBottom: 2,
-                    display: 'flex', alignItems: 'center', gap: 8,
-                    minWidth: 0,
-                  }}>
-                    <span
-                      onClick={(e) => { e.stopPropagation(); clearSelectedScope?.(); }}
-                      style={{ ...crumbStyle, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }}
-                      title="Back to all systems"
-                    >
-                      <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#036AB5' }}>chevron_left</span>
-                      My Systems
-                    </span>
-                    {immediateParent && (
-                      <>
-                        <span style={{ color: '#B8BCC4', flexShrink: 0 }}>·</span>
-                        <span
-                          onClick={(e) => { e.stopPropagation(); setSelectedScope?.(immediateParent); }}
-                          style={{ ...crumbStyle, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                          title={immediateParent.name}
-                        >{immediateParent.name}</span>
-                      </>
-                    )}
-                  </div>
+                  <CompactBreadcrumb
+                    ancestors={ancestors}
+                    onClearScope={() => clearSelectedScope?.()}
+                    onSelectAncestor={(a) => setSelectedScope?.(a)}
+                  />
                 );
               })()}
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
