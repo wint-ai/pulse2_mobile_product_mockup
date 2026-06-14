@@ -292,17 +292,18 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
         <div
           title={name}
           style={{
-            fontSize: 14, fontWeight: selected ? 600 : 500,
+            fontSize: 15, fontWeight: selected ? 700 : 600,
             color: textColor,
+            letterSpacing: '-0.1px',
             lineHeight: 1.25,
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
           }}>{name}</div>
         {sub && (
-          <div style={{ fontSize: 11, color: subColor, marginTop: 1, opacity: selected ? 0.85 : 1 }}>
+          <div style={{ fontSize: 12, color: subColor, marginTop: 2, opacity: selected ? 0.85 : 1 }}>
             {sub}
-            {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 600 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
-            {alertCount > 0 && <span style={{ color: theme.orange, fontWeight: 600 }}> · {alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
+            {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
+            {alertCount > 0 && <span style={{ color: theme.orange, fontWeight: 700 }}> · {alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
           </div>
         )}
       </div>
@@ -416,9 +417,10 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
         <div
           title={sys.name}
           style={{
-            fontSize: 13, fontWeight: isCurrent ? 700 : 500,
+            fontSize: 14, fontWeight: isCurrent ? 700 : 600,
             color: isCurrent ? accent : isLeak ? theme.red : (theme.drawerText || theme.text),
-            lineHeight: 1.25,
+            letterSpacing: '-0.1px',
+            lineHeight: 1.3,
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
           }}>{sys.name}</div>
@@ -629,9 +631,9 @@ function AccountCard({
           <div
             title={tile.name}
             style={{
-              fontSize: 15, fontWeight: 700,
+              fontSize: 16, fontWeight: 700,
               color: theme.drawerText || theme.text,
-              letterSpacing: '-0.1px',
+              letterSpacing: '-0.2px',
               lineHeight: 1.25,
               // Allow names to wrap to as many lines as they need - long
               // account names ("Heathrow Airport Authority", "Weizmann
@@ -642,9 +644,9 @@ function AccountCard({
               overflowWrap: 'anywhere',
             }}>{tile.name}</div>
           <div style={{
-            fontSize: 11.5, fontWeight: 500,
+            fontSize: 12, fontWeight: 500,
             color: theme.drawerTextSub || theme.textTertiary,
-            marginTop: 2,
+            marginTop: 3,
           }}>
             {tile.systems.length} system{tile.systems.length !== 1 ? 's' : ''}
             {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
