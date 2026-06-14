@@ -75,24 +75,13 @@ export function StatusPills({ sys, theme }) {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
-   ALL CLEAR / ALERT BANNER
+   ALERT BANNER (non-water alert path; "All Clear" component removed 2026-06-13)
    ════════════════════════════════════════════════════════════════════════ */
 
-export function AllClear({ sys, theme, isTenant }) {
-  if (sys.alert || sys.offline || sys.comm === 'offline') return null;
-  return (
-    <div style={{
-      background: theme.clearBg, borderRadius: 10, padding: '12px 14px',
-      display: 'flex', alignItems: 'center', marginBottom: 10, border: theme.clearBorder,
-    }}>
-      <MIcon name="check_circle" size={20} color={theme.green} fill style={{ marginRight: 10 }} />
-      <div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: theme.green }}>All Clear</div>
-        <div style={{ fontSize: 13, color: theme.textMuted, marginTop: 1 }}>{isTenant ? 'Your water system is working normally' : 'No active alerts'}</div>
-      </div>
-    </div>
-  );
-}
+// Note: the legacy AllClear banner was removed 2026-06-13. "All Clear" framing
+// implied a global system state and contradicted any active health issue
+// surfaced by the Health widget below. The Water Event widget handles its own
+// empty state ("No active Water Events") and reports only on its dimension.
 
 const TYPE_LABELS = { 'leak-high': 'High Flow', 'leak-low': 'Low Flow', 'valve-error': 'Valve Error', 'power-lost': 'Power Lost', 'offline': 'Offline' };
 
@@ -844,9 +833,11 @@ function OverviewTab({ sys, navigate }) {
       <div style={{ padding: '0 14px' }}>
         {/* Water Event widget always renders. When there's an active water
             event it shows the full active card; when there isn't, it shows
-            the locked All clear state ("No active Water Event"). The widget
-            stays visible so users always have a positive water-event
-            indicator regardless of other alerts on the system. */}
+            the empty state ("No active Water Events"). The widget stays
+            visible so users always have a positive water-event indicator
+            regardless of other alerts on the system. "All Clear" framing
+            was dropped 2026-06-13 -- the widget reports water only, not
+            global system status. */}
         <WaterEventDetailsWidget sys={sys} />
         {!isWaterEvent && <AlertBanner sys={sys} navigate={navigate} theme={theme} />}
         <ProtectionStatusCard sys={sys} theme={theme} />

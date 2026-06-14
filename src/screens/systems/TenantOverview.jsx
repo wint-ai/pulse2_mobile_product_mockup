@@ -142,9 +142,10 @@ export default function TenantOverview({ sys, navigate }) {
     <div style={{ flex: 1, overflowY: 'auto', paddingTop: 10, paddingBottom: 24 }}>
       <div style={{ padding: '0 14px' }}>
         {/* Water Event widget - always rendered, always on top. Shows the
-            active card when a water event is happening, otherwise the locked
-            All clear state ("No active Water Event"). Same widget on tenant
-            view; All clear is a STATE of this widget, not a separate widget.
+            active card when a water event is happening, otherwise the empty
+            state ("No active Water Events"). Same widget on tenant view;
+            empty state is a STATE of this widget, not a separate widget.
+            "All Clear" framing was dropped 2026-06-13.
             hideOnIt: tenant context is a single occupant. "On it" is a
             team-coordination action that doesn't apply, so we omit it. */}
         <WaterEventDetailsWidget sys={sys} hideOnIt />

@@ -73,39 +73,44 @@ describe('WaterEventDetailsWidget renders correct state pill', () => {
   });
 });
 
-describe('WaterEventDetailsWidget All clear state', () => {
-  // PRD 04a § "All clear state" - locked 2026-06-08. The widget MUST stay
-  // visible when there is no active water event - shows green check_circle
-  // + "All clear" + sub-text "No active Water Event" so users always have a
-  // positive water-event indicator on the System page (independent of valve
-  // / power / comm alerts).
-  it('no alert at all -> shows All clear + "No active Water Event"', () => {
+describe('WaterEventDetailsWidget empty state', () => {
+  // PRD 04a § empty state - locked 2026-06-13. The widget MUST stay visible
+  // when there is no active water event - shows green check_circle + "No
+  // active Water Events" so users always have a positive water-event
+  // indicator on the System page (independent of valve / power / comm
+  // alerts).
+  //
+  // "All clear" wording was DROPPED 2026-06-13 because it implied a global
+  // system status, contradicting "1 issue" on the Health widget below when
+  // another protection dimension was failing. The widget now reports its
+  // dimension only - water events.
+  it('no alert at all -> shows "No active Water Events"', () => {
     // Pick a system that starts with no static alert.
     const sys = { id: 'test-sys-1', name: 'Test', alert: null };
     renderWidget(sys);
-    expect(screen.getByText('All clear')).toBeInTheDocument();
-    expect(screen.getByText('No active Water Event')).toBeInTheDocument();
+    expect(screen.getByText('No active Water Events')).toBeInTheDocument();
+    expect(screen.queryByText('All clear')).toBeNull();
+    expect(screen.queryByText('All Clear')).toBeNull();
   });
 
-  it('resolved water event -> shows All clear (no active card)', () => {
+  it('resolved water event -> shows empty state (no active card)', () => {
     // Fire Warning then End of Leak so sys.alert is tombstoned to null on
-    // the data side, but we ALSO want to verify the widget renders All clear
-    // when alert.resolved is truthy (defensive - handles in-flight resolutions
-    // before the data tombstone has propagated).
+    // the data side, but we ALSO want to verify the widget renders the
+    // empty state when alert.resolved is truthy (defensive - handles
+    // in-flight resolutions before the data tombstone has propagated).
     const sys = {
       id: 'test-sys-2', name: 'Test',
       alert: { type: 'leak-high', resolved: true },
     };
     renderWidget(sys);
-    expect(screen.getByText('All clear')).toBeInTheDocument();
-    expect(screen.getByText('No active Water Event')).toBeInTheDocument();
+    expect(screen.getByText('No active Water Events')).toBeInTheDocument();
     // Active-state pills must NOT render.
     expect(screen.queryByText('Warning')).toBeNull();
     expect(screen.queryByText('Ongoing')).toBeNull();
     expect(screen.queryByText('Shutoff')).toBeNull();
   });
 
-  it('non-water alert present (e.g. valve-error) -> still shows All clear', () => {
+  it('non-water alert present (e.g. valve-error) -> still shows empty state', () => {
     // A system can have a valve error without any water event happening.
     // The water widget should report "no water event" regardless of other
     // protection issues - those are surfaced by their own widgets/banners.
@@ -114,7 +119,6 @@ describe('WaterEventDetailsWidget All clear state', () => {
       alert: { type: 'valve-error' },
     };
     renderWidget(sys);
-    expect(screen.getByText('All clear')).toBeInTheDocument();
-    expect(screen.getByText('No active Water Event')).toBeInTheDocument();
+    expect(screen.getByText('No active Water Events')).toBeInTheDocument();
   });
 });

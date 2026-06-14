@@ -10,9 +10,13 @@
 //   [flow rate row: "Flow rate XX.X L/hour"]
 //   [optional action row: Ignore this event . Notify team I'm on it]
 //
-// States rendered: All clear (parent shows All Clear card), Warning, Ongoing,
+// States rendered: empty (no active water event), Warning, Ongoing,
 // Shutoff, Ignored (muted). Ended is NOT rendered by this widget (W18) -- the
-// widget returns to All clear when an event ends.
+// widget returns to the empty state when an event ends. Empty-state copy is
+// "No active Water Events" only -- no "All clear" framing, since other
+// dimensions (valve / power / comm) may still need attention and the Health
+// widget below surfaces those. The water-event widget reports its dimension
+// only. Locked 2026-06-13.
 //
 // Severity drives the icon color (high flow #DB4670 / low flow #F05C25). State
 // pill changes per lifecycle phase. Shutoff is a phase, not a category -- same
@@ -162,13 +166,16 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
     && onItActor.toLowerCase() === currentActor.toLowerCase();
 
   const lifecycle = deriveLifecycle(sys);
-  // Resolved (Ended) events go to All clear, NOT to the active card (W18).
-  // No active water event -> render the All clear state (PRD 04a § "All clear
-  // state", locked 2026-06-08): green check_circle + "All clear" + sub-text
-  // "No active Water Event". Same on Standard and Simple. Locked palette:
-  // circle #5C9E1A, card gradient #F5FBF0 -> #fff, border #C8E4B4.
-  const isAllClear = !lifecycle || sys.alert?.resolved;
-  if (isAllClear) {
+  // Resolved (Ended) events go to the empty state, NOT to the active card
+  // (W18). Empty state = single label "No active Water Events" (plural). No
+  // "All clear" framing -- the widget reports the water-event dimension only;
+  // other dimensions (valve, power, comm) are surfaced by the Health widget
+  // below. "All clear" implied a global system state and contradicted "1
+  // issue" on the next widget. Locked 2026-06-13. Same on Standard and Simple.
+  // Locked palette: circle #5C9E1A, card gradient #F5FBF0 -> #fff, border
+  // #C8E4B4.
+  const isEmpty = !lifecycle || sys.alert?.resolved;
+  if (isEmpty) {
     return (
       <div style={{
         background: 'linear-gradient(180deg, #F5FBF0 0%, #FFFFFF 100%)',
@@ -191,10 +198,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
           <div style={{
             fontSize: 15, fontWeight: 700, color: '#14151A',
             lineHeight: 1.2, letterSpacing: '-0.1px',
-          }}>All clear</div>
-          <div style={{
-            fontSize: 12.5, color: '#4A4F5A', marginTop: 2,
-          }}>No active Water Event</div>
+          }}>No active Water Events</div>
         </div>
       </div>
     );
