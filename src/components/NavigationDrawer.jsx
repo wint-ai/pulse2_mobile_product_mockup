@@ -268,11 +268,19 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 
       {/* Name + meta */}
       <div style={{ flex: 1, minWidth: 0, zIndex: 1 }}>
-        <div style={{
-          fontSize: 14, fontWeight: selected ? 600 : 500,
-          color: textColor,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>{name}</div>
+        <div
+          title={name}
+          style={{
+            fontSize: 14, fontWeight: selected ? 600 : 500,
+            color: textColor,
+            lineHeight: 1.25,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+          }}>{name}</div>
         {sub && (
           <div style={{ fontSize: 11, color: subColor, marginTop: 1, opacity: selected ? 0.85 : 1 }}>
             {sub}
@@ -385,11 +393,19 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
 
       {/* Name + alert label */}
       <div style={{ flex: 1, minWidth: 0, zIndex: 1 }}>
-        <div style={{
-          fontSize: 13, fontWeight: isCurrent ? 700 : 500,
-          color: isCurrent ? accent : isLeak ? theme.red : (theme.drawerText || theme.text),
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>{sys.name}</div>
+        <div
+          title={sys.name}
+          style={{
+            fontSize: 13, fontWeight: isCurrent ? 700 : 500,
+            color: isCurrent ? accent : isLeak ? theme.red : (theme.drawerText || theme.text),
+            lineHeight: 1.25,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+          }}>{sys.name}</div>
         {/* Parent location path — shown in search results to disambiguate
             systems with identical names across locations (e.g. "Floor 21"
             exists in 3 buildings). 2026-06-07. */}
@@ -588,16 +604,29 @@ function AccountCard({
             color={'#036AB5'} />
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 15, fontWeight: 700,
-            color: theme.drawerText || theme.text,
-            letterSpacing: '-0.1px',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>{tile.name}</div>
+          <div
+            title={tile.name}
+            style={{
+              fontSize: 15, fontWeight: 700,
+              color: theme.drawerText || theme.text,
+              letterSpacing: '-0.1px',
+              lineHeight: 1.25,
+              // Allow up to 2 lines before truncating - long account names
+              // (e.g. "Heathrow Airport Authority", "Weizmann Institute of
+              // Science") fit fully on two lines instead of being chopped
+              // with "...". Native title attribute exposes the full name on
+              // hover for desktop / accessibility.
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+            }}>{tile.name}</div>
           <div style={{
             fontSize: 11.5, fontWeight: 500,
             color: theme.drawerTextSub || theme.textTertiary,
-            marginTop: 1,
+            marginTop: 2,
           }}>
             {tile.systems.length} system{tile.systems.length !== 1 ? 's' : ''}
             {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
@@ -835,7 +864,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
     return { systems, locations };
   }, [search, activeSystems, rootTiles]);
 
-  function handleView(tile, ancestors = []) {
+  function handleView(tile, ancestors = [], closeDrawer = true) {
     setSelectedTileId(tile.id);
     // Set the global selected scope so every screen can show it.
     if (setSelectedScope) {
@@ -848,7 +877,13 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
         systemIds: tile.systems.map(s => s.id),
       });
     }
-    if (onSelectLocation) onSelectLocation(tile);
+    // The parent's onSelectLocation handler typically closes the drawer
+    // (HomeUnified) or navigates away (SystemDetail). We only want that
+    // behavior when the user is making a definite scope CHOICE - tapping
+    // a nested location row. For an accordion open/close on a top-level
+    // account card, the drawer must stay open so the user can explore
+    // children. Pass closeDrawer=false from AccountCard's onToggleOpen.
+    if (closeDrawer && onSelectLocation) onSelectLocation(tile);
   }
 
   function handleSystemClick(id) {
@@ -1145,7 +1180,10 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   isOpen={expandedIds.has(tile.id)}
                   isSelected={selectedTileId === tile.id || selectedScope?.id === tile.id}
                   onToggleOpen={() => {
-                    handleView(tile, []);
+                    // closeDrawer=false: opening an account card stays in the
+                    // drawer for exploration. A scope CHOICE that closes the
+                    // drawer requires tapping a nested location or system.
+                    handleView(tile, [], false);
                     toggleAccountOpen(tile.id);
                   }}
                   onView={handleView}
