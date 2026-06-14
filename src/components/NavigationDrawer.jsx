@@ -289,15 +289,27 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 
       {/* Name + meta */}
       <div style={{ flex: 1, minWidth: 0, zIndex: 1 }}>
-        <div
-          title={name}
-          style={{
-            fontSize: 14, fontWeight: selected ? 600 : 500,
-            color: textColor,
-            lineHeight: 1.25,
-            wordBreak: 'break-word',
-            overflowWrap: 'anywhere',
-          }}>{name}</div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+          <div
+            title={name}
+            style={{
+              fontSize: 14, fontWeight: selected ? 600 : 500,
+              color: textColor,
+              lineHeight: 1.25,
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+              flex: 1, minWidth: 0,
+            }}>{name}</div>
+          {selected && (
+            <span style={{
+              fontSize: 10, fontWeight: 700,
+              color: accent,
+              padding: '1px 6px', borderRadius: 4,
+              background: accent + '15',
+              flexShrink: 0,
+            }}>Viewing</span>
+          )}
+        </div>
         {sub && (
           <div style={{ fontSize: 11, color: subColor, marginTop: 1, opacity: selected ? 0.85 : 1 }}>
             {sub}
@@ -630,16 +642,28 @@ function AccountCard({
             color={'#036AB5'} />
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            title={tile.name}
-            style={{
-              fontSize: 15, fontWeight: 700,
-              color: theme.drawerText || theme.text,
-              letterSpacing: '-0.1px',
-              lineHeight: 1.25,
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-            }}>{tile.name}</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+            <div
+              title={tile.name}
+              style={{
+                fontSize: 15, fontWeight: 700,
+                color: theme.drawerText || theme.text,
+                letterSpacing: '-0.1px',
+                lineHeight: 1.25,
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
+                flex: 1, minWidth: 0,
+              }}>{tile.name}</div>
+            {isSelected && (
+              <span style={{
+                fontSize: 10, fontWeight: 700,
+                color: accent,
+                padding: '1px 6px', borderRadius: 4,
+                background: accent + '15',
+                flexShrink: 0,
+              }}>Viewing</span>
+            )}
+          </div>
           <div style={{
             fontSize: 11.5, fontWeight: 500,
             color: theme.drawerTextSub || theme.textTertiary,
