@@ -1,7 +1,7 @@
 // Shared navigation drawer — Option D design (minimal list + tree guides)
 // Used on Home (HomeUnified) and System Detail page
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
