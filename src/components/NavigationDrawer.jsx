@@ -170,6 +170,21 @@ function findPathToLocation(tiles, locationId, allSystems) {
   return [];
 }
 
+// Collect all expandable descendant IDs of a tile (locations only, not
+// system leaves). Used by the accordion: when an account card closes, we
+// also clear every nested-expansion id inside its subtree so re-opening
+// the same account starts from a clean "just the account header" state.
+function collectDescendantIds(tile) {
+  if (!tile.children) return [];
+  const ids = [];
+  for (const child of tile.children) {
+    if (child.type === 'system') continue;
+    ids.push(child.id);
+    ids.push(...collectDescendantIds(child));
+  }
+  return ids;
+}
+
 // Find the actual tile (with its populated `systems` list) + its ancestor
 // chain, given just a location id. Used when activating a favorite — the
 // favorites store only caches id+name, so we have to re-resolve the tile
@@ -486,6 +501,209 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
   );
 }
 
+// ── Account card (Solution A — top-level accordion card) ──
+//
+// Wraps each top-level account/root tile in a visually distinct card so
+// the boundary between accounts is unambiguous. Per the multi-account
+// orientation feedback (2026-06-13): users opening the flat-list drawer
+// lost track of which children belonged to which parent. The card chrome
+// + single-expand accordion behavior fix that.
+//
+// Behavior:
+//   • Tap the header → open this card + close any OTHER open account
+//     (accordion) + set selected scope to this account.
+//   • Tap the header of the already-open card → close it + clear its
+//     nested expansion (collapseDescendants from parent).
+//   • Children render inside the card body using the standard TreeNode
+//     recursive component, depth=2+.
+function AccountCard({
+  tile, isOpen, isSelected, onToggleOpen, onView,
+  expandedIds, toggleExpanded, onSystemClick, currentSystemId,
+  allSystems, theme, onToggleFavorite,
+}) {
+  const accent = theme.drawerAccent || theme.accent;
+  const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
+
+  // Card chrome adapts to light vs dark drawer themes. Both modes use the
+  // same brand-blue tint on open; the base contrast differs.
+  const cardBg = dk ? 'rgba(255,255,255,0.04)' : '#FFFFFF';
+  const cardBorder = dk ? 'rgba(255,255,255,0.10)' : '#E5E8EE';
+  const cardOpenBg = dk
+    ? 'linear-gradient(180deg, rgba(11,149,248,0.14) 0%, rgba(255,255,255,0.04) 60%)'
+    : 'linear-gradient(180deg, rgba(11,149,248,0.05) 0%, #FFFFFF 60%)';
+  const cardOpenBorder = dk ? 'rgba(11,149,248,0.45)' : 'rgba(11,149,248,0.30)';
+  const cardShadow = dk ? '0 1px 4px rgba(0,0,0,0.20)' : '0 1px 2px rgba(20,21,26,0.03)';
+  const cardOpenShadow = dk ? '0 2px 10px rgba(11,149,248,0.18)' : '0 2px 8px rgba(11,149,248,0.08)';
+
+  const iconBg = isOpen
+    ? (dk ? 'rgba(11,149,248,0.28)' : 'rgba(11,149,248,0.18)')
+    : (dk ? 'rgba(11,149,248,0.18)' : 'rgba(11,149,248,0.10)');
+
+  // Roll up leak / alert counts for the sub-line — same logic as TreeNode.
+  const leakCount = tile.systems.filter(sys => computeSystemHealth(sys).isLeak).length;
+  const alertCount = tile.systems.filter(sys => {
+    const h = computeSystemHealth(sys);
+    return !h.isLeak && (!h.allOk || !!sys.alert);
+  }).length;
+
+  // System or sub-location children for the body.
+  const childLocations = tile.children ? tile.children.filter(c => c.type !== 'system') : [];
+  const hasChildLocations = childLocations.length > 0;
+  const hasSystemChildren = tile.systems.length > 0 && !hasChildLocations;
+  const childTiles = hasChildLocations ? getHierarchyTiles(childLocations, allSystems) : [];
+
+  return (
+    <div
+      data-drawer-target={tile.id}
+      style={{
+        background: isOpen ? cardOpenBg : cardBg,
+        border: `1px solid ${isOpen ? cardOpenBorder : cardBorder}`,
+        borderRadius: 12,
+        marginBottom: 10,
+        overflow: 'hidden',
+        boxShadow: isOpen ? cardOpenShadow : cardShadow,
+        transition: 'background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+      }}
+    >
+      {/* Header — tap to open/close + set scope */}
+      <div
+        onClick={onToggleOpen}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '14px 14px',
+          cursor: 'pointer',
+          // Accent left bar when this card represents the selected scope.
+          borderLeft: isSelected ? `3px solid ${accent}` : '3px solid transparent',
+        }}
+        role="button"
+        aria-expanded={isOpen}
+      >
+        <span style={{
+          flexShrink: 0, width: 36, height: 36, borderRadius: 10,
+          background: iconBg,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <MIcon name={iconForLevel(tile.levelType).name} size={22}
+            fill={iconForLevel(tile.levelType).fill !== false}
+            color={'#036AB5'} />
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 15, fontWeight: 700,
+            color: theme.drawerText || theme.text,
+            letterSpacing: '-0.1px',
+            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          }}>{tile.name}</div>
+          <div style={{
+            fontSize: 11.5, fontWeight: 500,
+            color: theme.drawerTextSub || theme.textTertiary,
+            marginTop: 1,
+          }}>
+            {tile.systems.length} system{tile.systems.length !== 1 ? 's' : ''}
+            {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
+            {alertCount > 0 && <span style={{ color: theme.orange, fontWeight: 700 }}> · {alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
+          </div>
+        </div>
+        {/* Star — wraps the account itself */}
+        <StarButton
+          entry={{
+            kind: 'location',
+            id: tile.id,
+            name: tile.name,
+            sub: `${tile.systems.length} system${tile.systems.length !== 1 ? 's' : ''}`,
+            levelType: tile.levelType,
+          }}
+          onChange={onToggleFavorite}
+          theme={theme}
+        />
+        {/* Leak indicator dot to the right of the star when the subtree has Water Events */}
+        {leakCount > 0 && (
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.red, flexShrink: 0 }} />
+        )}
+        {/* Expand chevron */}
+        <span style={{
+          flexShrink: 0,
+          fontFamily: 'Material Symbols Outlined',
+          fontSize: 22, color: isOpen ? (accent || '#036AB5') : (theme.drawerTextSub || theme.textTertiary),
+        }}>{isOpen ? 'expand_less' : 'chevron_right'}</span>
+      </div>
+
+      {/* Body — children render only when open */}
+      {isOpen && (
+        <div style={{
+          paddingTop: 4, paddingBottom: 8,
+          borderTop: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : '#EEF1F4'}`,
+        }}>
+          {childTiles.map(child => (
+            <TreeNode
+              key={child.id} tile={child} depth={2}
+              expandedIds={expandedIds} toggleExpanded={toggleExpanded}
+              selectedTileId={null}
+              onView={onView} onSystemClick={onSystemClick}
+              currentSystemId={currentSystemId} allSystems={allSystems}
+              theme={theme} onToggleFavorite={onToggleFavorite}
+            />
+          ))}
+          {hasSystemChildren && tile.systems.map(sys => (
+            <SystemRow
+              key={sys.id} sys={sys} depth={2}
+              isCurrent={sys.id === currentSystemId}
+              onClick={() => sys.id !== currentSystemId && onSystemClick(sys.id)}
+              theme={theme} onToggleFavorite={onToggleFavorite}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Collapse-all bar (Solution A) ──
+// Shows above the account cards. Active state = ≥1 account open or any
+// nested expansion exists; tap clears everything. Disabled (greyed) state
+// stays visible so users discover the affordance.
+function CollapseAllBar({ accountCount, hasAnyExpansion, onCollapseAll, theme }) {
+  const accent = theme.drawerAccent || theme.accent || '#036AB5';
+  const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '10px 12px',
+      borderBottom: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : '#EEF1F4'}`,
+      marginBottom: 10,
+    }}>
+      <span style={{
+        fontSize: 10.5, fontWeight: 700,
+        color: theme.drawerTextSub || theme.textTertiary,
+        textTransform: 'uppercase', letterSpacing: '.5px',
+      }}>{accountCount} {accountCount === 1 ? 'account' : 'accounts'}</span>
+      <span
+        onClick={hasAnyExpansion ? onCollapseAll : undefined}
+        title={hasAnyExpansion ? 'Close the open account and reset any nested expansion' : 'Everything is already collapsed'}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          fontSize: 11.5, fontWeight: 600,
+          color: hasAnyExpansion ? accent : (theme.drawerTextSub || theme.textTertiary),
+          background: hasAnyExpansion
+            ? (dk ? 'rgba(11,149,248,0.14)' : 'rgba(11,149,248,0.08)')
+            : (dk ? 'rgba(255,255,255,0.04)' : '#F2F4F7'),
+          padding: '5px 10px', borderRadius: 999,
+          cursor: hasAnyExpansion ? 'pointer' : 'default',
+          border: `1px solid ${hasAnyExpansion
+            ? (dk ? 'rgba(11,149,248,0.30)' : 'rgba(11,149,248,0.18)')
+            : (dk ? 'rgba(255,255,255,0.06)' : '#E5E8EE')}`,
+          userSelect: 'none',
+          opacity: hasAnyExpansion ? 1 : 0.6,
+        }}
+      >
+        <MIcon name="unfold_less" size={14}
+          color={hasAnyExpansion ? accent : (theme.drawerTextSub || theme.textTertiary)} />
+        Collapse all
+      </span>
+    </div>
+  );
+}
+
 // ── Main drawer ──
 export default function NavigationDrawer({ open, onClose, onSelectLocation, currentSystemId }) {
   useDataRefresh();
@@ -575,6 +793,34 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
   });
+
+  // Accordion behavior for top-level account cards (Solution A).
+  // Opening an account closes every other account AND clears all nested
+  // expansion (returns the drawer to "just this account open at the top").
+  // Closing an account also clears its nested expansion so re-opening is
+  // clean. Locked 2026-06-13.
+  const toggleAccountOpen = (accountId) => {
+    setExpandedIds(prev => {
+      if (prev.has(accountId)) {
+        // Closing — drop this account + every descendant id in its subtree
+        const tile = rootTiles.find(t => t.id === accountId);
+        const descendants = tile ? collectDescendantIds(tile) : [];
+        const next = new Set(prev);
+        next.delete(accountId);
+        descendants.forEach(id => next.delete(id));
+        return next;
+      }
+      // Opening — close every other top-level account + their descendants
+      return new Set([accountId]);
+    });
+  };
+
+  // Collapse-all: reset every expansion (account + nested).
+  const collapseAll = () => setExpandedIds(new Set());
+
+  // Whether any account is open or any expansion exists. Drives the
+  // CollapseAllBar disabled/active state.
+  const hasAnyExpansion = expandedIds.size > 0;
 
   // Search both systems and locations
   const searchResults = useMemo(() => {
@@ -885,14 +1131,34 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
               </>
             )
           ) : (
-            rootTiles.map(tile => (
-              <TreeNode key={tile.id} tile={tile} depth={1}
-                expandedIds={expandedIds} toggleExpanded={toggleExpanded}
-                selectedTileId={selectedTileId} onView={handleView}
-                onSystemClick={handleSystemClick} currentSystemId={currentSystemId}
-                allSystems={activeSystems} theme={theme}
-                onToggleFavorite={bumpFavorites} />
-            ))
+            <div style={{ padding: '0 12px 80px' }}>
+              <CollapseAllBar
+                accountCount={rootTiles.length}
+                hasAnyExpansion={hasAnyExpansion}
+                onCollapseAll={collapseAll}
+                theme={theme}
+              />
+              {rootTiles.map(tile => (
+                <AccountCard
+                  key={tile.id}
+                  tile={tile}
+                  isOpen={expandedIds.has(tile.id)}
+                  isSelected={selectedTileId === tile.id || selectedScope?.id === tile.id}
+                  onToggleOpen={() => {
+                    handleView(tile, []);
+                    toggleAccountOpen(tile.id);
+                  }}
+                  onView={handleView}
+                  expandedIds={expandedIds}
+                  toggleExpanded={toggleExpanded}
+                  onSystemClick={handleSystemClick}
+                  currentSystemId={currentSystemId}
+                  allSystems={activeSystems}
+                  theme={theme}
+                  onToggleFavorite={bumpFavorites}
+                />
+              ))}
+            </div>
           )}
         </div>
 
