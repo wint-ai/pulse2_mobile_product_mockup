@@ -280,27 +280,38 @@ export default function EventsScreen() {
               <MIcon name="home_work" size={22} color="#036AB5" fill />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
+              {/* Compact two-crumb breadcrumb (locked 2026-06-13). Same
+                  pattern as Home + System Detail headers. */}
               {selectedScope && (() => {
                 const sample = (selectedScope.systems?.[0]) || scopedSystems[0];
                 const all = sample ? getAncestorScopes(sample) : [];
                 const ancestors = all.slice(0, selectedScope.ancestors.length);
+                const immediateParent = ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
                 const crumbStyle = { color: '#036AB5', textDecoration: 'underline', cursor: 'pointer' };
-                const sepStyle = { color: '#B8BCC4', margin: '0 4px' };
                 return (
-                  <div style={{ fontSize: 12, color: '#4A4F5A', lineHeight: 1.4, marginBottom: 2, wordBreak: 'break-word' }}>
+                  <div style={{
+                    fontSize: 12, color: '#4A4F5A', lineHeight: 1.4, marginBottom: 2,
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    minWidth: 0,
+                  }}>
                     <span
                       onClick={(e) => { e.stopPropagation(); clearSelectedScope?.(); }}
-                      style={crumbStyle}
-                    >My Systems</span>
-                    {ancestors.map((a) => (
-                      <span key={a.id}>
-                        <span style={sepStyle}>›</span>
+                      style={{ ...crumbStyle, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }}
+                      title="Back to all systems"
+                    >
+                      <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#036AB5' }}>chevron_left</span>
+                      My Systems
+                    </span>
+                    {immediateParent && (
+                      <>
+                        <span style={{ color: '#B8BCC4', flexShrink: 0 }}>·</span>
                         <span
-                          onClick={(e) => { e.stopPropagation(); setSelectedScope?.(a); }}
-                          style={crumbStyle}
-                        >{a.name}</span>
-                      </span>
-                    ))}
+                          onClick={(e) => { e.stopPropagation(); setSelectedScope?.(immediateParent); }}
+                          style={{ ...crumbStyle, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          title={immediateParent.name}
+                        >{immediateParent.name}</span>
+                      </>
+                    )}
                   </div>
                 );
               })()}

@@ -632,13 +632,14 @@ export default function SystemDetail() {
                     );
                   }
 
-                  // Bug fix 2026-06-09: only show ancestors that are WITHIN
-                  // the user's visible scope. Mark Cohen scoped to Tower One
-                  // previously saw "My Systems > Tidhar > UK > Manchester >
-                  // Tower One"; he now sees just "My Systems > Tower One"
-                  // because the levels above Tower One are outside his scope.
-                  // Filter rule: keep an ancestor only if every system in
-                  // its subtree is visible to the user.
+                  // Compact two-crumb breadcrumb (locked 2026-06-13).
+                  // Replaces the full ancestor chain. Shows at most:
+                  //   "‹ My Systems  ·  {immediate parent name}"
+                  // Visible-scope filtering preserved: only ancestors whose
+                  // subtree is entirely within the user's visible scope are
+                  // considered. Bug fix 2026-06-09: Mark Cohen scoped to
+                  // Tower One sees just "My Systems · Tower One", not the
+                  // full chain that bleeds outside his scope.
                   const visibleSystemIds = new Set(visibleSystems.map(s => s.id));
                   const allAncestors = getAncestorScopes(sys);
                   const ancestors = allAncestors.filter(a =>
@@ -646,21 +647,31 @@ export default function SystemDetail() {
                     a.systemIds.length > 0 &&
                     a.systemIds.every(id => visibleSystemIds.has(id))
                   );
+                  const immediateParent = ancestors.length > 0 ? ancestors[ancestors.length - 1] : null;
                   return (
-                    <div style={{ fontSize: 12, color: '#4A4F5A', lineHeight: 1.4, marginBottom: 2, wordBreak: 'break-word' }}>
+                    <div style={{
+                      fontSize: 12, color: '#4A4F5A', lineHeight: 1.4, marginBottom: 2,
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      minWidth: 0,
+                    }}>
                       <span
                         onClick={(e) => { e.stopPropagation(); setSelectedScope?.(null); navigate('/'); }}
-                        style={crumbStyle}
-                      >My Systems</span>
-                      {ancestors.map((a) => (
-                        <span key={a.id}>
-                          <span style={sepStyle}>›</span>
+                        style={{ ...crumbStyle, display: 'inline-flex', alignItems: 'center', gap: 2, flexShrink: 0 }}
+                        title="Back to all systems"
+                      >
+                        <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#036AB5' }}>chevron_left</span>
+                        My Systems
+                      </span>
+                      {immediateParent && (
+                        <>
+                          <span style={{ color: '#B8BCC4', flexShrink: 0 }}>·</span>
                           <span
-                            onClick={(e) => { e.stopPropagation(); setSelectedScope?.(a); navigate('/'); }}
-                            style={crumbStyle}
-                          >{a.name}</span>
-                        </span>
-                      ))}
+                            onClick={(e) => { e.stopPropagation(); setSelectedScope?.(immediateParent); navigate('/'); }}
+                            style={{ ...crumbStyle, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                            title={immediateParent.name}
+                          >{immediateParent.name}</span>
+                        </>
+                      )}
                     </div>
                   );
                 })()}
