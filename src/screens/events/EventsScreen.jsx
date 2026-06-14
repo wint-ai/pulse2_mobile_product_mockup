@@ -295,11 +295,16 @@ export default function EventsScreen() {
                   />
                 );
               })()}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                <MIcon name="notifications_active" size={18} color="#DB4670" fill style={{ flexShrink: 0 }} />
+              {/* Title row - same structure as Home: scope name + expand_more
+                  chevron. The page's identity (Alerts) is conveyed by the
+                  Active / History tab strip below + the bottom TabBar's
+                  active indicator. Header just communicates WHERE the user
+                  is scoped, like Home. 2026-06-13. */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
                 <span style={{ fontSize: 18, fontWeight: 700, color: '#14151A', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  Alerts
+                  {pageTitle}
                 </span>
+                <MIcon name="expand_more" size={22} color="#4A4F5A" style={{ flexShrink: 0, marginLeft: 2 }} />
               </div>
               <div style={{ fontSize: 13, color: '#4A4F5A' }}>
                 {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
