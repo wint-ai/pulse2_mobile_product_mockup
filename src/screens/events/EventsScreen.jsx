@@ -464,6 +464,7 @@ export default function EventsScreen() {
       <NavigationDrawer
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
+        onSelectLocation={() => setDrawerOpen(false)}
       />
     </div>
   );
