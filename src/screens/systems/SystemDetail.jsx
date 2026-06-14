@@ -634,17 +634,19 @@ export default function SystemDetail() {
                   }
 
                   // Compact breadcrumb with ellipsis-collapsed middle.
-                  // Visible-scope filtering preserved: only ancestors whose
-                  // subtree is entirely within the user's visible scope are
-                  // considered. Bug fix 2026-06-09: Mark Cohen scoped to
-                  // Tower One sees just "My Systems > Tower One", not the
-                  // full chain that bleeds outside his scope.
+                  // Visible-scope filtering: include any ancestor whose
+                  // subtree contains AT LEAST ONE system the user can see.
+                  // Previously used .every() which dropped account/country/
+                  // region for narrow-scope users (Mark @ Tower One saw
+                  // only "My Systems" with no path). Switched to .some()
+                  // so the chain reflects the user's actual position even
+                  // when their scope is narrow. 2026-06-13.
                   const visibleSystemIds = new Set(visibleSystems.map(s => s.id));
                   const allAncestors = getAncestorScopes(sys);
                   const ancestors = allAncestors.filter(a =>
                     Array.isArray(a.systemIds) &&
                     a.systemIds.length > 0 &&
-                    a.systemIds.every(id => visibleSystemIds.has(id))
+                    a.systemIds.some(id => visibleSystemIds.has(id))
                   );
                   return (
                     <CompactBreadcrumb

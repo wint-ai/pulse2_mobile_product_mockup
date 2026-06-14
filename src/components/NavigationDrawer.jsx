@@ -676,6 +676,7 @@ function AccountCard({
           {childTiles.map(child => (
             <TreeNode
               key={child.id} tile={child} depth={2}
+              ancestors={[tile.name]}
               expandedIds={expandedIds} toggleExpanded={toggleExpanded}
               selectedTileId={null}
               onView={onView} onSystemClick={onSystemClick}
