@@ -274,10 +274,6 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
             fontSize: 14, fontWeight: selected ? 600 : 500,
             color: textColor,
             lineHeight: 1.25,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
           }}>{name}</div>
@@ -399,10 +395,6 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
             fontSize: 13, fontWeight: isCurrent ? 700 : 500,
             color: isCurrent ? accent : isLeak ? theme.red : (theme.drawerText || theme.text),
             lineHeight: 1.25,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
           }}>{sys.name}</div>
@@ -533,7 +525,7 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
 //   • Children render inside the card body using the standard TreeNode
 //     recursive component, depth=2+.
 function AccountCard({
-  tile, isOpen, isSelected, onToggleOpen, onView,
+  tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onView,
   expandedIds, toggleExpanded, onSystemClick, currentSystemId,
   allSystems, theme, onToggleFavorite,
 }) {
@@ -611,15 +603,11 @@ function AccountCard({
               color: theme.drawerText || theme.text,
               letterSpacing: '-0.1px',
               lineHeight: 1.25,
-              // Allow up to 2 lines before truncating - long account names
-              // (e.g. "Heathrow Airport Authority", "Weizmann Institute of
-              // Science") fit fully on two lines instead of being chopped
-              // with "...". Native title attribute exposes the full name on
-              // hover for desktop / accessibility.
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
+              // Allow names to wrap to as many lines as they need - long
+              // account names ("Heathrow Airport Authority", "Weizmann
+              // Institute of Science") just take 2 lines instead of being
+              // chopped with "...". Native title attribute exposes the full
+              // name on hover for desktop / accessibility.
               wordBreak: 'break-word',
               overflowWrap: 'anywhere',
             }}>{tile.name}</div>
@@ -649,12 +637,36 @@ function AccountCard({
         {leakCount > 0 && (
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: theme.red, flexShrink: 0 }} />
         )}
-        {/* Expand chevron */}
-        <span style={{
-          flexShrink: 0,
-          fontFamily: 'Material Symbols Outlined',
-          fontSize: 22, color: isOpen ? (accent || '#036AB5') : (theme.drawerTextSub || theme.textTertiary),
-        }}>{isOpen ? 'expand_less' : 'chevron_right'}</span>
+        {/* Expand chevron - own clickable area with stopPropagation so it
+            ONLY toggles open/close, never sets scope or triggers drawer
+            close. 44x44 tap target per UI/UX skill touch-target-size rule.
+            Locked 2026-06-13 after the user reported "arrow next to
+            account closes the menu" - the previous version routed the
+            chevron click through the header's onClick (which also called
+            handleView -> setSelectedScope, harmless on its own, but the
+            symptom suggested an indirect close was happening). Giving the
+            chevron its own handler removes the ambiguity entirely. */}
+        <span
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onChevronToggle) onChevronToggle();
+          }}
+          role="button"
+          aria-label={isOpen ? 'Collapse account' : 'Expand account'}
+          style={{
+            flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            width: 44, height: 44,
+            margin: '-11px -10px -11px 0',  // expand into the row's padding for a generous hit area
+            cursor: 'pointer',
+          }}
+        >
+          <MIcon
+            name={isOpen ? 'expand_less' : 'chevron_right'}
+            size={22}
+            color={isOpen ? (accent || '#036AB5') : (theme.drawerTextSub || theme.textTertiary)}
+          />
+        </span>
       </div>
 
       {/* Body — children render only when open */}
@@ -1184,6 +1196,13 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                     // drawer for exploration. A scope CHOICE that closes the
                     // drawer requires tapping a nested location or system.
                     handleView(tile, [], false);
+                    toggleAccountOpen(tile.id);
+                  }}
+                  onChevronToggle={() => {
+                    // Chevron does NOT call handleView - it just toggles the
+                    // card's open state, no scope change, no drawer close.
+                    // Locked 2026-06-13 to remove any ambiguity about the
+                    // chevron tap triggering a drawer-close.
                     toggleAccountOpen(tile.id);
                   }}
                   onView={handleView}
