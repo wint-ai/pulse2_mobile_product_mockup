@@ -289,18 +289,31 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 
       {/* Name + meta */}
       <div style={{ flex: 1, minWidth: 0, zIndex: 1 }}>
-        <div
-          title={name}
-          style={{
-            fontSize: 15, fontWeight: selected ? 700 : 600,
-            color: textColor,
-            letterSpacing: '-0.1px',
-            lineHeight: 1.25,
-            wordBreak: 'break-word',
-            overflowWrap: 'anywhere',
-          }}>{name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <div
+            title={name}
+            style={{
+              fontSize: 16, fontWeight: selected ? 700 : 600,
+              color: textColor,
+              letterSpacing: '-0.2px',
+              lineHeight: 1.25,
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+              flex: 1, minWidth: 0,
+            }}>{name}</div>
+          {selected && (
+            <span style={{
+              fontSize: 10, fontWeight: 800,
+              color: '#fff', background: accent,
+              padding: '3px 8px', borderRadius: 4,
+              letterSpacing: '0.5px',
+              flexShrink: 0,
+              textTransform: 'uppercase',
+            }}>Viewing</span>
+          )}
+        </div>
         {sub && (
-          <div style={{ fontSize: 12, color: subColor, marginTop: 2, opacity: selected ? 0.85 : 1 }}>
+          <div style={{ fontSize: 13, color: subColor, marginTop: 3, opacity: selected ? 0.85 : 1 }}>
             {sub}
             {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
             {alertCount > 0 && <span style={{ color: theme.orange, fontWeight: 700 }}> · {alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
@@ -417,7 +430,7 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
         <div
           title={sys.name}
           style={{
-            fontSize: 14, fontWeight: isCurrent ? 700 : 600,
+            fontSize: 15, fontWeight: isCurrent ? 700 : 600,
             color: isCurrent ? accent : isLeak ? theme.red : (theme.drawerText || theme.text),
             letterSpacing: '-0.1px',
             lineHeight: 1.3,
@@ -604,7 +617,11 @@ function AccountCard({
         transition: 'background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
       }}
     >
-      {/* Header — tap to open/close + set scope */}
+      {/* Header — tap to NAVIGATE to this account (sets scope + closes
+          drawer). Tapping the chevron at the right only expands/collapses
+          the card body without navigating. This is the standard nav-drawer
+          pattern (Slack, Notion, etc.) and resolves the "I can't choose an
+          account" feedback. */}
       <div
         onClick={onToggleOpen}
         ref={headerRef}
@@ -613,7 +630,8 @@ function AccountCard({
           padding: '14px 14px',
           cursor: 'pointer',
           // Accent left bar when this card represents the selected scope.
-          borderLeft: isSelected ? `3px solid ${accent}` : '3px solid transparent',
+          // Bumped from 3 to 5 px so the indicator is impossible to miss.
+          borderLeft: isSelected ? `5px solid ${accent}` : '5px solid transparent',
         }}
         role="button"
         aria-expanded={isOpen}
@@ -628,25 +646,38 @@ function AccountCard({
             color={'#036AB5'} />
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            title={tile.name}
-            style={{
-              fontSize: 16, fontWeight: 700,
-              color: theme.drawerText || theme.text,
-              letterSpacing: '-0.2px',
-              lineHeight: 1.25,
-              // Allow names to wrap to as many lines as they need - long
-              // account names ("Heathrow Airport Authority", "Weizmann
-              // Institute of Science") just take 2 lines instead of being
-              // chopped with "...". Native title attribute exposes the full
-              // name on hover for desktop / accessibility.
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-            }}>{tile.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <div
+              title={tile.name}
+              style={{
+                fontSize: 18, fontWeight: 700,
+                color: theme.drawerText || theme.text,
+                letterSpacing: '-0.3px',
+                lineHeight: 1.2,
+                // Allow names to wrap to as many lines as they need - long
+                // account names ("Heathrow Airport Authority", "Weizmann
+                // Institute of Science") just take 2 lines instead of being
+                // chopped with "...". Native title attribute exposes the full
+                // name on hover for desktop / accessibility.
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
+                flex: 1, minWidth: 0,
+              }}>{tile.name}</div>
+            {isSelected && (
+              <span style={{
+                fontSize: 10, fontWeight: 800,
+                color: '#fff', background: accent,
+                padding: '3px 8px', borderRadius: 4,
+                letterSpacing: '0.5px',
+                flexShrink: 0,
+                textTransform: 'uppercase',
+              }}>Viewing</span>
+            )}
+          </div>
           <div style={{
-            fontSize: 12, fontWeight: 500,
+            fontSize: 13, fontWeight: 500,
             color: theme.drawerTextSub || theme.textTertiary,
-            marginTop: 3,
+            marginTop: 4,
           }}>
             {tile.systems.length} system{tile.systems.length !== 1 ? 's' : ''}
             {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
@@ -1237,17 +1268,19 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   isOpen={expandedIds.has(tile.id)}
                   isSelected={selectedTileId === tile.id || selectedScope?.id === tile.id}
                   onToggleOpen={() => {
-                    // closeDrawer=false: opening an account card stays in the
-                    // drawer for exploration. A scope CHOICE that closes the
-                    // drawer requires tapping a nested location or system.
-                    handleView(tile, [], false);
-                    toggleAccountOpen(tile.id);
+                    // Header tap = NAVIGATE to this account (standard
+                    // nav-drawer pattern). Sets scope + closes drawer so the
+                    // user can see Home re-rendered for the new scope.
+                    // Locked 2026-06-13 after the "can't choose an account"
+                    // feedback - previously this only expanded the card
+                    // in-drawer with no visible "I'm scoped to this now"
+                    // signal on the page behind.
+                    handleView(tile, [], true);
                   }}
                   onChevronToggle={() => {
-                    // Chevron does NOT call handleView - it just toggles the
-                    // card's open state, no scope change, no drawer close.
-                    // Locked 2026-06-13 to remove any ambiguity about the
-                    // chevron tap triggering a drawer-close.
+                    // Chevron tap = EXPAND card only (drawer stays open).
+                    // Used when the user wants to drill into the account's
+                    // children without leaving the drawer.
                     toggleAccountOpen(tile.id);
                   }}
                   onView={handleView}

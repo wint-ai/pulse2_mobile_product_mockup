@@ -717,10 +717,13 @@ export default function SystemDetail() {
       <TabBar activeTab={isSingleTenantHome ? 'home' : 'systems'} />
 
       <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} currentSystemId={systemId}
-        onSelectLocation={(tile) => {
-          // Navigate to systems tab with selected location scope
-          sessionStorage.setItem('pulse2-selected-location', JSON.stringify({ id: tile.id, name: tile.name, systemIds: tile.systems.map(s => s.id) }));
-          navigate('/systems');
+        onSelectLocation={() => {
+          // Navigate to modern Home with the selected scope (which the
+          // drawer already set via setSelectedScope before calling this
+          // callback). Previously routed to legacy '/systems'; updated
+          // 2026-06-13 to land on '/' so the user sees Home with the
+          // new account/location scoped.
+          navigate('/');
         }}
       />
 
