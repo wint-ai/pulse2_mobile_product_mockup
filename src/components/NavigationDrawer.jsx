@@ -289,34 +289,20 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 
       {/* Name + meta */}
       <div style={{ flex: 1, minWidth: 0, zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          <div
-            title={name}
-            style={{
-              fontSize: 16, fontWeight: selected ? 700 : 600,
-              color: textColor,
-              letterSpacing: '-0.2px',
-              lineHeight: 1.25,
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-              flex: 1, minWidth: 0,
-            }}>{name}</div>
-          {selected && (
-            <span style={{
-              fontSize: 10, fontWeight: 800,
-              color: '#fff', background: accent,
-              padding: '3px 8px', borderRadius: 4,
-              letterSpacing: '0.5px',
-              flexShrink: 0,
-              textTransform: 'uppercase',
-            }}>Viewing</span>
-          )}
-        </div>
+        <div
+          title={name}
+          style={{
+            fontSize: 14, fontWeight: selected ? 600 : 500,
+            color: textColor,
+            lineHeight: 1.25,
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+          }}>{name}</div>
         {sub && (
-          <div style={{ fontSize: 13, color: subColor, marginTop: 3, opacity: selected ? 0.85 : 1 }}>
+          <div style={{ fontSize: 11, color: subColor, marginTop: 1, opacity: selected ? 0.85 : 1 }}>
             {sub}
-            {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
-            {alertCount > 0 && <span style={{ color: theme.orange, fontWeight: 700 }}> · {alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
+            {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 600 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
+            {alertCount > 0 && <span style={{ color: theme.orange, fontWeight: 600 }}> · {alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
           </div>
         )}
       </div>
@@ -430,10 +416,9 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
         <div
           title={sys.name}
           style={{
-            fontSize: 15, fontWeight: isCurrent ? 700 : 600,
+            fontSize: 13, fontWeight: isCurrent ? 700 : 500,
             color: isCurrent ? accent : isLeak ? theme.red : (theme.drawerText || theme.text),
-            letterSpacing: '-0.1px',
-            lineHeight: 1.3,
+            lineHeight: 1.25,
             wordBreak: 'break-word',
             overflowWrap: 'anywhere',
           }}>{sys.name}</div>
@@ -567,7 +552,7 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
 //   • Children render inside the card body using the standard TreeNode
 //     recursive component, depth=2+.
 function AccountCard({
-  tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onView,
+  tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onGoToAccount, onView,
   expandedIds, toggleExpanded, onSystemClick, currentSystemId,
   allSystems, theme, onToggleFavorite, pulseTick = 0,
 }) {
@@ -617,11 +602,10 @@ function AccountCard({
         transition: 'background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
       }}
     >
-      {/* Header — tap to NAVIGATE to this account (sets scope + closes
-          drawer). Tapping the chevron at the right only expands/collapses
-          the card body without navigating. This is the standard nav-drawer
-          pattern (Slack, Notion, etc.) and resolves the "I can't choose an
-          account" feedback. */}
+      {/* Header — tap to EXPAND the card body (drawer stays open). Tapping
+          the chevron also expands/collapses. To NAVIGATE to this account
+          (set scope + close drawer), the user taps the explicit "Go to
+          {account}" affordance rendered inside the expanded body. */}
       <div
         onClick={onToggleOpen}
         ref={headerRef}
@@ -629,9 +613,7 @@ function AccountCard({
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '14px 14px',
           cursor: 'pointer',
-          // Accent left bar when this card represents the selected scope.
-          // Bumped from 3 to 5 px so the indicator is impossible to miss.
-          borderLeft: isSelected ? `5px solid ${accent}` : '5px solid transparent',
+          borderLeft: isSelected ? `3px solid ${accent}` : '3px solid transparent',
         }}
         role="button"
         aria-expanded={isOpen}
@@ -646,38 +628,20 @@ function AccountCard({
             color={'#036AB5'} />
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-            <div
-              title={tile.name}
-              style={{
-                fontSize: 18, fontWeight: 700,
-                color: theme.drawerText || theme.text,
-                letterSpacing: '-0.3px',
-                lineHeight: 1.2,
-                // Allow names to wrap to as many lines as they need - long
-                // account names ("Heathrow Airport Authority", "Weizmann
-                // Institute of Science") just take 2 lines instead of being
-                // chopped with "...". Native title attribute exposes the full
-                // name on hover for desktop / accessibility.
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-                flex: 1, minWidth: 0,
-              }}>{tile.name}</div>
-            {isSelected && (
-              <span style={{
-                fontSize: 10, fontWeight: 800,
-                color: '#fff', background: accent,
-                padding: '3px 8px', borderRadius: 4,
-                letterSpacing: '0.5px',
-                flexShrink: 0,
-                textTransform: 'uppercase',
-              }}>Viewing</span>
-            )}
-          </div>
+          <div
+            title={tile.name}
+            style={{
+              fontSize: 15, fontWeight: 700,
+              color: theme.drawerText || theme.text,
+              letterSpacing: '-0.1px',
+              lineHeight: 1.25,
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+            }}>{tile.name}</div>
           <div style={{
-            fontSize: 13, fontWeight: 500,
+            fontSize: 11.5, fontWeight: 500,
             color: theme.drawerTextSub || theme.textTertiary,
-            marginTop: 4,
+            marginTop: 1,
           }}>
             {tile.systems.length} system{tile.systems.length !== 1 ? 's' : ''}
             {leakCount > 0 && <span style={{ color: theme.red, fontWeight: 700 }}> · {leakCount} Water Event{leakCount !== 1 ? 's' : ''}</span>}
@@ -738,6 +702,26 @@ function AccountCard({
           paddingTop: 4, paddingBottom: 8,
           borderTop: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : '#EEF1F4'}`,
         }}>
+          {/* Explicit "Go to {account}" affordance - the path to scope
+              Home / Alerts to the whole account. Sits at the top of the
+              expanded body so it's the first thing the user sees after
+              opening the card. */}
+          <div
+            onClick={(e) => { e.stopPropagation(); if (onGoToAccount) onGoToAccount(); }}
+            role="button"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '10px 14px',
+              cursor: 'pointer',
+              borderBottom: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : '#EEF1F4'}`,
+              fontSize: 12.5, fontWeight: 600,
+              color: '#036AB5',
+              background: dk ? 'rgba(11,149,248,0.06)' : 'rgba(11,149,248,0.04)',
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#036AB5' }}>arrow_forward</span>
+            <span>Go to {tile.name}</span>
+          </div>
           {childTiles.map(child => (
             <TreeNode
               key={child.id} tile={child} depth={2}
@@ -1268,20 +1252,23 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   isOpen={expandedIds.has(tile.id)}
                   isSelected={selectedTileId === tile.id || selectedScope?.id === tile.id}
                   onToggleOpen={() => {
-                    // Header tap = NAVIGATE to this account (standard
-                    // nav-drawer pattern). Sets scope + closes drawer so the
-                    // user can see Home re-rendered for the new scope.
-                    // Locked 2026-06-13 after the "can't choose an account"
-                    // feedback - previously this only expanded the card
-                    // in-drawer with no visible "I'm scoped to this now"
-                    // signal on the page behind.
-                    handleView(tile, [], true);
+                    // Header tap = EXPAND the card (drawer stays open) so
+                    // the user can see nested locations and pick one.
+                    // To navigate TO the account itself, the user taps the
+                    // "Go to {account name}" affordance inside the expanded
+                    // body. This restores nested location selection while
+                    // still giving an explicit account-scope path.
+                    toggleAccountOpen(tile.id);
                   }}
                   onChevronToggle={() => {
-                    // Chevron tap = EXPAND card only (drawer stays open).
-                    // Used when the user wants to drill into the account's
-                    // children without leaving the drawer.
+                    // Chevron tap also expands - same behavior as header.
                     toggleAccountOpen(tile.id);
+                  }}
+                  onGoToAccount={() => {
+                    // Explicit "Go to {account}" tap - navigate + close
+                    // drawer (this is the path to scope Home / Alerts to
+                    // the account as a whole).
+                    handleView(tile, [], true);
                   }}
                   onView={handleView}
                   expandedIds={expandedIds}

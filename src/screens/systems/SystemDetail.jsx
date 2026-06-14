@@ -718,11 +718,8 @@ export default function SystemDetail() {
 
       <NavigationDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} currentSystemId={systemId}
         onSelectLocation={() => {
-          // Navigate to modern Home with the selected scope (which the
-          // drawer already set via setSelectedScope before calling this
-          // callback). Previously routed to legacy '/systems'; updated
-          // 2026-06-13 to land on '/' so the user sees Home with the
-          // new account/location scoped.
+          // Drawer already set scope via setSelectedScope before calling
+          // this; navigate to modern Home so the user sees their new scope.
           navigate('/');
         }}
       />
