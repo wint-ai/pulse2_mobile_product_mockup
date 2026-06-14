@@ -552,7 +552,7 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
 //   • Children render inside the card body using the standard TreeNode
 //     recursive component, depth=2+.
 function AccountCard({
-  tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onGoToAccount, onView,
+  tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onView,
   expandedIds, toggleExpanded, onSystemClick, currentSystemId,
   allSystems, theme, onToggleFavorite, pulseTick = 0,
 }) {
@@ -602,10 +602,12 @@ function AccountCard({
         transition: 'background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
       }}
     >
-      {/* Header — tap to EXPAND the card body (drawer stays open). Tapping
-          the chevron also expands/collapses. To NAVIGATE to this account
-          (set scope + close drawer), the user taps the explicit "Go to
-          {account}" affordance rendered inside the expanded body. */}
+      {/* Header — tap to NAVIGATE to this account (set scope + close
+          drawer). Matches the standard drawer rule: tap any row -> select
+          and close. Tap the chevron at the right -> expand the card body
+          inline (drawer stays open) so the user can drill into nested
+          locations and tap one to scope there. Consistency with every
+          other row in the drawer. */}
       <div
         onClick={onToggleOpen}
         ref={headerRef}
@@ -696,32 +698,14 @@ function AccountCard({
         </span>
       </div>
 
-      {/* Body — children render only when open */}
+      {/* Body — children render only when open. Each child row is a
+          nested location/system - tap to scope to it + close drawer
+          (consistent with the row at top). */}
       {isOpen && (
         <div style={{
           paddingTop: 4, paddingBottom: 8,
           borderTop: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : '#EEF1F4'}`,
         }}>
-          {/* Explicit "Go to {account}" affordance - the path to scope
-              Home / Alerts to the whole account. Sits at the top of the
-              expanded body so it's the first thing the user sees after
-              opening the card. */}
-          <div
-            onClick={(e) => { e.stopPropagation(); if (onGoToAccount) onGoToAccount(); }}
-            role="button"
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '10px 14px',
-              cursor: 'pointer',
-              borderBottom: `1px solid ${dk ? 'rgba(255,255,255,0.06)' : '#EEF1F4'}`,
-              fontSize: 12.5, fontWeight: 600,
-              color: '#036AB5',
-              background: dk ? 'rgba(11,149,248,0.06)' : 'rgba(11,149,248,0.04)',
-            }}
-          >
-            <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#036AB5' }}>arrow_forward</span>
-            <span>Go to {tile.name}</span>
-          </div>
           {childTiles.map(child => (
             <TreeNode
               key={child.id} tile={child} depth={2}
@@ -1252,23 +1236,17 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   isOpen={expandedIds.has(tile.id)}
                   isSelected={selectedTileId === tile.id || selectedScope?.id === tile.id}
                   onToggleOpen={() => {
-                    // Header tap = EXPAND the card (drawer stays open) so
-                    // the user can see nested locations and pick one.
-                    // To navigate TO the account itself, the user taps the
-                    // "Go to {account name}" affordance inside the expanded
-                    // body. This restores nested location selection while
-                    // still giving an explicit account-scope path.
-                    toggleAccountOpen(tile.id);
+                    // Header tap = NAVIGATE to this account (set scope +
+                    // close drawer). Same rule as every other row in the
+                    // drawer: tap a row -> select + close. Consistency.
+                    handleView(tile, [], true);
                   }}
                   onChevronToggle={() => {
-                    // Chevron tap also expands - same behavior as header.
+                    // Chevron tap = EXPAND the card body without
+                    // navigating. Lets the user drill into the account's
+                    // children and pick a nested location without
+                    // committing to the account scope.
                     toggleAccountOpen(tile.id);
-                  }}
-                  onGoToAccount={() => {
-                    // Explicit "Go to {account}" tap - navigate + close
-                    // drawer (this is the path to scope Home / Alerts to
-                    // the account as a whole).
-                    handleView(tile, [], true);
                   }}
                   onView={handleView}
                   expandedIds={expandedIds}
