@@ -1,7 +1,7 @@
 // Shared navigation drawer — Option D design (minimal list + tree guides)
 // Used on Home (HomeUnified) and System Detail page
 
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
@@ -220,30 +220,10 @@ function searchLocations(tiles, query, allSystems, ancestors = []) {
   return results;
 }
 
-// Apply a one-shot 'drawer-current-pulse' CSS class to a DOM ref when the
-// drawer's pulseTick increments and the row is the current focus target.
-// Restarts cleanly each pulse by remove -> reflow -> add. Auto-removes after
-// the animation duration (kept 50 ms ahead of the keyframes' 1200 ms).
-function usePulseOnTick(ref, isCurrent, pulseTick) {
-  useEffect(() => {
-    if (!isCurrent || pulseTick === 0) return;
-    const el = ref.current;
-    if (!el) return;
-    el.classList.remove('drawer-current-pulse');
-    // Force browser reflow so re-adding the class restarts the animation.
-    void el.offsetWidth;
-    el.classList.add('drawer-current-pulse');
-    const id = setTimeout(() => { el.classList.remove('drawer-current-pulse'); }, 1250);
-    return () => { clearTimeout(id); };
-  }, [pulseTick, isCurrent, ref]);
-}
-
 // ── Row component (Option D) ──
-function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded, expandable, selected, onClick, onToggle, theme, search, targetId, favoriteEntry, onToggleFavorite, pulseTick = 0 }) {
+function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded, expandable, selected, onClick, onToggle, theme, search, targetId, favoriteEntry, onToggleFavorite }) {
   const indent = 12 + (depth - 1) * 11; // 11px per depth level
   const accent = theme.drawerAccent || theme.accent;
-  const rowRef = useRef(null);
-  usePulseOnTick(rowRef, selected, pulseTick);
   const textColor = selected ? accent : (theme.drawerText || theme.text);
   const subColor = selected ? accent : (theme.drawerTextSub || theme.textTertiary);
   const ico = iconForLevel(levelType);
@@ -256,7 +236,6 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 
   return (
     <div onClick={onClick}
-      ref={rowRef}
       className="nav-drawer-row"
       data-drawer-target={targetId}
       style={{
@@ -289,27 +268,15 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 
       {/* Name + meta */}
       <div style={{ flex: 1, minWidth: 0, zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-          <div
-            title={name}
-            style={{
-              fontSize: 14, fontWeight: selected ? 600 : 500,
-              color: textColor,
-              lineHeight: 1.25,
-              wordBreak: 'break-word',
-              overflowWrap: 'anywhere',
-              flex: 1, minWidth: 0,
-            }}>{name}</div>
-          {selected && (
-            <span style={{
-              fontSize: 10, fontWeight: 700,
-              color: accent,
-              padding: '1px 6px', borderRadius: 4,
-              background: accent + '15',
-              flexShrink: 0,
-            }}>Viewing</span>
-          )}
-        </div>
+        <div
+          title={name}
+          style={{
+            fontSize: 14, fontWeight: selected ? 600 : 500,
+            color: textColor,
+            lineHeight: 1.25,
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+          }}>{name}</div>
         {sub && (
           <div style={{ fontSize: 11, color: subColor, marginTop: 1, opacity: selected ? 0.85 : 1 }}>
             {sub}
@@ -350,11 +317,9 @@ function NavRow({ depth, levelType, name, count, leakCount, alertCount, expanded
 }
 
 // ── System leaf row ──
-function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, showPath = false, pulseTick = 0 }) {
+function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, showPath = false }) {
   const indent = 12 + (depth - 1) * 11;
   const accent = theme.drawerAccent || theme.accent;
-  const rowRef = useRef(null);
-  usePulseOnTick(rowRef, isCurrent, pulseTick);
 
   // Status — derived via the shared helper so the drawer dot and the System
   // Health card on the system page never disagree.  Three states:
@@ -396,7 +361,6 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
 
   return (
     <div onClick={onClick}
-      ref={rowRef}
       data-drawer-target={sys.id}
       style={{
         position: 'relative',
@@ -458,9 +422,6 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
         )}
       </div>
 
-      {isCurrent && (
-        <span style={{ fontSize: 10, fontWeight: 700, color: accent, padding: '1px 6px', borderRadius: 4, background: accent + '15', flexShrink: 0, zIndex: 1 }}>Viewing</span>
-      )}
 
       {/* Favorite star — systems are pinnable */}
       <StarButton
@@ -478,7 +439,7 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
 }
 
 // ── Recursive collapsible tree ──
-function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, selectedTileId, onView, onSystemClick, currentSystemId, allSystems, theme, onToggleFavorite, pulseTick = 0 }) {
+function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, selectedTileId, onView, onSystemClick, currentSystemId, allSystems, theme, onToggleFavorite }) {
   const isExpanded = expandedIds.has(tile.id);
   const isSelected = selectedTileId === tile.id;
   // Leak + alert rollups — drawn from the shared health helper so the parent
@@ -524,7 +485,6 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
           levelType: tile.levelType,
         }}
         onToggleFavorite={onToggleFavorite}
-        pulseTick={pulseTick}
       />
       {isExpanded && (
         <>
@@ -532,15 +492,13 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
             <TreeNode key={child.id} tile={child} depth={depth + 1} ancestors={childAncestors}
               expandedIds={expandedIds} toggleExpanded={toggleExpanded} selectedTileId={selectedTileId}
               onView={onView} onSystemClick={onSystemClick} currentSystemId={currentSystemId}
-              allSystems={allSystems} theme={theme} onToggleFavorite={onToggleFavorite}
-              pulseTick={pulseTick} />
+              allSystems={allSystems} theme={theme} onToggleFavorite={onToggleFavorite} />
           ))}
           {hasSystemChildren && tile.systems.map(sys => (
             <SystemRow key={sys.id} sys={sys} depth={depth + 1}
               isCurrent={sys.id === currentSystemId}
               onClick={() => sys.id !== currentSystemId && onSystemClick(sys.id)}
-              theme={theme} onToggleFavorite={onToggleFavorite}
-              pulseTick={pulseTick} />
+              theme={theme} onToggleFavorite={onToggleFavorite} />
           ))}
         </>
       )}
@@ -566,11 +524,9 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
 function AccountCard({
   tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onView,
   expandedIds, toggleExpanded, onSystemClick, currentSystemId,
-  allSystems, theme, onToggleFavorite, pulseTick = 0,
+  allSystems, theme, onToggleFavorite,
 }) {
   const accent = theme.drawerAccent || theme.accent;
-  const headerRef = useRef(null);
-  usePulseOnTick(headerRef, isSelected, pulseTick);
   const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
 
   // Card chrome adapts to light vs dark drawer themes. Both modes use the
@@ -622,7 +578,6 @@ function AccountCard({
           other row in the drawer. */}
       <div
         onClick={onToggleOpen}
-        ref={headerRef}
         style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '14px 14px',
@@ -642,28 +597,16 @@ function AccountCard({
             color={'#036AB5'} />
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-            <div
-              title={tile.name}
-              style={{
-                fontSize: 15, fontWeight: 700,
-                color: theme.drawerText || theme.text,
-                letterSpacing: '-0.1px',
-                lineHeight: 1.25,
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-                flex: 1, minWidth: 0,
-              }}>{tile.name}</div>
-            {isSelected && (
-              <span style={{
-                fontSize: 10, fontWeight: 700,
-                color: accent,
-                padding: '1px 6px', borderRadius: 4,
-                background: accent + '15',
-                flexShrink: 0,
-              }}>Viewing</span>
-            )}
-          </div>
+          <div
+            title={tile.name}
+            style={{
+              fontSize: 15, fontWeight: 700,
+              color: theme.drawerText || theme.text,
+              letterSpacing: '-0.1px',
+              lineHeight: 1.25,
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+            }}>{tile.name}</div>
           <div style={{
             fontSize: 11.5, fontWeight: 500,
             color: theme.drawerTextSub || theme.textTertiary,
@@ -738,7 +681,6 @@ function AccountCard({
               onView={onView} onSystemClick={onSystemClick}
               currentSystemId={currentSystemId} allSystems={allSystems}
               theme={theme} onToggleFavorite={onToggleFavorite}
-              pulseTick={pulseTick}
             />
           ))}
           {hasSystemChildren && tile.systems.map(sys => (
@@ -747,7 +689,6 @@ function AccountCard({
               isCurrent={sys.id === currentSystemId}
               onClick={() => sys.id !== currentSystemId && onSystemClick(sys.id)}
               theme={theme} onToggleFavorite={onToggleFavorite}
-              pulseTick={pulseTick}
             />
           ))}
         </div>
@@ -834,15 +775,6 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
   const favorites = useMemo(() => getFavorites(), [favoritesVersion]);   // eslint-disable-line react-hooks/exhaustive-deps
   const [favoritesOpen, setFavoritesOpen] = useState(true);
 
-  // Attention-pulse tick. Increments whenever the drawer transitions from
-  // closed -> open. The current row (the one matching currentSystemId or
-  // selectedScope.id) picks this up via useEffect and plays a one-shot
-  // background flash to land the user's eye on "where you are". Locked
-  // 2026-06-13.
-  const [pulseTick, setPulseTick] = useState(0);
-  useEffect(() => {
-    if (open) setPulseTick(t => t + 1);
-  }, [open]);
 
   // The "current target" the drawer should focus on:
   // 1) the system being viewed (currentSystemId), OR
@@ -1238,8 +1170,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                         isCurrent={sys.id === currentSystemId}
                         onClick={() => sys.id !== currentSystemId && handleSystemClick(sys.id)}
                         theme={theme}
-                        showPath
-                        pulseTick={pulseTick} />
+                        showPath />
                     ))}
                   </>
                 )}
@@ -1280,7 +1211,6 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   allSystems={activeSystems}
                   theme={theme}
                   onToggleFavorite={bumpFavorites}
-                  pulseTick={pulseTick}
                 />
               ))}
             </div>

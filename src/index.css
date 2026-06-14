@@ -50,25 +50,3 @@ html, body, #root {
   }
 }
 
-/* ──────────────────────────────────────────────────────────────────────
-   NavigationDrawer · current-row attention pulse (2026-06-13)
-   ──────────────────────────────────────────────────────────────────────
-   When the drawer opens, the row representing the user's current scope /
-   viewed system gets a brief one-shot background flash so the eye lands
-   on it instantly. The row is also already auto-scrolled into view and
-   stays statically highlighted (accent bar + tinted bg) - the pulse is
-   purely an attention cue at the moment of drawer-open.
-
-   Per UI/UX skill §7 Animation: 1.2s ease-out, motion expresses cause-
-   effect (drawer-open -> "here you are"). Respects prefers-reduced-motion
-   via the global reduce rule above.
-   ────────────────────────────────────────────────────────────────────── */
-@keyframes drawer-current-pulse {
-  0%   { box-shadow: 0 0 0 0 rgba(11,149,248,0),       inset 0 0 0 0 rgba(11,149,248,0); }
-  18%  { box-shadow: 0 0 0 10px rgba(11,149,248,0.35), inset 0 0 0 4px rgba(11,149,248,0.90); }
-  50%  { box-shadow: 0 0 0 6px rgba(11,149,248,0.18),  inset 0 0 0 4px rgba(11,149,248,0.65); }
-  100% { box-shadow: 0 0 0 0 rgba(11,149,248,0),       inset 0 0 0 0 rgba(11,149,248,0); }
-}
-.drawer-current-pulse {
-  animation: drawer-current-pulse 2.2s cubic-bezier(0.22, 1, 0.36, 1) 1;
-}
