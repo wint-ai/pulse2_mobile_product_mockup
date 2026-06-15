@@ -439,7 +439,7 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
 }
 
 // ── Recursive collapsible tree ──
-function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, currentLocationId, onView, onSystemClick, currentSystemId, allSystems, theme, onToggleFavorite }) {
+function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, currentLocationId, onView, onSystemClick, currentSystemId, effectiveSystemId, allSystems, theme, onToggleFavorite }) {
   const isExpanded = expandedIds.has(tile.id);
   // Location highlight is driven by the GLOBAL selectedScope id (passed in as
   // currentLocationId). Same model as systems use currentSystemId - one
@@ -496,11 +496,17 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, cu
             <TreeNode key={child.id} tile={child} depth={depth + 1} ancestors={childAncestors}
               expandedIds={expandedIds} toggleExpanded={toggleExpanded} currentLocationId={currentLocationId}
               onView={onView} onSystemClick={onSystemClick} currentSystemId={currentSystemId}
+              effectiveSystemId={effectiveSystemId}
               allSystems={allSystems} theme={theme} onToggleFavorite={onToggleFavorite} />
           ))}
           {hasSystemChildren && tile.systems.map(sys => (
             <SystemRow key={sys.id} sys={sys} depth={depth + 1}
-              isCurrent={sys.id === currentSystemId}
+              // Visual highlight uses effectiveSystemId so a system scope set
+              // on Home/Alerts still highlights its row. Click guard uses the
+              // strict currentSystemId - we only suppress the click when the
+              // user is ALREADY on /system/<id>, otherwise they need to
+              // navigate there.
+              isCurrent={sys.id === effectiveSystemId}
               onClick={() => sys.id !== currentSystemId && onSystemClick(sys.id)}
               theme={theme} onToggleFavorite={onToggleFavorite} />
           ))}
@@ -528,7 +534,7 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, cu
 function AccountCard({
   tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onView,
   expandedIds, toggleExpanded, onSystemClick, currentSystemId,
-  currentLocationId, allSystems, theme, onToggleFavorite,
+  effectiveSystemId, currentLocationId, allSystems, theme, onToggleFavorite,
 }) {
   const accent = theme.drawerAccent || theme.accent;
   const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
@@ -684,14 +690,15 @@ function AccountCard({
               expandedIds={expandedIds} toggleExpanded={toggleExpanded}
               currentLocationId={currentLocationId}
               onView={onView} onSystemClick={onSystemClick}
-              currentSystemId={currentSystemId} allSystems={allSystems}
+              currentSystemId={currentSystemId}
+              effectiveSystemId={effectiveSystemId} allSystems={allSystems}
               theme={theme} onToggleFavorite={onToggleFavorite}
             />
           ))}
           {hasSystemChildren && tile.systems.map(sys => (
             <SystemRow
               key={sys.id} sys={sys} depth={2}
-              isCurrent={sys.id === currentSystemId}
+              isCurrent={sys.id === effectiveSystemId}
               onClick={() => sys.id !== currentSystemId && onSystemClick(sys.id)}
               theme={theme} onToggleFavorite={onToggleFavorite}
             />
@@ -762,22 +769,48 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
     () => pruneRootTiles(accountTiles, activeSystems), [accountTiles, activeSystems]);
   const rootName = autoSkipped.length > 0 ? autoSkipped[0].name : 'All';
 
-  // Auto-expand path to current system on first render
+  // Drawer focus derivation - locked 2026-06-15, revised same day.
+  //
+  // The drawer renders two kinds of "this is the focus" chrome:
+  //   • Location-row highlight + path-to-location expansion - driven by
+  //     `currentLocationId` (a location-tile id present somewhere in the tree).
+  //   • System-row highlight + path-to-system expansion - driven by
+  //     `effectiveSystemId`.
+  //
+  // Sources:
+  //   • `currentSystemId` prop - set by SystemDetail (the route param).
+  //     ONLY present when the user is on /system/<id>.
+  //   • `selectedScope` (global context):
+  //       - levelType === 'system' → the user is implicitly scoped to one
+  //         system (via SystemDetail's mount effect, see PRD 04). The scope
+  //         id is `system-<sys.id>`; no LOCATION tile carries that id.
+  //         Treat it as a SYSTEM focus: use selectedScope.systemIds[0].
+  //       - any other levelType → location scope. Use selectedScope.id as
+  //         a location id (it WILL match a tile in the tree).
+  //
+  // The earlier (broken) version used currentLocationId = selectedScope?.id
+  // blindly. After a user picked a system and navigated to Home, the drawer
+  // tried findPathToLocation('system-X', ...) which returns []: nothing
+  // expanded, system row not highlighted on cross-page nav.
+  const isSystemScope = selectedScope?.levelType === 'system';
+  const effectiveSystemId = currentSystemId || (isSystemScope ? selectedScope?.systemIds?.[0] : null) || null;
+  const currentLocationId = !isSystemScope ? (selectedScope?.id || null) : null;
+
+  // Auto-expand path to current focus target on first render. Uses
+  // effectiveSystemId (NOT just the currentSystemId prop) so a system-typed
+  // scope set on Home/Alerts also expands the path to that system on
+  // first drawer open after navigation.
   const [expandedIds, setExpandedIds] = useState(() => {
-    if (currentSystemId) {
-      const path = findPathToSystem(rootTiles, currentSystemId, activeSystems);
+    if (effectiveSystemId) {
+      const path = findPathToSystem(rootTiles, effectiveSystemId, activeSystems);
+      if (path.length > 0) return new Set(path);
+    }
+    if (currentLocationId) {
+      const path = findPathToLocation(rootTiles, currentLocationId, activeSystems);
       if (path.length > 0) return new Set(path);
     }
     return new Set();
   });
-  // Location highlight is derived from the GLOBAL selectedScope id - the
-  // same way system highlight is derived from currentSystemId (a prop set
-  // by the parent screen). One stable source per highlight type, so a
-  // selected location stays highlighted across drawer close/reopen AND
-  // across page navigation. The previous local selectedTileId state was
-  // dropped on 2026-06-15 - it caused locations to lose their highlight
-  // whenever the drawer instance unmounted (Home -> Alerts tab switch).
-  const currentLocationId = selectedScope?.id || null;
   const [search, setSearch] = useState('');
 
   // Favorites are persisted in localStorage; the version counter is bumped on
@@ -792,11 +825,10 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
   const [favoritesOpen, setFavoritesOpen] = useState(false);
 
 
-  // The "current target" the drawer should focus on:
-  // 1) the system being viewed (currentSystemId, prop), OR
-  // 2) the global selected location (from drawer drill-down or persisted
-  //    across pages via UserContext.selectedScope).
-  const focusTarget = currentSystemId || currentLocationId;
+  // The "current target" the drawer should focus on (used to scroll the
+  // focused row into view). Mirrors the effective-system / effective-location
+  // split above.
+  const focusTarget = effectiveSystemId || currentLocationId;
 
   // Whenever drawer opens, expand path to current focus target.
   // ALSO: if the user has only one top-level location (e.g. Oren Tidhar
@@ -806,8 +838,8 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
   useEffect(() => {
     if (!open) return;
     let path = [];
-    if (currentSystemId) {
-      path = findPathToSystem(rootTiles, currentSystemId, activeSystems);
+    if (effectiveSystemId) {
+      path = findPathToSystem(rootTiles, effectiveSystemId, activeSystems);
     } else if (currentLocationId) {
       path = findPathToLocation(rootTiles, currentLocationId, activeSystems);
     }
@@ -825,7 +857,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, currentSystemId, currentLocationId, rootTiles.length]);
+  }, [open, effectiveSystemId, currentLocationId, rootTiles.length]);
 
   // Scroll the focused row into view ONLY when the drawer opens (or the focus
   // target itself changes). Earlier this also ran on every `expandedIds`
@@ -1182,7 +1214,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                     </div>
                     {searchResults.systems.map(sys => (
                       <SystemRow key={sys.id} sys={sys} depth={1}
-                        isCurrent={sys.id === currentSystemId}
+                        isCurrent={sys.id === effectiveSystemId}
                         onClick={() => sys.id !== currentSystemId && handleSystemClick(sys.id)}
                         theme={theme}
                         showPath />
@@ -1223,6 +1255,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   toggleExpanded={toggleExpanded}
                   onSystemClick={handleSystemClick}
                   currentSystemId={currentSystemId}
+                  effectiveSystemId={effectiveSystemId}
                   currentLocationId={currentLocationId}
                   allSystems={activeSystems}
                   theme={theme}

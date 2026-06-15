@@ -19,6 +19,7 @@ import { UserProvider, useUserContext } from '../context/UserContext';
 import { ThemeProvider } from '../context/ThemeContext';
 import HomeUnified from '../screens/home/HomeUnified';
 import EventsScreen from '../screens/events/EventsScreen';
+import SystemDetail from '../screens/systems/SystemDetail';
 import TabBar from '../components/TabBar';
 
 beforeEach(() => {
@@ -178,6 +179,53 @@ describe('Drawer location-highlight parity with system-highlight', () => {
     row = findRowByTargetId(picked.id);
     expect(row).toBeTruthy();
     expect(hasAccentStripe(row)).toBe(true);
+  });
+
+  it('cross-page: visiting /system/<id> then opening drawer on Home expands path + highlights system', () => {
+    // Simulates Rami's reported bug 2026-06-15: pick a system (URL =
+    // /system/<id> sets implicit system scope), navigate away to a
+    // different page, open the drawer - expected: path is expanded and
+    // the system row is highlighted; previous broken state: tree fully
+    // collapsed, nothing highlighted.
+    cleanup();
+    localStorage.clear();
+
+    // Render Home AND a route for /system/:id. Start on the system so the
+    // SystemDetail mount effect sets selectedScope to a system scope.
+    localStorage.setItem('pulse2-persona-id', 'wint-admin');
+    render(
+      <MemoryRouter initialEntries={['/system/ct1']}>
+        <ThemeProvider>
+          <UserProvider>
+            <ContextProbe />
+            <Routes>
+              <Route path="/" element={<div><HomeUnified /></div>} />
+              <Route path="/system/:systemId" element={<div><SystemDetail /></div>} />
+            </Routes>
+            <TabBar />
+          </UserProvider>
+        </ThemeProvider>
+      </MemoryRouter>
+    );
+
+    // Scope should be a system-scope after SystemDetail mount.
+    expect(exposedCtx.selectedScope?.levelType).toBe('system');
+    expect(exposedCtx.selectedScope?.systemIds).toEqual(['ct1']);
+
+    // Tap Home in the bottom TabBar (preserves scope per the 2026-06-15
+    // rule; selectedScope is still 'system-ct1').
+    act(() => { findTabButton('Home').click(); });
+
+    // Open the drawer on Home.
+    openDrawer();
+
+    // The system row should be visible (path expanded) and highlighted.
+    const row = findRowByTargetId('ct1');
+    expect(row, 'system row missing - drawer did not expand path').toBeTruthy();
+    expect(
+      hasAccentStripe(row),
+      'system row found but not highlighted (effectiveSystemId not wired through)'
+    ).toBe(true);
   });
 
   it('parity across personas: every demo persona highlights the picked location', () => {
