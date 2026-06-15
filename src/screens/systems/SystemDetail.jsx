@@ -546,6 +546,37 @@ export default function SystemDetail() {
   const isSingleTenantHome = tenant && visibleSystems.length === 1;
   const tabs = getTabsForSystem(sys);
 
+  // ── Implicit single-system scope (locked 2026-06-15) ─────────────────────
+  // Being on /system/<id> = the user's focus is THIS one system. Set the
+  // global selectedScope to a single-system scope so that when the user taps
+  // Alerts (or Home) in the bottom TabBar, the next page is implicitly
+  // scoped to just this device - NOT to the parent location they happened
+  // to be drilled into earlier. Matches the locked rule "scope persists
+  // across bottom-tab navigation" (PRD 02 § Bottom-tab tap NEVER mutates
+  // scope) + "viewing a system = system is the implicit scope" (PRD 05).
+  //
+  // The drawer's location-highlight uses `selectedScope.id`; a system scope
+  // carries `id: 'system-<id>'` which won't match any location TreeNode, so
+  // there's no incorrect location highlight in the tree. The drawer's
+  // SystemRow highlight is driven separately by the `currentSystemId` prop
+  // (the URL param), which stays correct.
+  useEffect(() => {
+    if (!sys || !sys.id || !setSelectedScope) return;
+    // ancestors is the location-name chain root-to-leaf - matches the shape
+    // the drawer's handleView stores (string[]). ScopeHeader only reads
+    // .length to derive how deep to slice the rendered breadcrumb.
+    const ancestorNames = getAncestorScopes(sys).map(a => a.name);
+    setSelectedScope({
+      id: `system-${sys.id}`,
+      name: sys.name,
+      levelType: 'system',
+      ancestors: ancestorNames,
+      systems: [sys],
+      systemIds: [sys.id],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sys?.id]);
+
   // Tag bottom sheet handler — lifted from WaterEventDetailsWidget so the
   // Tag CTA on a "Water Event ended" push still works AFTER the widget has
   // been tombstoned (sys.alert = null on End of Leak). Reads ?action=tag
