@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../context/UserContext';
 import { useTheme } from '../../context/ThemeContext';
 import { computeSystemHealth } from '../../utils/systemHealth';
-import { isIgnored } from '../../data/ignoredIncidents';
 import PipesHeader, { GLOW_PAGE_BG } from '../../components/PipesHeader';
 import { useDataRefresh } from '../../utils/useDataRefresh';
 
@@ -21,12 +20,14 @@ function MIcon({ name, size = 18, color, fill = false, style = {} }) {
 }
 
 // Status dot color for a single property.
-//   red   — active Water Event (not ignored)
+//   red   — active Water Event (includes ignored — per PRD 14 § 2.3, an
+//           ignored event stays "active" on the property until water flow
+//           actually stops; the tenant should still see their property as
+//           alert-state so they know water is still flowing)
 //   amber — protection issue (offline / valve error / power lost)
 //   green — healthy
 function statusFor(sys) {
-  const isLeak = (sys.alert?.type === 'leak-high' || sys.alert?.type === 'leak-low')
-    && !isIgnored(sys.id);
+  const isLeak = (sys.alert?.type === 'leak-high' || sys.alert?.type === 'leak-low');
   if (isLeak) return { color: '#F05C25', tone: 'alert' };
   const h = computeSystemHealth(sys);
   if (!h.allOk) return { color: '#E5A100', tone: 'warn' };

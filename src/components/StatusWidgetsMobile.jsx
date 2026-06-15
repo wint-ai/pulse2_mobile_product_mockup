@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { computeWidgets } from '../data/systems';
-import { isIgnored } from '../data/ignoredIncidents';
 
 function MIcon({ name, size = 18, color, fill, style = {} }) {
   return <span className="material-symbols-outlined" style={{ fontSize: size, color, fontVariationSettings: fill ? "'FILL' 1" : "'FILL' 0", ...style }}>{name}</span>;
@@ -53,11 +52,13 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
   const totalComm = w.comm.online + w.comm.offline;
   const totalValves = w.valves.open + w.valves.closed + w.valves.error;
   const totalPower = w.power.ac + w.power.acLost + w.power.battery;
-  // Active Water Events only — ignored events have moved to History and
-  // must not pop up on the Home Water Events widget any more.
+  // Active Water Events. Includes ignored events — per PRD 14 § 2.3 (locked
+  // 2026-06-15), an ignored Water Event stays on the Active surfaces until
+  // the underlying water flow actually stops; only then does it move to
+  // History (as Resolved). The Home Water Events strip counts ignored events
+  // alongside non-ignored ones.
   const leaks = systems.filter(s =>
-    (s.alert?.type === 'leak-high' || s.alert?.type === 'leak-low') &&
-    !isIgnored(s.id)
+    (s.alert?.type === 'leak-high' || s.alert?.type === 'leak-low')
   );
   const highFlows = leaks.filter(s => s.alert?.type === 'leak-high').length;
   const lowFlows = leaks.filter(s => s.alert?.type === 'leak-low').length;
