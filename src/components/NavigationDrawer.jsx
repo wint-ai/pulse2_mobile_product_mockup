@@ -439,9 +439,13 @@ function SystemRow({ sys, depth, isCurrent, onClick, theme, onToggleFavorite, sh
 }
 
 // ── Recursive collapsible tree ──
-function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, selectedTileId, onView, onSystemClick, currentSystemId, allSystems, theme, onToggleFavorite }) {
+function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, currentLocationId, onView, onSystemClick, currentSystemId, allSystems, theme, onToggleFavorite }) {
   const isExpanded = expandedIds.has(tile.id);
-  const isSelected = selectedTileId === tile.id;
+  // Location highlight is driven by the GLOBAL selectedScope id (passed in as
+  // currentLocationId). Same model as systems use currentSystemId - one
+  // stable source per highlight type, so the row stays highlighted across
+  // drawer close/reopen AND across page navigation. Locked 2026-06-15.
+  const isSelected = tile.id === currentLocationId;
   // Leak + alert rollups — drawn from the shared health helper so the parent
   // location's "· N alerts" count agrees with the per-system rows below it
   // and with the System Health card on the system page.
@@ -490,7 +494,7 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
         <>
           {childTiles.map(child => (
             <TreeNode key={child.id} tile={child} depth={depth + 1} ancestors={childAncestors}
-              expandedIds={expandedIds} toggleExpanded={toggleExpanded} selectedTileId={selectedTileId}
+              expandedIds={expandedIds} toggleExpanded={toggleExpanded} currentLocationId={currentLocationId}
               onView={onView} onSystemClick={onSystemClick} currentSystemId={currentSystemId}
               allSystems={allSystems} theme={theme} onToggleFavorite={onToggleFavorite} />
           ))}
@@ -524,7 +528,7 @@ function TreeNode({ tile, depth, ancestors = [], expandedIds, toggleExpanded, se
 function AccountCard({
   tile, isOpen, isSelected, onToggleOpen, onChevronToggle, onView,
   expandedIds, toggleExpanded, onSystemClick, currentSystemId,
-  allSystems, theme, onToggleFavorite,
+  currentLocationId, allSystems, theme, onToggleFavorite,
 }) {
   const accent = theme.drawerAccent || theme.accent;
   const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
@@ -678,7 +682,7 @@ function AccountCard({
               key={child.id} tile={child} depth={2}
               ancestors={[tile.name]}
               expandedIds={expandedIds} toggleExpanded={toggleExpanded}
-              selectedTileId={null}
+              currentLocationId={currentLocationId}
               onView={onView} onSystemClick={onSystemClick}
               currentSystemId={currentSystemId} allSystems={allSystems}
               theme={theme} onToggleFavorite={onToggleFavorite}
@@ -766,7 +770,14 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
     }
     return new Set();
   });
-  const [selectedTileId, setSelectedTileId] = useState(null);
+  // Location highlight is derived from the GLOBAL selectedScope id - the
+  // same way system highlight is derived from currentSystemId (a prop set
+  // by the parent screen). One stable source per highlight type, so a
+  // selected location stays highlighted across drawer close/reopen AND
+  // across page navigation. The previous local selectedTileId state was
+  // dropped on 2026-06-15 - it caused locations to lose their highlight
+  // whenever the drawer instance unmounted (Home -> Alerts tab switch).
+  const currentLocationId = selectedScope?.id || null;
   const [search, setSearch] = useState('');
 
   // Favorites are persisted in localStorage; the version counter is bumped on
@@ -782,10 +793,10 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
 
 
   // The "current target" the drawer should focus on:
-  // 1) the system being viewed (currentSystemId), OR
-  // 2) the global selectedScope (from drawer drill-down), OR
-  // 3) the locally-selected tile id.
-  const focusTarget = currentSystemId || selectedScope?.id || selectedTileId;
+  // 1) the system being viewed (currentSystemId, prop), OR
+  // 2) the global selected location (from drawer drill-down or persisted
+  //    across pages via UserContext.selectedScope).
+  const focusTarget = currentSystemId || currentLocationId;
 
   // Whenever drawer opens, expand path to current focus target.
   // ALSO: if the user has only one top-level location (e.g. Oren Tidhar
@@ -797,10 +808,8 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
     let path = [];
     if (currentSystemId) {
       path = findPathToSystem(rootTiles, currentSystemId, activeSystems);
-    } else if (selectedScope?.id) {
-      path = findPathToLocation(rootTiles, selectedScope.id, activeSystems);
-    } else if (selectedTileId) {
-      path = findPathToLocation(rootTiles, selectedTileId, activeSystems);
+    } else if (currentLocationId) {
+      path = findPathToLocation(rootTiles, currentLocationId, activeSystems);
     }
     // Single-root auto-expand. Append the single root id to the path so
     // any prior focus-path expansion still applies; if there was no focus
@@ -816,7 +825,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, currentSystemId, selectedScope?.id, selectedTileId, rootTiles.length]);
+  }, [open, currentSystemId, currentLocationId, rootTiles.length]);
 
   // Scroll the focused row into view ONLY when the drawer opens (or the focus
   // target itself changes). Earlier this also ran on every `expandedIds`
@@ -881,8 +890,9 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
   }, [search, activeSystems, rootTiles]);
 
   function handleView(tile, ancestors = [], closeDrawer = true) {
-    setSelectedTileId(tile.id);
-    // Set the global selected scope so every screen can show it.
+    // Set the global selected scope so every screen can show it. The drawer
+    // highlight is derived from this value (via currentLocationId), so the
+    // tap is the ONLY state mutation needed - no parallel local state.
     if (setSelectedScope) {
       setSelectedScope({
         id: tile.id,
@@ -1194,7 +1204,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   key={tile.id}
                   tile={tile}
                   isOpen={expandedIds.has(tile.id)}
-                  isSelected={selectedTileId === tile.id || selectedScope?.id === tile.id}
+                  isSelected={tile.id === currentLocationId}
                   onToggleOpen={() => {
                     // Header tap = NAVIGATE to this account (set scope +
                     // close drawer). Same rule as every other row in the
@@ -1213,6 +1223,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
                   toggleExpanded={toggleExpanded}
                   onSystemClick={handleSystemClick}
                   currentSystemId={currentSystemId}
+                  currentLocationId={currentLocationId}
                   allSystems={activeSystems}
                   theme={theme}
                   onToggleFavorite={bumpFavorites}
@@ -1223,7 +1234,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
         </div>
 
         {/* Explore toggle */}
-        <div onClick={() => { toggleExplore(); setExpandedIds(new Set()); setSelectedTileId(null); }} style={{
+        <div onClick={() => { toggleExplore(); setExpandedIds(new Set()); }} style={{
           padding: '12px 14px', borderTop: `1px solid ${theme.drawerDivider || theme.divider}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           cursor: 'pointer', flexShrink: 0,
