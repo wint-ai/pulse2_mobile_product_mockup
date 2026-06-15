@@ -8,8 +8,7 @@ import { useDataRefresh } from '../../utils/useDataRefresh';
 import StatusWidgetsMobile from '../../components/StatusWidgetsMobile';
 import PipesHeader, { WINT_SKY_HOME_BG, WINT_SKY_HOME_BG_SIZE } from '../../components/PipesHeader';
 import NavigationDrawer from '../../components/NavigationDrawer';
-import CompactBreadcrumb from '../../components/CompactBreadcrumb';
-import { getAncestorScopes } from '../../utils/ancestorScopes';
+import ScopeHeader from '../../components/ScopeHeader';
 import { useUserContext } from '../../context/UserContext';
 import { useTheme } from '../../context/ThemeContext';
 import { getAccountById } from '../../data/accounts';
@@ -820,7 +819,7 @@ export default function HomeUnified() {
   useDataRefresh();
   const { theme } = useTheme();
   const navigate = useNavigate();
-  const { visibleSystems = [], exploreSystems = [], exploring, selectedScope, setSelectedScope, clearSelectedScope } = useUserContext() || {};
+  const { visibleSystems = [], exploreSystems = [], exploring, selectedScope } = useUserContext() || {};
   // Home reflects the user's ASSIGNED scope only — never explore-all.
   // Per PRD 03 § Scope behavior + decision #6: a Wint admin with Explore
   // All on can see 20,000+ systems across customers; aggregating Water
@@ -845,9 +844,9 @@ export default function HomeUnified() {
     const a = getAccountById(accId);
     return a?.parentId ? getAccountById(a.parentId) : a;
   }, [scopedSystems]);
-  // Page title: "My Systems" when no scope is selected (root view);
-  // the scope name otherwise.
-  const pageTitle = selectedScope?.name || 'My Systems';
+  // InfoTab still needs an account-name fallback for its header (it shows the
+  // account industry/address). Page-header title rules live in ScopeHeader and
+  // intentionally do NOT include the account fallback. 2026-06-15.
   const scopeName = selectedScope?.name || account?.name || 'My Systems';
 
   // Counters in the header — strict next-level rule.
@@ -907,55 +906,24 @@ export default function HomeUnified() {
       {/* Header — transparent, sits on the Wint Sky home wave variant
           (ui-improvements-take-1, locked 2026-06-10). */}
       <PipesHeader glow={true}>
-        <div style={{ display: 'flex', alignItems: 'center', padding: '12px 14px' }}>
-          {/* Drawer trigger — circular badge + title + chevron form one large tap target. */}
-          <div onClick={() => setDrawerOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, cursor: 'pointer' }}
-            role="button" aria-label="Switch location"
-            title="Switch location">
-            <div style={{
-              width: 38, height: 38, borderRadius: '50%',
-              background: 'rgba(11,149,248,0.12)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-              border: '1px solid rgba(11,149,248,0.20)',
-            }}>
-              <MIcon name="home_work" size={22} color="#036AB5" fill />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {/* Compact breadcrumb with ellipsis-collapsed middle.
-                  Pattern locked 2026-06-13: "My Systems > [...] > {parent}"
-                  Tapping the [...] reveals the hidden middle ancestors in
-                  a small popover. */}
-              {selectedScope && (() => {
-                const all = scopedSystems[0] ? getAncestorScopes(scopedSystems[0]) : [];
-                const ancestors = all.slice(0, selectedScope.ancestors.length);
-                return (
-                  <CompactBreadcrumb
-                    ancestors={ancestors}
-                    onClearScope={() => clearSelectedScope?.()}
-                    onSelectAncestor={(a) => setSelectedScope?.(a)}
-                  />
-                );
-              })()}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: '#14151A', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {pageTitle}
-                </span>
-                <MIcon name="expand_more" size={22} color="#4A4F5A" style={{ flexShrink: 0, marginLeft: 2 }} />
-              </div>
-              <div style={{ fontSize: 13, color: '#4A4F5A' }}>
-                {hasNextLevel && (
-                  <>
-                    {locationsBelow} location{locationsBelow !== 1 ? 's' : ''}
-                    <span style={{ margin: '0 6px', opacity: 0.6 }}>·</span>
-                  </>
-                )}
-                Total {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Shared header component. Used identically on Alerts (with a
+            different badge icon). Don't fork - extend ScopeHeader if you
+            need new behavior. */}
+        <ScopeHeader
+          badgeIcon="home_work"
+          onDrawerOpen={() => setDrawerOpen(true)}
+          subLine={
+            <>
+              {hasNextLevel && (
+                <>
+                  {locationsBelow} location{locationsBelow !== 1 ? 's' : ''}
+                  <span style={{ margin: '0 6px', opacity: 0.6 }}>·</span>
+                </>
+              )}
+              Total {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
+            </>
+          }
+        />
 
         {/* Tab strip - brand-blue active tab on light bg.
             Hidden when there's only one tab (no choice = no need to show a

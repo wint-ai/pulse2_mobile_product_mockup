@@ -774,7 +774,11 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
   const [favoritesVersion, setFavoritesVersion] = useState(0);
   const bumpFavorites = () => setFavoritesVersion(v => v + 1);
   const favorites = useMemo(() => getFavorites(), [favoritesVersion]);   // eslint-disable-line react-hooks/exhaustive-deps
-  const [favoritesOpen, setFavoritesOpen] = useState(true);
+  // Favorites section defaults to FOLDED on every drawer open, regardless of
+  // whether favorites is empty or has entries. Users explicitly open it when
+  // they want to browse their starred locations - the section header always
+  // sits at the top, so the affordance is never hidden. 2026-06-15.
+  const [favoritesOpen, setFavoritesOpen] = useState(false);
 
 
   // The "current target" the drawer should focus on:

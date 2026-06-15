@@ -4,10 +4,8 @@ import TabBar from '../../components/TabBar';
 import PipesHeader, { GLOW_PAGE_BG } from '../../components/PipesHeader';
 import EventRow from '../../components/EventRow';
 import NavigationDrawer from '../../components/NavigationDrawer';
-import CompactBreadcrumb from '../../components/CompactBreadcrumb';
+import ScopeHeader from '../../components/ScopeHeader';
 import { CURRENT_EVENTS, HISTORY_EVENTS, computeActiveEvents, computeIgnoredEvents, computeConfigurationGaps, computePusherResolvedEvents } from '../../data/events';
-import { getAncestorScopes } from '../../utils/ancestorScopes';
-import { getAccountById } from '../../data/accounts';
 import { useUserContext } from '../../context/UserContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useDataRefresh } from '../../utils/useDataRefresh';
@@ -113,7 +111,7 @@ export default function EventsScreen() {
     });
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { exploring, selectedScope, setSelectedScope, clearSelectedScope } = useUserContext() || {};
+  const { exploring, selectedScope } = useUserContext() || {};
 
   const scopeIds = useMemo(() => {
     if (!scopeParam) return null;
@@ -220,26 +218,13 @@ export default function EventsScreen() {
     { key: 'conn',  label: 'Comms',  color: '#717684' },
   ];
 
-  // ── Header data — mirrors the Home screen so both top bars look identical ──
-  // The scoped system list (after applying drawer/scope selection), the parent
-  // account, the page title, and the "N locations · Total X systems" subtitle.
+  // ── Header data ──
+  // Header rendering (badge + breadcrumb + title + chevron) is handled by the
+  // shared ScopeHeader component - same code path as Home. Here we only need
+  // the scoped system list (for the sub-line counts) and the locations-below
+  // derivation; the title fallback is owned by ScopeHeader (selectedScope?.name
+  // || 'My Systems' - no account-name fallback). 2026-06-15.
   const scopedSystems = selectedScope?.systems || visibleSystems;
-  const account = useMemo(() => {
-    const accId = scopedSystems[0]?.account;
-    if (!accId) return null;
-    const a = getAccountById(accId);
-    return a?.parentId ? getAccountById(a.parentId) : a;
-  }, [scopedSystems]);
-  const pageTitle = selectedScope?.name || account?.name || 'My Systems';
-  const { locationsBelow, hasNextLevel } = useMemo(() => {
-    if (!scopedSystems.length) return { locationsBelow: 0, hasNextLevel: false };
-    const levels = ['l1', 'l2', 'l3', 'l4'];
-    const scopeLevel = selectedScope?.ancestors?.length ?? 0;
-    if (scopeLevel >= levels.length) return { locationsBelow: 0, hasNextLevel: false };
-    const nextKey = levels[scopeLevel];
-    const distinct = new Set(scopedSystems.map(s => s[nextKey]).filter(Boolean));
-    return { locationsBelow: distinct.size, hasNextLevel: true };
-  }, [scopedSystems, selectedScope]);
   const totalSystems = scopedSystems.length;
 
   // Slide-in animation when arriving from a Home deep-link. iOS-style page
@@ -261,61 +246,29 @@ export default function EventsScreen() {
         }
       `}</style>
 
-      {/* Header — same rich pattern as Home for visual consistency.
-          Left: 38 px circular badge with home_work icon.
-          Center: breadcrumb (My Systems > ...) + account/scope title + chevron + subtitle. */}
+      {/* Header — shared with Home via ScopeHeader. Same code, same breadcrumb,
+          same scope-pick behavior. Only the badge differs: Alerts uses the
+          notifications_active glyph in danger red (the page is about alerts).
+          The page's identity is also reinforced by the Active / History tab
+          strip below + the bottom TabBar's active indicator. 2026-06-15. */}
       <PipesHeader glow={true}>
-      <div style={{ padding: '12px 14px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <div onClick={() => setDrawerOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, cursor: 'pointer' }}
-            role="button" aria-label="Switch location"
-            title="Switch location">
-            <div style={{
-              width: 38, height: 38, borderRadius: '50%',
-              background: 'rgba(11,149,248,0.12)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-              border: '1px solid rgba(11,149,248,0.20)',
-            }}>
-              <MIcon name="home_work" size={22} color="#036AB5" fill />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {/* Compact breadcrumb with ellipsis-collapsed middle.
-                  Same pattern as Home + System Detail headers. */}
-              {selectedScope && (() => {
-                const sample = (selectedScope.systems?.[0]) || scopedSystems[0];
-                const all = sample ? getAncestorScopes(sample) : [];
-                const ancestors = all.slice(0, selectedScope.ancestors.length);
-                return (
-                  <CompactBreadcrumb
-                    ancestors={ancestors}
-                    onClearScope={() => clearSelectedScope?.()}
-                    onSelectAncestor={(a) => setSelectedScope?.(a)}
-                  />
-                );
-              })()}
-              {/* Title row - same structure as Home: scope name + expand_more
-                  chevron. The page's identity (Alerts) is conveyed by the
-                  Active / History tab strip below + the bottom TabBar's
-                  active indicator. Header just communicates WHERE the user
-                  is scoped, like Home. 2026-06-13. */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
-                <span style={{ fontSize: 18, fontWeight: 700, color: '#14151A', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {pageTitle}
-                </span>
-                <MIcon name="expand_more" size={22} color="#4A4F5A" style={{ flexShrink: 0, marginLeft: 2 }} />
-              </div>
-              <div style={{ fontSize: 13, color: '#4A4F5A' }}>
-                {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
-                <span style={{ margin: '0 6px', opacity: 0.6 }}>·</span>
-                {totalActiveCount === 0
-                  ? 'All clear'
-                  : `${totalActiveCount} need${totalActiveCount === 1 ? 's' : ''} attention`}
-              </div>
-            </div>
-          </div>
-        </div>
+      <div style={{ padding: '0 0 0' }}>
+        <ScopeHeader
+          badgeIcon="notifications_active"
+          badgeIconColor="#DB4670"
+          badgeBgColor="rgba(219,70,112,0.10)"
+          badgeBorderColor="rgba(219,70,112,0.20)"
+          onDrawerOpen={() => setDrawerOpen(true)}
+          subLine={
+            <>
+              {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
+              <span style={{ margin: '0 6px', opacity: 0.6 }}>·</span>
+              {totalActiveCount === 0
+                ? 'All clear'
+                : `${totalActiveCount} need${totalActiveCount === 1 ? 's' : ''} attention`}
+            </>
+          }
+        />
 
         {/* Tabs - brand-blue active on light bg. No count badges on either
             tab (PRD 05 lock 2026-06-13). The only count surface on this page
