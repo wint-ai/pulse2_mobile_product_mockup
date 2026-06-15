@@ -247,13 +247,15 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   const showIgnoreBtn = !readOnly && !isIgnored && lifecycle.state === 'warning';
   const showOnItBtn = !readOnly && !isIgnored && !hideOnIt && !onItClaimed && isActiveLifecycle;
   const showStandDownBtn = !readOnly && !isIgnored && !hideOnIt && viewerIsTheActor && isActiveLifecycle;
-  // Tag button on the widget — visible ONLY when the event is ignored AND
-  // still alive. Per PRD 14 § 6 + PRD 15 § 3 (locked 2026-06-15): in the
-  // Ignored state the Ignore + On it buttons go away (both no longer
-  // applicable), but the Tag button stays so the user can still annotate
-  // the event without leaving the System page. Same Tag sheet used
-  // everywhere else.
-  const showTagBtnIgnored = !readOnly && isIgnored && isActiveLifecycle;
+  // Per Rami 2026-06-15 (reverses the earlier same-day decision): the Tag
+  // button does NOT live on the Water Event widget in ANY state. Tag entry
+  // points are: (a) the Ignore bottom sheet at ignore-commit time, (b) the
+  // End-of-Event push CTA, (c) the Timeline tab row on closed events.
+  // The Ignored-state widget has no action row at all (Ignore is irreversible,
+  // On it is moot post-ignore, Tag is reached only via Ignore-sheet / push /
+  // Timeline). The widget still opens the Tag sheet via the `?action=tag`
+  // URL deep-link (push CTA) - that's not a button on the widget, that's the
+  // push CTA landing on the System page.
 
   // Pills row visibility (W20, W27):
   //   On it pill: Standard only (!hideOnIt), when claimed.
@@ -275,7 +277,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   // Tag handling (still kept for URL-param deep link from push CTA).
   const tagList = getTags(sys.id);
 
-  const showActionsRow = showIgnoreBtn || showOnItBtn || showStandDownBtn || showTagBtnIgnored;
+  const showActionsRow = showIgnoreBtn || showOnItBtn || showStandDownBtn;
 
   return (
     <>
@@ -399,15 +401,6 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
                 bg="#EBF3FB"
                 color="#036AB5"
                 onClick={standDown}
-              />
-            )}
-            {showTagBtnIgnored && (
-              <ActionButton
-                icon="label"
-                label={tagList.length > 0 ? 'Edit tags' : 'Tag this event'}
-                bg="#EBF3FB"
-                color="#036AB5"
-                onClick={() => setShowTag(true)}
               />
             )}
           </div>
