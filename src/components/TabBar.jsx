@@ -65,7 +65,7 @@ export default function TabBar({ activeTab }) {
   const location = useLocation();
   const { theme } = useTheme();
   const userCtx = useUserContext() || {};
-  const { persona, visibleSystems = [], clearSelectedScope } = userCtx;
+  const { persona, visibleSystems = [] } = userCtx;
   const isTenant = persona?.tabMode === 'tenant';
 
   // For single-system tenants, Home tab points directly to their system
@@ -98,11 +98,15 @@ export default function TabBar({ activeTab }) {
           <button
             key={tab.key}
             onClick={() => {
-              // Bug fix 2026-06-08: tapping a bottom tab clears any drilled-in
-              // scope (e.g. user was on System Detail or a drilled-into location
-              // and tapped "Alerts" — the prior scope shouldn't carry over).
-              // Tap-from-tab = "show me everything in this section".
-              if (clearSelectedScope) clearSelectedScope();
+              // Bottom-tab tap NEVER mutates scope. Scope is owned by the
+              // drawer (set by drill-down) and the breadcrumb (cleared via
+              // 'My Systems' tap). Home and Alerts share one scope and must
+              // stay in sync as the user navigates between them.
+              //
+              // Earlier (2026-06-08) we cleared scope here to avoid carry-over
+              // from System Detail; that was the wrong fix - it broke the
+              // Alerts-pick-location → Home → Alerts flow (scope wiped on the
+              // Home tap, then wiped again on the Alerts tap). 2026-06-15.
               navigate(tab.path);
             }}
             style={{
