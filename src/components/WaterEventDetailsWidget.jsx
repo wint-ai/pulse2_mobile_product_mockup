@@ -247,6 +247,13 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   const showIgnoreBtn = !readOnly && !isIgnored && lifecycle.state === 'warning';
   const showOnItBtn = !readOnly && !isIgnored && !hideOnIt && !onItClaimed && isActiveLifecycle;
   const showStandDownBtn = !readOnly && !isIgnored && !hideOnIt && viewerIsTheActor && isActiveLifecycle;
+  // Tag button on the widget — visible ONLY when the event is ignored AND
+  // still alive. Per PRD 14 § 6 + PRD 15 § 3 (locked 2026-06-15): in the
+  // Ignored state the Ignore + On it buttons go away (both no longer
+  // applicable), but the Tag button stays so the user can still annotate
+  // the event without leaving the System page. Same Tag sheet used
+  // everywhere else.
+  const showTagBtnIgnored = !readOnly && isIgnored && isActiveLifecycle;
 
   // Pills row visibility (W20, W27):
   //   On it pill: Standard only (!hideOnIt), when claimed.
@@ -268,7 +275,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   // Tag handling (still kept for URL-param deep link from push CTA).
   const tagList = getTags(sys.id);
 
-  const showActionsRow = showIgnoreBtn || showOnItBtn || showStandDownBtn;
+  const showActionsRow = showIgnoreBtn || showOnItBtn || showStandDownBtn || showTagBtnIgnored;
 
   return (
     <>
@@ -392,6 +399,15 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
                 bg="#EBF3FB"
                 color="#036AB5"
                 onClick={standDown}
+              />
+            )}
+            {showTagBtnIgnored && (
+              <ActionButton
+                icon="label"
+                label={tagList.length > 0 ? 'Edit tags' : 'Tag this event'}
+                bg="#EBF3FB"
+                color="#036AB5"
+                onClick={() => setShowTag(true)}
               />
             )}
           </div>

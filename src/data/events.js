@@ -565,7 +565,13 @@ function buildSecondaryEvent(sys, type) {
 /**
  * Derive the live "Active" event list from systems.js + incidents.js.
  * Single source of truth — replaces the static active subset of CURRENT_EVENTS.
- * Excludes Water Events the user has ignored (those move to History).
+ *
+ * Ignored Water Events STAY in the Active list (locked 2026-06-15 per PRD 14
+ * § 2.3): the underlying flow is still happening, so hiding the row would lie
+ * about the system's state. They're flagged with `ignored: true` so the row
+ * component renders the muted treatment + Ignored pill instead of Warning.
+ * They move to History only when the underlying flow ends, and at that point
+ * they show as Resolved (not Ignored).
  *
  * A single system can contribute MULTIPLE events when it has multiple
  * concurrent issues (e.g. Water Event AND Valve Error). The primary event
@@ -588,12 +594,19 @@ export function computeActiveEvents() {
     const isWaterAlert = primaryType === 'leak-high' || primaryType === 'leak-low';
     const waterIgnored = isWaterAlert && isIgnored(sys.id);
 
-    // Primary alert (if any). Water events that have been ignored are skipped
-    // entirely — but secondary issues on the same system are NOT skipped, they
-    // still represent active problems the user should see.
-    if (sys.alert && !waterIgnored) {
+    // Primary alert (if any). Ignored water events STAY in the list with an
+    // `ignored: true` flag so the row renders muted; the row is NOT filtered
+    // out. Secondary issues on the same system aren't ignored either.
+    if (sys.alert) {
       const ev = buildActiveEvent(sys);
-      if (ev) out.push(ev);
+      if (ev) {
+        if (waterIgnored) {
+          const info = getIgnoredInfo(sys.id) || {};
+          ev.ignored = true;
+          ev.ignoredInfo = info;
+        }
+        out.push(ev);
+      }
     }
 
     // Secondary issues — emit one event per failing dimension whose category
@@ -675,24 +688,16 @@ export function computePusherResolvedEvents() {
   return out;
 }
 
+// Deprecated 2026-06-15 per PRD 14 § 2.4 / PRD 05d.
+// Ignored events stay on the Active tab while the underlying water flow is
+// still happening. They land in History only when the flow actually ends, at
+// which point they go through computePusherResolvedEvents() and appear as
+// "Resolved" (not "Ignored" — that state was a transient user choice while
+// the issue was live). This function now returns [] to keep the import in
+// EventsScreen working as a no-op until the next refactor removes it
+// entirely.
 export function computeIgnoredEvents() {
-  return getAllIgnored().map(({ systemId }) => {
-    const sys = SYSTEMS.find(s => s.id === systemId);
-    if (!sys || !sys.alert) return null;
-    const isWater = sys.alert.type === 'leak-high' || sys.alert.type === 'leak-low';
-    if (!isWater) return null;
-    const event = buildActiveEvent(sys);
-    if (!event) return null;
-    const info = getIgnoredInfo(systemId);
-    return {
-      ...event,
-      id: `ign_${sys.id}`,
-      resolved: true,
-      ignored: true,
-      dateGroup: 'Today',
-      ignoredInfo: info,
-    };
-  }).filter(Boolean);
+  return [];
 }
 
 // Legacy CT1-specific exports
