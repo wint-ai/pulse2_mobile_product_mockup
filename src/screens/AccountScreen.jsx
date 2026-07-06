@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TabBar from '../components/TabBar';
 import PipesHeader, { GLOW_PAGE_BG } from '../components/PipesHeader';
 import { useUserContext } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { getAccountById } from '../data/accounts';
+import { SUPPORTED_LANGUAGES } from '../i18n';
 
 /* -- Toggle (iOS-style) -- */
 function Toggle({ on, onToggle, theme }) {
@@ -151,11 +153,19 @@ export default function AccountScreen() {
   // needed for styling now.
   const { theme } = useTheme();
 
+  const { t, i18n } = useTranslation();
+
   const [view, setView] = useState('main');
   const [pushOn, setPushOn] = useState(false);
   const [smsOn, setSmsOn] = useState(false);
-  const [language, setLanguage] = useState('English');
   const [units, setUnits] = useState('Liters');
+
+  const languageLabel = (SUPPORTED_LANGUAGES.find(l => l.code === i18n.language) || SUPPORTED_LANGUAGES[0]).label;
+  const languageOptions = SUPPORTED_LANGUAGES.map(l => l.label);
+  function changeLanguage(label) {
+    const target = SUPPORTED_LANGUAGES.find(l => l.label === label);
+    if (target) i18n.changeLanguage(target.code);
+  }
 
   const [showWarning, setShowWarning] = useState(false);
   const [pendingToggle, setPendingToggle] = useState(null);
@@ -207,7 +217,7 @@ export default function AccountScreen() {
       {/* Header */}
       <PipesHeader glow={true}>
         <div style={{ padding: '12px 14px' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px', textAlign: 'center', color: '#14151A' }}>More</div>
+          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.3px', textAlign: 'center', color: '#14151A' }}>{t('more.title')}</div>
         </div>
       </PipesHeader>
 
@@ -219,7 +229,7 @@ export default function AccountScreen() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '10px 16px', background: 'rgba(219,70,112,0.1)', borderBottom: '1px solid rgba(219,70,112,0.2)',
           }}>
-            <span style={{ fontSize: 15, fontWeight: 500, color: '#DB4670' }}>SMS and Push notifications are OFF.</span>
+            <span style={{ fontSize: 15, fontWeight: 500, color: '#DB4670' }}>{t('more.both_off_warning')}</span>
             <span style={{ fontSize: 16, color: theme.textTertiary, cursor: 'pointer' }}>{'\u24D8'}</span>
           </div>
         )}
@@ -334,24 +344,21 @@ export default function AccountScreen() {
 
           {/* Personal Settings */}
           <SectionCard theme={theme}>
-            <SectionTitle theme={theme}>Personal Settings</SectionTitle>
+            <SectionTitle theme={theme}>{t('more.personal_settings')}</SectionTitle>
             <div style={{ padding: '4px 16px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: theme.separator }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18, color: theme.textTertiary }}>{'\u6587A'}</span>
-                  <div>
-                    <div style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>App & Notification</div>
-                    <div style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>Language</div>
-                  </div>
+                  <span className="material-symbols-outlined" style={{ fontSize: 20, color: theme.textTertiary }}>language</span>
+                  <div style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>{t('more.language')}</div>
                 </div>
-                <Dropdown value={language} options={['English', 'Hebrew']} onChange={setLanguage} theme={theme} />
+                <Dropdown value={languageLabel} options={languageOptions} onChange={changeLanguage} theme={theme} />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 18, color: theme.textTertiary }}>{'\u2697'}</span>
-                  <div style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>Measurement Units</div>
+                  <span className="material-symbols-outlined" style={{ fontSize: 20, color: theme.textTertiary }}>straighten</span>
+                  <div style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>{t('more.measurement_units')}</div>
                 </div>
-                <Dropdown value={units} options={['Liters', 'Gallons', 'm\u00B3']} onChange={setUnits} theme={theme} />
+                <Dropdown value={units} options={[t('more.units.liters'), t('more.units.gallons'), t('more.units.cubic_meters')]} onChange={setUnits} theme={theme} />
               </div>
             </div>
           </SectionCard>

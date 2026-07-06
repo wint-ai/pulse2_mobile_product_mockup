@@ -1,0 +1,157 @@
+{
+  "common": {
+    "app_name": "Wint",
+    "cancel": "ביטול",
+    "confirm": "אישור",
+    "save": "שמירה",
+    "close": "סגירה",
+    "back": "חזרה",
+    "loading": "טוען…",
+    "just_now": "הרגע",
+    "yes": "כן",
+    "no": "לא"
+  },
+  "tabs": {
+    "home": "בית",
+    "alerts": "התראות",
+    "more": "עוד"
+  },
+  "home": {
+    "title_default": "המערכות שלי",
+    "title_no_scope": "לא הוגדר תחום",
+    "subline_no_scope": "לחשבון שלך לא הוקצו מערכות",
+    "counts_line": "{{locations}} מיקומים · {{count}} מערכות בסך הכול",
+    "needs_attention": "{{count}} דורש{{count_s}} טיפול",
+    "all_clear": "הכל תקין",
+    "overview_tab": "סקירה",
+    "info_tab": "פרטים",
+    "water_events": {
+      "title": "אירועי מים",
+      "high_flow": "זרימה גבוהה",
+      "low_flow": "זרימה נמוכה",
+      "empty": "אין אירועי מים פעילים"
+    },
+    "systems_health": {
+      "title": "תקינות המערכות",
+      "healthy": "תקין",
+      "require_attention": "דורש טיפול",
+      "systems": "מערכות"
+    },
+    "status_overview": {
+      "title": "סקירת סטטוס",
+      "communication": "תקשורת",
+      "valves": "ברזים",
+      "external_power": "חשמל חיצוני",
+      "notification_recipients": "נמענים להתראות",
+      "online": "מחובר",
+      "offline": "מנותק",
+      "open": "פתוח",
+      "closed": "סגור",
+      "errors": "שגיאות",
+      "no_valve": "אין ברז",
+      "on_ac": "מחשמל",
+      "unplugged": "מנותק מחשמל",
+      "battery": "סוללה",
+      "registered": "רשומים",
+      "missing": "חסרים"
+    }
+  },
+  "system_detail": {
+    "tabs": {
+      "system": "מערכת",
+      "policy": "מדיניות",
+      "timeline": "ציר זמן",
+      "info": "פרטים"
+    },
+    "water_event_widget": {
+      "detected_at": "זוהה בתאריך",
+      "warning": "אזהרה",
+      "shutoff": "סגירה אוטומטית",
+      "ongoing": "מתמשך",
+      "resolved": "נפתר",
+      "ignored": "התעלמו",
+      "flow_rate": "ספיקה",
+      "duration": "משך",
+      "volume": "נפח",
+      "actions": {
+        "ignore": "התעלם",
+        "on_it": "מטפל",
+        "tag": "תייג את האירוע"
+      }
+    },
+    "health_widget": {
+      "title_healthy": "תקין",
+      "title_issues": "{{count}} תקלות",
+      "show_passing": "הצג {{count}} בדיקות תקינות",
+      "hide_passing": "הסתר בדיקות תקינות",
+      "communications": "תקשורת",
+      "valve": "ברז",
+      "ext_power": "חשמל חיצוני",
+      "alert_recipients": "נמענים להתראות"
+    },
+    "valve_widget": {
+      "title": "סטטוס ברז",
+      "position": {
+        "open": "פתוח",
+        "closed": "סגור",
+        "opening": "נפתח…",
+        "closing": "נסגר…",
+        "verifying_closed": "מאמת סגירה",
+        "middle": "אמצע",
+        "unknown": "לא ידוע",
+        "disconnected": "מנותק"
+      },
+      "actions": {
+        "open": "פתח",
+        "close": "סגור",
+        "retry": "נסה שוב"
+      },
+      "auto_shutoff_enabled": "סגירה אוטומטית מופעלת",
+      "auto_shutoff_disabled": "סגירה אוטומטית מכובה",
+      "no_valve_installed": "אין ברז מותקן"
+    }
+  },
+  "more": {
+    "title": "עוד",
+    "personal_information": "פרטים אישיים",
+    "personal_settings": "הגדרות אישיות",
+    "language": "שפה",
+    "measurement_units": "יחידות מידה",
+    "units": {
+      "liters": "ליטרים",
+      "gallons": "גלונים",
+      "cubic_meters": "מ״ק"
+    },
+    "notifications": "התראות",
+    "push": "התראות דחיפה",
+    "push_desc": "בתוך האפליקציה ובמסך הנעילה",
+    "sms": "SMS",
+    "sms_desc": "הודעות טקסט",
+    "sign_out": "התנתקות",
+    "sign_out_confirm_title": "להתנתק מ-Wint?",
+    "app_version": "Pulse 2.0 · v{{version}}",
+    "both_off_warning": "התראות SMS ודחיפה כבויות.",
+    "both_off_modal": {
+      "title": "לכבות את כל ההתראות?",
+      "body": "עם שתי ההתראות (Push ו-SMS) כבויות, לא תקבל שום התראה על אירועי מים או תקלות. תראה אותן רק בתוך האפליקציה.",
+      "cancel": "ביטול",
+      "disable_all": "כבה הכל"
+    },
+    "profile_fields": {
+      "full_name": "שם מלא",
+      "email": "אימייל",
+      "phone": "טלפון",
+      "role": "תפקיד",
+      "account": "חשבון"
+    }
+  },
+  "offline": {
+    "no_internet": "אין חיבור לאינטרנט",
+    "no_internet_desc": "מנותק · מוצגים נתונים אחרונים ידועים",
+    "system_offline": "המערכת מנותקת",
+    "system_offline_desc": "לא ניתן להגיע ל-{{name}} · הנתונים עשויים להיות לא מעודכנים",
+    "couldnt_refresh": "לא ניתן לרענן את הנתונים",
+    "couldnt_refresh_desc": "מציג נתונים אחרונים · ננסה שוב",
+    "updating": "מעדכן…"
+  }
+}

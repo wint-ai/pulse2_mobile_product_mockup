@@ -1,0 +1,157 @@
+{
+  "common": {
+    "app_name": "Wint",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "close": "Close",
+    "back": "Back",
+    "loading": "Loading…",
+    "just_now": "Just now",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "tabs": {
+    "home": "Home",
+    "alerts": "Alerts",
+    "more": "More"
+  },
+  "home": {
+    "title_default": "My Systems",
+    "title_no_scope": "No scope defined",
+    "subline_no_scope": "Your account has no systems assigned",
+    "counts_line": "{{locations}} location{{locations_s}} · Total {{count}} system{{count_s}}",
+    "needs_attention": "{{count}} need{{count_s}} attention",
+    "all_clear": "All clear",
+    "overview_tab": "Overview",
+    "info_tab": "Info",
+    "water_events": {
+      "title": "Water Events",
+      "high_flow": "High Flow",
+      "low_flow": "Low Flow",
+      "empty": "No active Water Events"
+    },
+    "systems_health": {
+      "title": "Systems Health",
+      "healthy": "Healthy",
+      "require_attention": "Require attention",
+      "systems": "Systems"
+    },
+    "status_overview": {
+      "title": "Status Overview",
+      "communication": "Communication",
+      "valves": "Valves",
+      "external_power": "External Power",
+      "notification_recipients": "Notification recipients",
+      "online": "Online",
+      "offline": "Offline",
+      "open": "Open",
+      "closed": "Closed",
+      "errors": "Errors",
+      "no_valve": "No valve",
+      "on_ac": "On AC",
+      "unplugged": "Unplugged",
+      "battery": "Battery",
+      "registered": "Registered",
+      "missing": "Missing"
+    }
+  },
+  "system_detail": {
+    "tabs": {
+      "system": "System",
+      "policy": "Policy",
+      "timeline": "Timeline",
+      "info": "Info"
+    },
+    "water_event_widget": {
+      "detected_at": "Detected at",
+      "warning": "Warning",
+      "shutoff": "Shutoff",
+      "ongoing": "Ongoing",
+      "resolved": "Resolved",
+      "ignored": "Ignored",
+      "flow_rate": "Flow rate",
+      "duration": "Duration",
+      "volume": "Volume",
+      "actions": {
+        "ignore": "Ignore",
+        "on_it": "On it",
+        "tag": "Tag this Water Event"
+      }
+    },
+    "health_widget": {
+      "title_healthy": "Healthy",
+      "title_issues": "{{count}} issue{{count_s}}",
+      "show_passing": "Show {{count}} passing check{{count_s}}",
+      "hide_passing": "Hide passing checks",
+      "communications": "Communications",
+      "valve": "Valve",
+      "ext_power": "Ext. Power",
+      "alert_recipients": "Alert recipients"
+    },
+    "valve_widget": {
+      "title": "Valve Status",
+      "position": {
+        "open": "Open",
+        "closed": "Closed",
+        "opening": "Opening…",
+        "closing": "Closing…",
+        "verifying_closed": "Verifying Closed",
+        "middle": "Middle",
+        "unknown": "Unknown",
+        "disconnected": "Disconnected"
+      },
+      "actions": {
+        "open": "Open",
+        "close": "Close",
+        "retry": "Retry"
+      },
+      "auto_shutoff_enabled": "Auto-shutoff enabled",
+      "auto_shutoff_disabled": "Auto-shutoff disabled",
+      "no_valve_installed": "No valve installed"
+    }
+  },
+  "more": {
+    "title": "More",
+    "personal_information": "Personal Information",
+    "personal_settings": "Personal Settings",
+    "language": "Language",
+    "measurement_units": "Measurement Units",
+    "units": {
+      "liters": "Liters",
+      "gallons": "Gallons",
+      "cubic_meters": "m³"
+    },
+    "notifications": "Notifications",
+    "push": "Push",
+    "push_desc": "In-app and lock-screen",
+    "sms": "SMS",
+    "sms_desc": "Text messages",
+    "sign_out": "Sign out",
+    "sign_out_confirm_title": "Sign out of Wint?",
+    "app_version": "Pulse 2.0 · v{{version}}",
+    "both_off_warning": "SMS and Push notifications are OFF.",
+    "both_off_modal": {
+      "title": "Disable all notifications?",
+      "body": "With both Push and SMS off, you won't receive any alerts about Water Events or system malfunctions. You'll only see them inside the app.",
+      "cancel": "Cancel",
+      "disable_all": "Disable all"
+    },
+    "profile_fields": {
+      "full_name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "account": "Account"
+    }
+  },
+  "offline": {
+    "no_internet": "No internet connection",
+    "no_internet_desc": "You're offline · showing last known data",
+    "system_offline": "System is offline",
+    "system_offline_desc": "Can't reach {{name}} · data may be outdated",
+    "couldnt_refresh": "Couldn't refresh data",
+    "couldnt_refresh_desc": "Showing last known state · we'll keep trying",
+    "updating": "Updating…"
+  }
+}

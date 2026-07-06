@@ -14,9 +14,11 @@
     "deploy": "npm run build && npx gh-pages -d dist"
   },
   "dependencies": {
+    "i18next": "^26.3.4",
     "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
