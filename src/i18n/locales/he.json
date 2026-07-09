@@ -175,6 +175,58 @@
     "back_to_my_scope": "חזרה לתחום שלי",
     "all_root": "הכל"
   },
+  "info_tab": {
+    "sections": {
+      "location": "מיקום",
+      "address": "כתובת",
+      "shipping_address": "כתובת למשלוח",
+      "location_contacts": "אנשי קשר במיקום",
+      "about": "אודות",
+      "protects": "מגן על",
+      "general": "כללי",
+      "device_type": "סוג התקן",
+      "coverage": "כיסוי",
+      "pictures": "תמונות",
+      "notes": "הערות"
+    },
+    "location_fields": {
+      "building": "בניין",
+      "campus": "קמפוס",
+      "floor": "קומה",
+      "zone": "אזור",
+      "room": "חדר"
+    },
+    "general_fields": {
+      "pipe_topology": "טופולוגיית צנרת",
+      "valve_model": "דגם ברז",
+      "monitored_environment": "סביבה מנוטרת",
+      "meter_model": "דגם מונה"
+    },
+    "device_fields": {
+      "device_family": "משפחת התקן",
+      "manufacturer": "יצרן",
+      "model": "דגם",
+      "serial_number": "מספר סידורי",
+      "install_date": "תאריך התקנה"
+    },
+    "coverage_fields": {
+      "coverage_area": "שטח כיסוי",
+      "occupancy": "תפוסה"
+    },
+    "placeholders": {
+      "no_address": "אין כתובת רשומה",
+      "same_as_address": "זהה לכתובת",
+      "no_shipping": "אין כתובת למשלוח רשומה",
+      "no_contacts": "אין אנשי קשר רשומים",
+      "no_notes": "אין הערות עדיין",
+      "no_pictures": "אין תמונות עדיין"
+    },
+    "add_picture": "הוסף תמונה",
+    "add_notes": "הוסף הערות",
+    "edit": "עריכה",
+    "cancel": "ביטול",
+    "save": "שמירה"
+  },
   "timeline": {
     "today": "היום",
     "yesterday": "אתמול",

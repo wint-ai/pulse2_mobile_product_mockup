@@ -175,6 +175,58 @@
     "back_to_my_scope": "Back to My Scope",
     "all_root": "All"
   },
+  "info_tab": {
+    "sections": {
+      "location": "Location",
+      "address": "Address",
+      "shipping_address": "Shipping address",
+      "location_contacts": "Location contacts",
+      "about": "About",
+      "protects": "Protects",
+      "general": "General",
+      "device_type": "Device type",
+      "coverage": "Coverage",
+      "pictures": "Pictures",
+      "notes": "Notes"
+    },
+    "location_fields": {
+      "building": "Building",
+      "campus": "Campus",
+      "floor": "Floor",
+      "zone": "Zone",
+      "room": "Room"
+    },
+    "general_fields": {
+      "pipe_topology": "Pipe topology",
+      "valve_model": "Valve model",
+      "monitored_environment": "Monitored environment",
+      "meter_model": "Meter model"
+    },
+    "device_fields": {
+      "device_family": "Device family",
+      "manufacturer": "Manufacturer",
+      "model": "Model",
+      "serial_number": "Serial number",
+      "install_date": "Install date"
+    },
+    "coverage_fields": {
+      "coverage_area": "Coverage area",
+      "occupancy": "Occupancy"
+    },
+    "placeholders": {
+      "no_address": "No address on file",
+      "same_as_address": "Same as address",
+      "no_shipping": "No shipping address on file",
+      "no_contacts": "No contacts on file",
+      "no_notes": "No notes yet",
+      "no_pictures": "No pictures yet"
+    },
+    "add_picture": "Add picture",
+    "add_notes": "Add notes",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
   "timeline": {
     "today": "Today",
     "yesterday": "Yesterday",

@@ -5,6 +5,7 @@
 // location record).
 
 import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { getSystemInfo, getSystemSpecs } from '../../data/systemsInfo';
 import { getAccountById } from '../../data/accounts';
@@ -215,6 +216,7 @@ function PicturesEditor({ scopeId, theme }) {
 
 // ── Main ──
 export default function SystemInfoTab({ sys }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const info = getSystemInfo(sys.id);
   const specs = getSystemSpecs(sys.id);
@@ -251,14 +253,14 @@ export default function SystemInfoTab({ sys }) {
 
       {/* Location (granular per-system) */}
       {info.location && (
-        <InfoSection theme={theme} icon="location_on" title="Location">
+        <InfoSection theme={theme} icon="location_on" title={t('info_tab.sections.location')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
             {[
-              { label: 'Building', value: info.location.building },
-              { label: 'Campus',   value: info.location.campus },
-              { label: 'Floor',    value: info.location.floor },
-              { label: 'Zone',     value: info.location.zone },
-              { label: 'Room',     value: info.location.room },
+              { label: t('info_tab.location_fields.building'), value: info.location.building },
+              { label: t('info_tab.location_fields.campus'),   value: info.location.campus },
+              { label: t('info_tab.location_fields.floor'),    value: info.location.floor },
+              { label: t('info_tab.location_fields.zone'),     value: info.location.zone },
+              { label: t('info_tab.location_fields.room'),     value: info.location.room },
             ].filter(r => r.value).map(row => (
               <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 13, color: theme.textTertiary }}>{row.label}</span>
@@ -270,24 +272,24 @@ export default function SystemInfoTab({ sys }) {
       )}
 
       {/* Address */}
-      <InfoSection theme={theme} icon="home_pin" title="Address">
+      <InfoSection theme={theme} icon="home_pin" title={t('info_tab.sections.address')}>
         {address
           ? <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.45, whiteSpace: 'pre-line' }}>{address}</div>
-          : placeholder('No address on file')}
+          : placeholder(t('info_tab.placeholders.no_address'))}
       </InfoSection>
 
       {/* Shipping address */}
-      <InfoSection theme={theme} icon="local_shipping" title="Shipping address">
+      <InfoSection theme={theme} icon="local_shipping" title={t('info_tab.sections.shipping_address')}>
         {shippingAddress
           ? <div style={{ fontSize: 14, color: theme.text, lineHeight: 1.45, whiteSpace: 'pre-line' }}>{shippingAddress}</div>
           : (address
-              ? <div style={{ fontSize: 13, color: theme.textTertiary, fontStyle: 'italic' }}>Same as address</div>
-              : placeholder('No shipping address on file'))}
+              ? <div style={{ fontSize: 13, color: theme.textTertiary, fontStyle: 'italic' }}>{t('info_tab.placeholders.same_as_address')}</div>
+              : placeholder(t('info_tab.placeholders.no_shipping')))}
       </InfoSection>
 
       {/* Location contacts — email + phone, no role */}
-      <InfoSection theme={theme} icon="contacts" title={`Location contacts${contacts.length ? ` (${contacts.length})` : ''}`}>
-        {contacts.length === 0 ? placeholder('No contacts on file') : (
+      <InfoSection theme={theme} icon="contacts" title={`${t('info_tab.sections.location_contacts')}${contacts.length ? ` (${contacts.length})` : ''}`}>
+        {contacts.length === 0 ? placeholder(t('info_tab.placeholders.no_contacts')) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {contacts.map((c, i) => (
               <div key={i} style={{
@@ -322,14 +324,14 @@ export default function SystemInfoTab({ sys }) {
 
       {/* About */}
       {info.description && (
-        <InfoSection theme={theme} icon="info" title="About">
+        <InfoSection theme={theme} icon="info" title={t('info_tab.sections.about')}>
           <p style={{ fontSize: 14, color: theme.textSecondary, lineHeight: 1.55, margin: 0 }}>{info.description}</p>
         </InfoSection>
       )}
 
       {/* Protects */}
       {info.protects?.length > 0 && (
-        <InfoSection theme={theme} icon="shield" title="Protects">
+        <InfoSection theme={theme} icon="shield" title={t('info_tab.sections.protects')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {info.protects.map((p, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -342,41 +344,41 @@ export default function SystemInfoTab({ sys }) {
       )}
 
       {/* General specs — pipe topology, valve model, monitored env, meter model */}
-      <InfoSection theme={theme} icon="tune" title="General">
+      <InfoSection theme={theme} icon="tune" title={t('info_tab.sections.general')}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <KV label="Pipe topology"        value={specs.pipeTopology}        theme={theme} />
-          <KV label="Valve model"          value={specs.valveModel}          theme={theme} />
-          <KV label="Monitored environment" value={specs.monitoredEnvironment} theme={theme} />
-          <KV label="Meter model"          value={specs.meterModel}          theme={theme} />
+          <KV label={t('info_tab.general_fields.pipe_topology')}        value={specs.pipeTopology}        theme={theme} />
+          <KV label={t('info_tab.general_fields.valve_model')}          value={specs.valveModel}          theme={theme} />
+          <KV label={t('info_tab.general_fields.monitored_environment')} value={specs.monitoredEnvironment} theme={theme} />
+          <KV label={t('info_tab.general_fields.meter_model')}          value={specs.meterModel}          theme={theme} />
         </div>
       </InfoSection>
 
       {/* Device type — family + manufacturer + model + serial + install date */}
-      <InfoSection theme={theme} icon="memory" title="Device type">
+      <InfoSection theme={theme} icon="memory" title={t('info_tab.sections.device_type')}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <KV label="Device family" value={specs.deviceFamily} theme={theme} />
-          {info.manufacturer  && <KV label="Manufacturer"  value={info.manufacturer} theme={theme} />}
-          {info.model         && <KV label="Model"         value={info.model}        theme={theme} />}
-          {info.serialNumber  && <KV label="Serial number" value={info.serialNumber} theme={theme} copy />}
-          {info.installDate   && <KV label="Install date"  value={new Date(info.installDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} theme={theme} />}
+          <KV label={t('info_tab.device_fields.device_family')} value={specs.deviceFamily} theme={theme} />
+          {info.manufacturer  && <KV label={t('info_tab.device_fields.manufacturer')}  value={info.manufacturer} theme={theme} />}
+          {info.model         && <KV label={t('info_tab.device_fields.model')}         value={info.model}        theme={theme} />}
+          {info.serialNumber  && <KV label={t('info_tab.device_fields.serial_number')} value={info.serialNumber} theme={theme} copy />}
+          {info.installDate   && <KV label={t('info_tab.device_fields.install_date')}  value={new Date(info.installDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} theme={theme} />}
         </div>
       </InfoSection>
 
       {/* Coverage — area + occupancy */}
-      <InfoSection theme={theme} icon="square_foot" title="Coverage">
+      <InfoSection theme={theme} icon="square_foot" title={t('info_tab.sections.coverage')}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
-          <KV label="Coverage area" value={`${specs.coverageArea.toLocaleString()} m²`} theme={theme} />
-          <KV label="Occupancy"     value={specs.occupancy.toLocaleString()}            theme={theme} />
+          <KV label={t('info_tab.coverage_fields.coverage_area')} value={`${specs.coverageArea.toLocaleString()} m²`} theme={theme} />
+          <KV label={t('info_tab.coverage_fields.occupancy')}     value={specs.occupancy.toLocaleString()}            theme={theme} />
         </div>
       </InfoSection>
 
       {/* Pictures — editable, persisted via locationInfoStore */}
-      <InfoSection theme={theme} icon="image" title="Pictures">
+      <InfoSection theme={theme} icon="image" title={t('info_tab.sections.pictures')}>
         <PicturesEditor scopeId={scopeId} theme={theme} />
       </InfoSection>
 
       {/* Notes — editable, persisted via locationInfoStore */}
-      <InfoSection theme={theme} icon="notes" title="Notes">
+      <InfoSection theme={theme} icon="notes" title={t('info_tab.sections.notes')}>
         <NotesEditor scopeId={scopeId} defaultNotes={defaultNotes} theme={theme} />
       </InfoSection>
     </div>
