@@ -37,13 +37,22 @@
       "empty": "אין אירועי מים פעילים"
     },
     "systems_health": {
-      "title": "תקינות המערכות",
+      "title": "מצב המערכות",
       "healthy": "תקין",
       "require_attention": "דורש טיפול",
-      "systems": "מערכות"
+      "systems": "מערכות",
+      "info_tooltip_intro": "מערכת נחשבת תקינה כאשר:",
+      "info_tooltip_bullets": [
+        "היא מדווחת לענן באופן שוטף",
+        "אין שגיאות ברז",
+        "אין תקלות בחיבור המתח",
+        "לפחות נמען אחד רשום לקבלת התראות"
+      ],
+      "info_button_aria": "מידע על מצב המערכות"
     },
     "status_overview": {
       "title": "סקירת סטטוס",
+      "n_total": "{{count}} בסך הכול",
       "communication": "תקשורת",
       "valves": "ברזים",
       "external_power": "חשמל חיצוני",
@@ -146,10 +155,14 @@
       "cubic_meters": "מ״ק"
     },
     "notifications": "התראות",
+    "push_notifications_section": "התראות באפליקציה",
+    "sms_notifications_section": "התראות SMS",
     "push": "התראות באפליקציה (הודעות פוש)",
     "push_desc": "מוצגות במסך הנעילה ובאפליקציה",
-    "sms": "SMS",
-    "sms_desc": "הודעות טקסט",
+    "sms": "התראות SMS",
+    "sms_desc": "הודעות טקסט למספר הטלפון שלך",
+    "tutorial": "מדריך",
+    "tutorial_desc": "לימוד השימוש באפליקציה",
     "sign_out": "התנתקות",
     "sign_out_confirm_title": "להתנתק מ-Wint?",
     "app_version": "Pulse 2.0 · v{{version}}",
@@ -168,17 +181,20 @@
       "valve_control": "שליטה בברז",
       "edit_policies": "עריכת מדיניות"
     },
-    "both_off_warning": "התראות SMS ודחיפה כבויות.",
+    "both_off_warning": "התראות באפליקציה והתראות SMS כבויות.",
     "both_off_modal": {
       "title": "לכבות את כל ההתראות?",
-      "body": "עם שתי ההתראות (Push ו-SMS) כבויות, לא תקבל שום התראה על אירועי מים או תקלות. תראה אותן רק בתוך האפליקציה.",
+      "body": "אם תכבו את שתי ההתראות (באפליקציה וב-SMS) לא תקבלו שום התראה על אירועי מים או תקלות. תראו אותן רק בתוך האפליקציה.",
       "cancel": "ביטול",
       "disable_all": "כבה הכל"
     },
     "profile_fields": {
       "full_name": "שם מלא",
+      "first_name": "שם פרטי",
+      "last_name": "שם משפחה",
       "email": "אימייל",
       "phone": "טלפון",
+      "phone_number": "מספר טלפון",
       "role": "תפקיד",
       "account": "חשבון"
     }

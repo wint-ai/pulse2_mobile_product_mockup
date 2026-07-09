@@ -90,33 +90,34 @@ function SectionTitle({ children, right, theme }) {
 
 /* -- Personal Information detail view -- */
 function PersonalInfoView({ persona, onBack, onSignOut, theme }) {
+  const { t } = useTranslation();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, background: theme.bg }}>
       <div style={{ background: theme.headerBg, borderBottom: theme.headerBorder, padding: '11px 16px', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 12 }}>
         <div onClick={onBack} style={{ cursor: 'pointer', fontSize: 20, color: theme.text, lineHeight: 1, padding: '2px 4px' }}>&larr;</div>
-        <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px', color: theme.text }}>Personal Information</div>
+        <div style={{ fontSize: 17, fontWeight: 700, letterSpacing: '-0.3px', color: theme.text }}>{t('more.personal_information')}</div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 14px 8px' }}>
         <SectionCard theme={theme}>
-          <SectionTitle theme={theme}>Personal Information</SectionTitle>
+          <SectionTitle theme={theme}>{t('more.personal_information')}</SectionTitle>
           <div style={{ padding: '6px 16px 16px' }}>
             <div style={{ display: 'flex', gap: 16, marginBottom: 14 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>First Name</div>
+                <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>{t('more.profile_fields.first_name')}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 16, color: theme.textTertiary }}>{'\uD83D\uDC64'}</span>
                   <span style={{ fontSize: 15, color: theme.text }}>{persona?.name?.split(' ')[0] || '\u2014'}</span>
                 </div>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>Last Name</div>
+                <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>{t('more.profile_fields.last_name')}</div>
                 <span style={{ fontSize: 15, color: theme.text }}>{persona?.name?.split(' ').slice(1).join(' ') || '\u2014'}</span>
               </div>
             </div>
 
             <div style={{ borderTop: theme.separator, paddingTop: 12, marginBottom: 14 }}>
-              <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>Email</div>
+              <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>{t('more.profile_fields.email')}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 15, color: theme.textTertiary }}>{'\u2709'}</span>
                 <span style={{ fontSize: 15, color: theme.textSecondary }}>{persona?.email || '\u2014'}</span>
@@ -124,7 +125,7 @@ function PersonalInfoView({ persona, onBack, onSignOut, theme }) {
             </div>
 
             <div style={{ borderTop: theme.separator, paddingTop: 12, marginBottom: 18 }}>
-              <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>Phone number</div>
+              <div style={{ fontSize: 13, color: theme.textTertiary, fontWeight: 500, marginBottom: 4 }}>{t('more.profile_fields.phone_number')}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ fontSize: 15, color: theme.textTertiary }}>{'\uD83D\uDCF1'}</span>
                 <span style={{ fontSize: 15, color: theme.text }}>{persona?.phone || '\u2014'}</span>
@@ -135,7 +136,7 @@ function PersonalInfoView({ persona, onBack, onSignOut, theme }) {
               onClick={onSignOut}
               style={{ textAlign: 'center', fontSize: 15, fontWeight: 600, color: '#DB4670', cursor: 'pointer', padding: '8px 0' }}
             >
-              Sign Out
+              {t('more.sign_out')}
             </div>
           </div>
         </SectionCard>
@@ -380,13 +381,13 @@ export default function AccountScreen() {
           {/* Push Notifications */}
           <SectionCard theme={theme}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px 6px' }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>Push Notifications</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>{t('more.push_notifications_section')}</div>
               <span style={{ fontSize: 18, color: theme.textTertiary, cursor: 'pointer' }}>{'\u2699'}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 16px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 18, color: theme.textTertiary }}>{'\uD83D\uDD14'}</span>
-                <span style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>Push</span>
+                <span style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>{t('more.push')}</span>
               </div>
               <Toggle on={pushOn} onToggle={() => handleToggle('push')} theme={theme} />
             </div>
@@ -394,11 +395,11 @@ export default function AccountScreen() {
 
           {/* SMS Notifications */}
           <SectionCard theme={theme}>
-            <SectionTitle theme={theme}>SMS Notifications</SectionTitle>
+            <SectionTitle theme={theme}>{t('more.sms_notifications_section')}</SectionTitle>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 16px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 18, color: theme.textTertiary }}>{'\uD83D\uDCAC'}</span>
-                <span style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>SMS</span>
+                <span style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>{t('more.sms')}</span>
               </div>
               <Toggle on={smsOn} onToggle={() => handleToggle('sms')} theme={theme} />
             </div>
@@ -416,15 +417,15 @@ export default function AccountScreen() {
             >
               <span style={{ fontSize: 16 }}>{'\uD83C\uDF93'}</span>
               <div>
-                <span style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>Tutorial</span>
-                <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>Learn how to use the app</div>
+                <span style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>{t('more.tutorial')}</span>
+                <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{t('more.tutorial_desc')}</div>
               </div>
             </div>
           </SectionCard>
 
           {/* Version */}
           <div style={{ textAlign: 'center', fontSize: 13, color: theme.textMuted, padding: '4px 0 16px' }}>
-            Pulse 2.0 {'\u00B7'} v1.2.0
+            {t('more.app_version', { version: '1.2.0' })}
           </div>
 
         </div>
@@ -448,9 +449,9 @@ export default function AccountScreen() {
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 26, marginBottom: 14,
               }}>{'\uD83D\uDD15'}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Important Notice</div>
+              <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t('more.both_off_modal.title')}</div>
               <div style={{ fontSize: 15, lineHeight: 1.5, opacity: .92 }}>
-                Disabling both SMS and PUSH notifications will stop all alerts for Water Events and malfunctions. Do you want to proceed?
+                {t('more.both_off_modal.body')}
               </div>
             </div>
             <div style={{
@@ -463,7 +464,7 @@ export default function AccountScreen() {
                   background: theme.card, fontSize: 15, fontWeight: 600, color: theme.text,
                   fontFamily: 'inherit', cursor: 'pointer',
                 }}
-              >Cancel</button>
+              >{t('more.both_off_modal.cancel')}</button>
               <button
                 onClick={confirmWarning}
                 style={{
@@ -471,7 +472,7 @@ export default function AccountScreen() {
                   background: '#DB4670', fontSize: 15, fontWeight: 600, color: '#fff',
                   fontFamily: 'inherit', cursor: 'pointer',
                 }}
-              >Proceed</button>
+              >{t('more.both_off_modal.disable_all')}</button>
             </div>
             <div
               onClick={cancelWarning}

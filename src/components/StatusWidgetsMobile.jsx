@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { computeWidgets } from '../data/systems';
 
@@ -31,6 +32,7 @@ function IconBox({ icon, color }) {
 }
 
 export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = false, skipAlerts = false }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const w = computeWidgets(systems);
@@ -112,7 +114,7 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
             <MIcon name="water_drop" size={18} color="#DB4670" fill />
-            <span style={{ fontSize: 14, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>Water Events</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>{t('home.water_events.title')}</span>
           </div>
           {/* Chip-style pills — label on top, tabular-num count below. No arrows.
               Both High Flow and Low Flow always render. 0 fades to 50% opacity.
@@ -133,7 +135,7 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
                 opacity: highFlows === 0 ? 0.5 : 1,
                 cursor: 'pointer',
               }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#DB4670', lineHeight: 1.1 }}>High Flow</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#DB4670', lineHeight: 1.1 }}>{t('home.water_events.high_flow')}</div>
               <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.4px', color: '#DB4670', fontVariantNumeric: 'tabular-nums', lineHeight: 1, marginTop: 2 }}>{highFlows}</div>
             </div>
             <div
@@ -148,7 +150,7 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
                 opacity: lowFlows === 0 ? 0.5 : 1,
                 cursor: 'pointer',
               }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#8C5A0F', lineHeight: 1.1 }}>Low Flow</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#8C5A0F', lineHeight: 1.1 }}>{t('home.water_events.low_flow')}</div>
               <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.4px', color: '#8C5A0F', fontVariantNumeric: 'tabular-nums', lineHeight: 1, marginTop: 2 }}>{lowFlows}</div>
             </div>
           </div>
@@ -169,7 +171,7 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
           <MIcon name="check_circle" size={18} color={theme.green} fill />
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#2F6112', letterSpacing: '-0.1px' }}>No active Water Events</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#2F6112', letterSpacing: '-0.1px' }}>{t('home.water_events.empty')}</div>
         </div>
       )}
 
@@ -184,13 +186,13 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
             <IconBox icon={hasOffline ? 'wifi_off' : 'wifi'} color={hasOffline ? '#DB4670' : theme.green} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>Communication</div>
-              <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{totalComm} total</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{t('home.status_overview.communication')}</div>
+              <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{t('home.status_overview.n_total', { count: totalComm })}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <Chip value={w.comm.online} label="Online" color={theme.green} onClick={() => go('comm-online')} theme={theme} />
-            <Chip value={w.comm.offline} label="Offline" color={w.comm.offline > 0 ? '#DB4670' : theme.textMuted} onClick={() => go('comm-offline')} theme={theme} />
+            <Chip value={w.comm.online} label={t('home.status_overview.online')} color={theme.green} onClick={() => go('comm-online')} theme={theme} />
+            <Chip value={w.comm.offline} label={t('home.status_overview.offline')} color={w.comm.offline > 0 ? '#DB4670' : theme.textMuted} onClick={() => go('comm-offline')} theme={theme} />
           </div>
         </div>
       </div>
@@ -203,14 +205,14 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
             <IconBox icon="valve" color="#04ADEF" />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>Valves</div>
-              <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{totalValves} total</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{t('home.status_overview.valves')}</div>
+              <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{t('home.status_overview.n_total', { count: totalValves })}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <Chip value={w.valves.open} label="Open" color="#04ADEF" onClick={() => go('valve-open')} theme={theme} />
-            <Chip value={w.valves.closed} label="Closed" color="#717684" onClick={() => go('valve-closed')} theme={theme} />
-            <Chip value={w.valves.error} label="Error" color={w.valves.error > 0 ? '#DB4670' : theme.textMuted} onClick={() => go('valve-error')} theme={theme} />
+            <Chip value={w.valves.open} label={t('home.status_overview.open')} color="#04ADEF" onClick={() => go('valve-open')} theme={theme} />
+            <Chip value={w.valves.closed} label={t('home.status_overview.closed')} color="#717684" onClick={() => go('valve-closed')} theme={theme} />
+            <Chip value={w.valves.error} label={t('home.status_overview.errors')} color={w.valves.error > 0 ? '#DB4670' : theme.textMuted} onClick={() => go('valve-error')} theme={theme} />
           </div>
         </div>
       </div>
@@ -223,14 +225,14 @@ export default function StatusWidgetsMobile({ systems, scopeIds, alertsOnly = fa
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
             <IconBox icon="bolt" color="#E5A100" />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>Power</div>
-              <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{totalPower} total</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: theme.text }}>{t('home.status_overview.external_power')}</div>
+              <div style={{ fontSize: 13, color: theme.textTertiary, marginTop: 1 }}>{t('home.status_overview.n_total', { count: totalPower })}</div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
-            <Chip value={w.power.ac} label="AC" color="#04ADEF" onClick={() => go('power-ac')} theme={theme} />
-            <Chip value={w.power.acLost} label="AC Lost" color={w.power.acLost > 0 ? '#DB4670' : theme.textMuted} onClick={() => go('power-ac-lost')} theme={theme} />
-            <Chip value={w.power.battery} label="Battery" color={w.power.battery > 0 ? '#F05C25' : theme.textMuted} onClick={() => go('power-battery')} theme={theme} />
+            <Chip value={w.power.ac} label={t('home.status_overview.on_ac')} color="#04ADEF" onClick={() => go('power-ac')} theme={theme} />
+            <Chip value={w.power.acLost} label={t('home.status_overview.unplugged')} color={w.power.acLost > 0 ? '#DB4670' : theme.textMuted} onClick={() => go('power-ac-lost')} theme={theme} />
+            <Chip value={w.power.battery} label={t('home.status_overview.battery')} color={w.power.battery > 0 ? '#F05C25' : theme.textMuted} onClick={() => go('power-battery')} theme={theme} />
           </div>
         </div>
       </div>

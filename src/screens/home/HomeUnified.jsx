@@ -167,11 +167,12 @@ function StatusTab({ systems, theme, navigate }) {
         <div style={{ padding: '10px 14px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <MIcon name="shield" size={18} color={reqAttColor} fill />
-            <span style={{ fontSize: 14, fontWeight: 700, color: theme.text }}>Systems Health</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: theme.text }}>{t('home.systems_health.title')}</span>
           </div>
           <span
             data-stop-card-click
             onClick={(e) => { e.stopPropagation(); setShowInfo(v => !v); }}
+            aria-label={t('home.systems_health.info_button_aria')}
             className="material-symbols-outlined"
             style={{ fontSize: 18, color: theme.textMuted, cursor: 'pointer' }}>info</span>
         </div>
@@ -179,7 +180,12 @@ function StatusTab({ systems, theme, navigate }) {
         {showInfo && (
           <div style={{ padding: '6px 14px 0' }}>
             <div style={{ background: theme.inputBg, borderRadius: 8, padding: '8px 10px', fontSize: 12, lineHeight: 1.5, color: theme.textSecondary }}>
-              A system is <b>healthy</b> when it communicated within its expected window, has no valve or external-power errors, and has users registered to receive Water Event and Error notifications.
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{t('home.systems_health.info_tooltip_intro')}</div>
+              <ul style={{ margin: 0, paddingInlineStart: 18 }}>
+                {(t('home.systems_health.info_tooltip_bullets', { returnObjects: true }) || []).map((b, i) => (
+                  <li key={i} style={{ marginBottom: 2 }}>{b}</li>
+                ))}
+              </ul>
             </div>
           </div>
         )}
@@ -401,7 +407,7 @@ function FleetCompositionCard({ theme, dk, dims, navigate }) {
       }}>
         <span className="material-symbols-outlined"
           style={{ fontSize: 18, color: theme.textSecondary, fontVariationSettings: "'FILL' 1" }}>tune</span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>Status overview</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>{t('home.status_overview.title')}</span>
       </div>
 
       {/* Dimension sections — each shows a small heading + a 2-col tile-button

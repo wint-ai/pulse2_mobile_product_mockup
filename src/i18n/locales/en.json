@@ -40,10 +40,19 @@
       "title": "Systems Health",
       "healthy": "Healthy",
       "require_attention": "Require attention",
-      "systems": "Systems"
+      "systems": "Systems",
+      "info_tooltip_intro": "A system is healthy when:",
+      "info_tooltip_bullets": [
+        "It reports to the cloud regularly",
+        "No valve errors",
+        "No power-connection faults",
+        "At least one recipient is registered for notifications"
+      ],
+      "info_button_aria": "About Systems Health"
     },
     "status_overview": {
       "title": "Status Overview",
+      "n_total": "{{count}} total",
       "communication": "Communication",
       "valves": "Valves",
       "external_power": "External Power",
@@ -146,10 +155,14 @@
       "cubic_meters": "m³"
     },
     "notifications": "Notifications",
+    "push_notifications_section": "Push Notifications",
+    "sms_notifications_section": "SMS Notifications",
     "push": "Push",
     "push_desc": "In-app and lock-screen",
     "sms": "SMS",
     "sms_desc": "Text messages",
+    "tutorial": "Tutorial",
+    "tutorial_desc": "Learn how to use the app",
     "sign_out": "Sign out",
     "sign_out_confirm_title": "Sign out of Wint?",
     "app_version": "Pulse 2.0 · v{{version}}",
@@ -177,8 +190,11 @@
     },
     "profile_fields": {
       "full_name": "Full name",
+      "first_name": "First Name",
+      "last_name": "Last Name",
       "email": "Email",
       "phone": "Phone",
+      "phone_number": "Phone number",
       "role": "Role",
       "account": "Account"
     }
