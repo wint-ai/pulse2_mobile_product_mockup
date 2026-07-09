@@ -351,6 +351,7 @@ function dotColorFor(tint, theme) {
 }
 
 function FleetCompositionCard({ theme, dk, dims, navigate }) {
+  const { t } = useTranslation();
   // Card shell same as the other Home widgets.
   const cardStyle = {
     background: theme.card,
