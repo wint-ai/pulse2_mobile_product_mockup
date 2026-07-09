@@ -168,6 +168,13 @@
       "account": "Account"
     }
   },
+  "drawer": {
+    "search_placeholder": "Search my systems and locations",
+    "no_results": "No results",
+    "explore_all": "Explore All",
+    "back_to_my_scope": "Back to My Scope",
+    "all_root": "All"
+  },
   "alerts": {
     "tabs": {
       "active": "Active",

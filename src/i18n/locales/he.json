@@ -168,6 +168,13 @@
       "account": "חשבון"
     }
   },
+  "drawer": {
+    "search_placeholder": "חפש מערכות ומיקומים",
+    "no_results": "אין תוצאות",
+    "explore_all": "עיין בכל המערכות",
+    "back_to_my_scope": "חזרה לתחום שלי",
+    "all_root": "הכל"
+  },
   "alerts": {
     "tabs": {
       "active": "פעילות",

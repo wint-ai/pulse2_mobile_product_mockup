@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { getAccountById, getChildAccounts } from '../data/accounts';
@@ -757,6 +758,7 @@ function CollapseAllBar({ accountCount, hasAnyExpansion, onCollapseAll, theme })
 
 // ── Main drawer ──
 export default function NavigationDrawer({ open, onClose, onSelectLocation, currentSystemId }) {
+  const { t } = useTranslation();
   useDataRefresh();
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -973,7 +975,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: theme.drawerInput || theme.inputBg, borderRadius: 8, padding: '7px 10px' }}>
               <MIcon name="search" size={15} color={theme.drawerTextSub || theme.textTertiary} style={{ marginRight: 6 }} />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search my systems and locations"
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('drawer.search_placeholder')}
                 style={{ flex: 1, border: 'none', background: 'transparent', fontSize: 14, color: theme.drawerText || theme.text, fontFamily: 'inherit', outline: 'none', minWidth: 0 }} />
               {search && <span onClick={() => setSearch('')} style={{ cursor: 'pointer', display: 'flex' }}><MIcon name="close" size={14} color={theme.drawerTextSub || theme.textTertiary} /></span>}
             </div>
@@ -1172,7 +1174,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
           )}
           {search.length > 0 ? (
             (searchResults.locations.length === 0 && searchResults.systems.length === 0) ? (
-              <div style={{ textAlign: 'center', color: theme.drawerTextSub || theme.textTertiary, fontSize: 14, padding: 24 }}>No results</div>
+              <div style={{ textAlign: 'center', color: theme.drawerTextSub || theme.textTertiary, fontSize: 14, padding: 24 }}>{t('drawer.no_results')}</div>
             ) : (
               <>
                 {searchResults.locations.length > 0 && (
@@ -1274,7 +1276,7 @@ export default function NavigationDrawer({ open, onClose, onSelectLocation, curr
         }}>
           <MIcon name={exploring ? 'my_location' : 'explore'} size={18} color={accent} />
           <span style={{ fontSize: 14, fontWeight: 600, color: accent }}>
-            {exploring ? 'Back to My Scope' : 'Explore All'}
+            {exploring ? t('drawer.back_to_my_scope') : t('drawer.explore_all')}
           </span>
         </div>
       </div>
