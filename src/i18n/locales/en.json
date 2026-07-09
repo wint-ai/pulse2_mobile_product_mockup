@@ -173,6 +173,28 @@
       "active": "Active",
       "history": "History"
     },
+    "row": {
+      "severity_high_flow": "High Flow",
+      "severity_low_flow": "Low Flow",
+      "state_warning": "Warning",
+      "state_shutoff": "Shutoff",
+      "state_ongoing": "Ongoing",
+      "state_resolved": "Resolved",
+      "state_ignored": "Ignored",
+      "valve_open": "Valve open",
+      "valve_closed": "Valve closed",
+      "valve_error": "Valve error",
+      "tagged_prefix": "Tagged:",
+      "not_tagged_yet": "Not tagged yet",
+      "non_water": {
+        "valve_error": "Valve error",
+        "ac_unplugged": "AC unplugged",
+        "offline": "Offline",
+        "no_recipients": "No recipients",
+        "battery_low": "Battery low",
+        "battery_critical": "Battery critical"
+      }
+    },
     "filters": {
       "water": "Water",
       "valve": "Valve",

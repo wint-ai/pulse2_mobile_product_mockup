@@ -14,6 +14,7 @@
 // events) — handled by the onClick prop. No dedicated detail page for
 // non-water alerts yet; the system page is the canonical surface.
 
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { getSystemById } from '../data/systems';
 
@@ -52,24 +53,25 @@ function fmtDateShort(iso) {
 // 10% tinted fill, category-coloured icon inside.
 //   Valve #036AB5 · Power #B5651A · Connectivity #717684
 //   No-recipients → muted red #A5455E (matches Home Status Overview "Missing" pill)
+// `labelKey` resolves via t('alerts.row.non_water.<key>') at render time.
 function presetFor(type) {
   switch (type) {
     case 'valve-error':
-      return { icon: 'valve',         ring: '#036AB5', iconBg: 'rgba(3,106,181,0.10)',  pillLabel: 'Valve error',      pillBg: 'rgba(3,106,181,0.12)',  pillColor: '#036AB5' };
+      return { icon: 'valve',         ring: '#036AB5', iconBg: 'rgba(3,106,181,0.10)',  labelKey: 'valve_error',       pillBg: 'rgba(3,106,181,0.12)',  pillColor: '#036AB5' };
     case 'power-lost':
     case 'ac-lost':
-      return { icon: 'power_off',     ring: '#B5651A', iconBg: 'rgba(181,101,26,0.10)', pillLabel: 'AC unplugged',     pillBg: 'rgba(181,101,26,0.12)', pillColor: '#B5651A' };
+      return { icon: 'power_off',     ring: '#B5651A', iconBg: 'rgba(181,101,26,0.10)', labelKey: 'ac_unplugged',      pillBg: 'rgba(181,101,26,0.12)', pillColor: '#B5651A' };
     case 'offline':
     case 'comm':
-      return { icon: 'wifi_off',      ring: '#717684', iconBg: 'rgba(113,118,132,0.10)',pillLabel: 'Offline',          pillBg: 'rgba(113,118,132,0.16)',pillColor: '#4A4F5A' };
+      return { icon: 'wifi_off',      ring: '#717684', iconBg: 'rgba(113,118,132,0.10)',labelKey: 'offline',           pillBg: 'rgba(113,118,132,0.16)',pillColor: '#4A4F5A' };
     case 'no-recipients':
-      return { icon: 'group_off',     ring: '#A5455E', iconBg: 'rgba(165,69,94,0.10)',  pillLabel: 'No recipients',    pillBg: 'rgba(165,69,94,0.12)',  pillColor: '#A5455E' };
+      return { icon: 'group_off',     ring: '#A5455E', iconBg: 'rgba(165,69,94,0.10)',  labelKey: 'no_recipients',     pillBg: 'rgba(165,69,94,0.12)',  pillColor: '#A5455E' };
     case 'battery-low':
-      return { icon: 'battery_alert', ring: '#B5651A', iconBg: 'rgba(181,101,26,0.10)', pillLabel: 'Battery low',      pillBg: 'rgba(181,101,26,0.12)', pillColor: '#B5651A' };
+      return { icon: 'battery_alert', ring: '#B5651A', iconBg: 'rgba(181,101,26,0.10)', labelKey: 'battery_low',       pillBg: 'rgba(181,101,26,0.12)', pillColor: '#B5651A' };
     case 'battery-critical':
-      return { icon: 'battery_alert', ring: '#DB4670', iconBg: 'rgba(219,70,112,0.10)', pillLabel: 'Battery critical', pillBg: 'rgba(219,70,112,0.12)', pillColor: '#DB4670' };
+      return { icon: 'battery_alert', ring: '#DB4670', iconBg: 'rgba(219,70,112,0.10)', labelKey: 'battery_critical',  pillBg: 'rgba(219,70,112,0.12)', pillColor: '#DB4670' };
     default:
-      return { icon: 'error_outline', ring: '#B5651A', iconBg: 'rgba(181,101,26,0.10)', pillLabel: type || 'Alert',    pillBg: 'rgba(181,101,26,0.12)', pillColor: '#B5651A' };
+      return { icon: 'error_outline', ring: '#B5651A', iconBg: 'rgba(181,101,26,0.10)', labelKey: null, pillLabel: type, pillBg: 'rgba(181,101,26,0.12)', pillColor: '#B5651A' };
   }
 }
 
@@ -84,6 +86,7 @@ const pillBase = {
 };
 
 export default function NonWaterAlertSummary({ event, onClick, highlight }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const sys = event.system ? getSystemById(event.system) : null;
 
@@ -183,7 +186,7 @@ export default function NonWaterAlertSummary({ event, onClick, highlight }) {
         padding: '8px 12px 11px', gap: 10,
       }}>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-          <span style={{ ...pillBase, background: preset.pillBg, color: preset.pillColor }}>{preset.pillLabel}</span>
+          <span style={{ ...pillBase, background: preset.pillBg, color: preset.pillColor }}>{preset.labelKey ? t(`alerts.row.non_water.${preset.labelKey}`) : preset.pillLabel}</span>
           {isResolved && (
             <span style={{ ...pillBase, background: 'rgba(92,158,26,0.14)', color: '#2F6112' }}>Resolved</span>
           )}

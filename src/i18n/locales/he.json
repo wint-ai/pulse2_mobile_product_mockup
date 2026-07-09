@@ -173,6 +173,28 @@
       "active": "פעילות",
       "history": "היסטוריה"
     },
+    "row": {
+      "severity_high_flow": "זרימה גבוהה",
+      "severity_low_flow": "זרימה נמוכה",
+      "state_warning": "אזהרה",
+      "state_shutoff": "סגירה אוטומטית",
+      "state_ongoing": "מתמשך",
+      "state_resolved": "נפתר",
+      "state_ignored": "התעלמו",
+      "valve_open": "ברז פתוח",
+      "valve_closed": "ברז סגור",
+      "valve_error": "שגיאת ברז",
+      "tagged_prefix": "תויג:",
+      "not_tagged_yet": "עדיין לא תויג",
+      "non_water": {
+        "valve_error": "שגיאת ברז",
+        "ac_unplugged": "מנותק מחשמל",
+        "offline": "מנותק",
+        "no_recipients": "אין נמענים",
+        "battery_low": "סוללה נמוכה",
+        "battery_critical": "סוללה קריטית"
+      }
+    },
     "filters": {
       "water": "מים",
       "valve": "ברז",

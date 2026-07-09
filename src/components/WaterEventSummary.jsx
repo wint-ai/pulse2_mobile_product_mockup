@@ -9,6 +9,7 @@
 //
 // One per system. Top accent stripe colour-codes the lifecycle at a glance.
 
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { getSystemById } from '../data/systems';
 import { getTag, getTags } from '../data/tagsStore';
@@ -45,6 +46,7 @@ function fmtDateShort(iso) {
 }
 
 export default function WaterEventSummary({ event, onClick, highlight }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const sys = event.system ? getSystemById(event.system) : null;
   const isHigh = event.type === 'leak-high';
@@ -69,16 +71,16 @@ export default function WaterEventSummary({ event, onClick, highlight }) {
   const iconColor = ringColor;
 
   // Pills
-  const levelLabel = isHigh ? 'High Flow' : 'Low Flow';
+  const levelLabel = isHigh ? t('alerts.row.severity_high_flow') : t('alerts.row.severity_low_flow');
   // Pill colors match the Variant A ring color for the same category.
   const levelPillStyle = isHigh
     ? { background: 'rgba(219,70,112,0.12)', color: '#DB4670' }
     : { background: 'rgba(240,92,37,0.12)',  color: '#F05C25' };
 
   // Heuristic state derivation
-  const stateLabel = isIgnored ? 'Ignored'
-                  : isResolved ? 'Resolved'
-                  : (sys?.valve === 'closed' ? 'Shut-Off' : 'Warning');
+  const stateLabel = isIgnored ? t('alerts.row.state_ignored')
+                  : isResolved ? t('alerts.row.state_resolved')
+                  : (sys?.valve === 'closed' ? t('alerts.row.state_shutoff') : t('alerts.row.state_warning'));
   const statePillStyle = (() => {
     if (isIgnored)  return { background: 'rgba(20,21,26,0.06)', color: '#717684' };
     if (isResolved) return { background: 'rgba(92,158,26,0.14)', color: '#2F6112' };
@@ -89,9 +91,9 @@ export default function WaterEventSummary({ event, onClick, highlight }) {
   // Valve pill (hide for resolved/ignored — already implied)
   const valvePillEl = (() => {
     if (isResolved || isIgnored) return null;
-    if (sys?.valve === 'open') return { label: 'Open', style: { background: 'rgba(4,173,239,0.14)', color: '#036AB5' } };
-    if (sys?.valve === 'closed') return { label: 'Closed', style: { background: 'rgba(113,118,132,0.14)', color: theme.textSecondary } };
-    if (sys?.valve === 'error')  return { label: 'Valve error', style: { background: 'rgba(219,70,112,0.12)', color: '#DB4670' } };
+    if (sys?.valve === 'open') return { label: t('alerts.row.valve_open'), style: { background: 'rgba(4,173,239,0.14)', color: '#036AB5' } };
+    if (sys?.valve === 'closed') return { label: t('alerts.row.valve_closed'), style: { background: 'rgba(113,118,132,0.14)', color: theme.textSecondary } };
+    if (sys?.valve === 'error')  return { label: t('alerts.row.valve_error'), style: { background: 'rgba(219,70,112,0.12)', color: '#DB4670' } };
     return null;
   })();
 
@@ -251,7 +253,7 @@ export default function WaterEventSummary({ event, onClick, highlight }) {
                 color={isTagged ? '#036AB5' : (theme.textTertiary || '#717684')}
                 fill={isTagged}
               />
-              {isTagged ? `Tagged: ${labels.join(', ')}` : 'Not tagged yet'}
+              {isTagged ? `${t('alerts.row.tagged_prefix')} ${labels.join(', ')}` : t('alerts.row.not_tagged_yet')}
             </div>
           </div>
         );
