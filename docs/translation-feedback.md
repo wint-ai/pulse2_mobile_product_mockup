@@ -111,7 +111,17 @@ Hardcoded strings to extract + translate:
 
 ## Applied
 
-_(nothing applied yet — waiting for Rami's "go")_
+**Commit `8cbb840` on 2026-07-08:**
+- ✅ #1 — `more.sms` → `התראות SMS`.
+- ✅ #3 — `more.both_off_warning` → `התראות באפליקציה והתראות SMS כבויות.`
+- ✅ #4 — `more.both_off_modal.body` rewrite applied; the older "Important Notice / Disabling both…" hardcoded text is gone and the modal now reads from JSON with the PRD-locked copy.
+- ✅ #5 — `PersonalInfoView` fully wired to `useTranslation()`. New profile-field keys added: `first_name`, `last_name`, `phone_number`.
+- ✅ #6 — Home page section titles wired (Water Events, Systems Health, Status overview). Info tooltip refactored into intro + 4-bullet list format; Rami's approved Hebrew live. `home.systems_health.title` → `מצב המערכות`. Non-`alertsOnly` blocks in StatusWidgetsMobile also wired (Communication / Valves / External Power titles + chip labels + N total sub-lines).
+- ✅ Extra: `AccountScreen` main body — push/SMS section titles + row labels wired, warning modal wired to JSON, Tutorial / Learn how to use the app wired, app version footer wired.
+
+**Still open:**
+- ⏳ #2 — Measurement Units alignment with the Wint Units Format Standards wiki. (Current EN dropdown values match the wiki symbols; Hebrew values also match the wiki table. Left in Pending as a formal audit against the full wiki table — flow rates, temperature, etc. — since more surfaces beyond this dropdown may reference units.)
+- ⏳ #7 — General Hebrew-wiki alignment pass (months, common UI labels, etc.).
 
 ---
 
