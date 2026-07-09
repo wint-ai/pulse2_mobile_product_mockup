@@ -84,8 +84,8 @@
       "state_ongoing": "מתמשך",
       "state_shutoff": "סגירה אוטומטית",
       "state_ignored": "התעלמו",
-      "title_high_flow": "אירוע זרימה גבוהה",
-      "title_low_flow": "אירוע זרימה נמוכה",
+      "title_high_flow": "אירוע קצב זרימה גבוה",
+      "title_low_flow": "אירוע קצב זרימה נמוך",
       "flow_rate_prefix": "ספיקה",
       "since_ago": "לפני {{duration}}",
       "pill_on_it": "מטפל · {{actor}}",
@@ -270,8 +270,8 @@
       "power": "חשמל",
       "comms": "תקשורת",
       "all_water": "הכל",
-      "high_flow": "זרימה גבוהה",
-      "low_flow": "זרימה נמוכה"
+      "high_flow": "קצב זרימה גבוה",
+      "low_flow": "קצב זרימה נמוך"
     }
   },
   "alerts": {
@@ -280,8 +280,8 @@
       "history": "היסטוריה"
     },
     "row": {
-      "severity_high_flow": "זרימה גבוהה",
-      "severity_low_flow": "זרימה נמוכה",
+      "severity_high_flow": "קצב זרימה גבוה",
+      "severity_low_flow": "קצב זרימה נמוך",
       "state_warning": "אזהרה",
       "state_shutoff": "סגירה אוטומטית",
       "state_ongoing": "מתמשך",
@@ -310,8 +310,8 @@
     },
     "water_sub_filters": {
       "all_water": "הכל",
-      "high_flow": "זרימה גבוהה",
-      "low_flow": "זרימה נמוכה"
+      "high_flow": "קצב זרימה גבוה",
+      "low_flow": "קצב זרימה נמוך"
     },
     "subline_all_clear": "הכל תקין",
     "subline_needs_attention_one": "אחת דורשת טיפול",
