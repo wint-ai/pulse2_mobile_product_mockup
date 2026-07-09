@@ -32,8 +32,8 @@
     "info_tab": "פרטים",
     "water_events": {
       "title": "אירועי מים",
-      "high_flow": "זרימה גבוהה",
-      "low_flow": "זרימה נמוכה",
+      "high_flow": "קצב זרימה גבוה",
+      "low_flow": "קצב זרימה נמוך",
       "empty": "אין אירועי מים פעילים"
     },
     "systems_health": {
