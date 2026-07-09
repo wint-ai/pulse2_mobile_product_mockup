@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TabBar from '../../components/TabBar';
 import NavigationDrawer from '../../components/NavigationDrawer';
 import SystemInfoTab from './SystemInfoTab';
@@ -511,16 +512,17 @@ function getTabsForSystem(sys) {
   // Consumption is now folded into Overview. The middle tab becomes Policy
   // for non-tenants (wraps the Active Policy card). Tenants don't have a
   // policy surface so the tab is dropped for them.
+  // labelKey resolves via t('system_detail.tabs.<key>') at render time.
   return isTenantSystem(sys)
     ? [
-        { key: 'overview', label: 'System' },
-        { key: 'activity', label: 'Timeline' },
+        { key: 'overview', labelKey: 'system' },
+        { key: 'activity', labelKey: 'timeline' },
       ]
     : [
-        { key: 'overview', label: 'System' },
-        { key: 'policy',   label: 'Policy' },
-        { key: 'activity', label: 'Timeline' },
-        { key: 'info',     label: 'Info' },
+        { key: 'overview', labelKey: 'system' },
+        { key: 'policy',   labelKey: 'policy' },
+        { key: 'activity', labelKey: 'timeline' },
+        { key: 'info',     labelKey: 'info' },
       ];
 }
 
@@ -529,6 +531,7 @@ function getTabsForSystem(sys) {
    ════════════════════════════════════════════════════════════════════════ */
 
 export default function SystemDetail() {
+  const { t } = useTranslation();
   useDataRefresh();
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -733,7 +736,7 @@ export default function SystemDetail() {
               background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit',
               borderBottom: activeTab === tab.key ? '2px solid #0B95F8' : '2px solid transparent',
               whiteSpace: 'nowrap',
-            }}>{tab.label}</button>
+            }}>{t(`system_detail.tabs.${tab.labelKey}`)}</button>
           ))}
         </div>
       </PipesHeader>

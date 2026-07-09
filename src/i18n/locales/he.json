@@ -156,6 +156,30 @@
       "account": "חשבון"
     }
   },
+  "alerts": {
+    "tabs": {
+      "active": "פעילות",
+      "history": "היסטוריה"
+    },
+    "filters": {
+      "water": "מים",
+      "valve": "ברז",
+      "power": "חשמל",
+      "comms": "תקשורת",
+      "clear": "נקה מסננים"
+    },
+    "water_sub_filters": {
+      "all_water": "הכל",
+      "high_flow": "זרימה גבוהה",
+      "low_flow": "זרימה נמוכה"
+    },
+    "subline_all_clear": "הכל תקין",
+    "subline_needs_attention_one": "אחת דורשת טיפול",
+    "subline_needs_attention_other": "{{count}} דורשות טיפול",
+    "empty_active": "אין התראות פעילות",
+    "empty_history": "אין היסטוריה",
+    "showing_x_of_y": "מציג {{shown}} מתוך {{total}} (מסונן)"
+  },
   "offline": {
     "no_internet": "אין חיבור לאינטרנט",
     "no_internet_desc": "מנותק · מוצגים נתונים אחרונים ידועים",

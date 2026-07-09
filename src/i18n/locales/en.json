@@ -156,6 +156,30 @@
       "account": "Account"
     }
   },
+  "alerts": {
+    "tabs": {
+      "active": "Active",
+      "history": "History"
+    },
+    "filters": {
+      "water": "Water",
+      "valve": "Valve",
+      "power": "Power",
+      "comms": "Comms",
+      "clear": "Clear all filters"
+    },
+    "water_sub_filters": {
+      "all_water": "All water",
+      "high_flow": "High Flow",
+      "low_flow": "Low Flow"
+    },
+    "subline_all_clear": "All clear",
+    "subline_needs_attention_one": "{{count}} needs attention",
+    "subline_needs_attention_other": "{{count}} need attention",
+    "empty_active": "No active alerts",
+    "empty_history": "No history",
+    "showing_x_of_y": "Showing {{shown}} of {{total}} (filtered)"
+  },
   "offline": {
     "no_internet": "No internet connection",
     "no_internet_desc": "You're offline · showing last known data",

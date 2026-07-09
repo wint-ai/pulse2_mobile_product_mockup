@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TabBar from '../../components/TabBar';
 import PipesHeader, { GLOW_PAGE_BG } from '../../components/PipesHeader';
 import EventRow from '../../components/EventRow';
@@ -50,6 +51,7 @@ function MIcon({ name, size = 18, color, fill, style = {} }) {
 }
 
 export default function EventsScreen() {
+  const { t } = useTranslation();
   useDataRefresh();
   const { theme } = useTheme();
   const { visibleSystems = [] } = useUserContext() || {};
@@ -212,10 +214,10 @@ export default function EventsScreen() {
   // reset lives in a "N selected · Clear x" strip above the row only when
   // filters are active. Mirrors the Timeline tab anatomy on the System page.
   const FILTERS = [
-    { key: 'water', label: 'Water',  color: '#DB4670' },
-    { key: 'valve', label: 'Valve',  color: '#036AB5' },
-    { key: 'power', label: 'Power',  color: '#B5651A' },
-    { key: 'conn',  label: 'Comms',  color: '#717684' },
+    { key: 'water', label: t('alerts.filters.water'), color: '#DB4670' },
+    { key: 'valve', label: t('alerts.filters.valve'), color: '#036AB5' },
+    { key: 'power', label: t('alerts.filters.power'), color: '#B5651A' },
+    { key: 'conn',  label: t('alerts.filters.comms'), color: '#717684' },
   ];
 
   // ── Header data ──
@@ -261,11 +263,11 @@ export default function EventsScreen() {
           onDrawerOpen={() => setDrawerOpen(true)}
           subLine={
             <>
-              {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
+              {t('home.counts_systems', { count: totalSystems, formatted: totalSystems.toLocaleString() })}
               <span style={{ margin: '0 6px', opacity: 0.6 }}>·</span>
               {totalActiveCount === 0
-                ? 'All clear'
-                : `${totalActiveCount} need${totalActiveCount === 1 ? 's' : ''} attention`}
+                ? t('alerts.subline_all_clear')
+                : t('alerts.subline_needs_attention', { count: totalActiveCount })}
             </>
           }
         />
@@ -275,8 +277,8 @@ export default function EventsScreen() {
             is the header sub-line ({N} systems . {M} need attention). */}
         <div style={{ display: 'flex' }}>
           {[
-            { key: 'active', label: 'Active' },
-            { key: 'history', label: 'History' },
+            { key: 'active', label: t('alerts.tabs.active') },
+            { key: 'history', label: t('alerts.tabs.history') },
           ].map(tab => (
             <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
               flex: 1, padding: '9px 0', border: 'none', background: 'none',
@@ -322,7 +324,7 @@ export default function EventsScreen() {
           );
         })}
         {activeFilters.size > 0 && (
-          <button onClick={clearFilters} title="Clear all filters" style={{
+          <button onClick={clearFilters} title={t('alerts.filters.clear')} style={{
             width: 28, height: 28, flexShrink: 0,
             borderRadius: '50%', border: 'none', cursor: 'pointer',
             background: theme.inputBg, color: theme.textTertiary,

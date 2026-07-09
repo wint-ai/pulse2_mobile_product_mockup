@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useUserContext } from '../context/UserContext';
 
@@ -48,19 +49,8 @@ const MORE_ICON_STROKE = (
   </svg>
 );
 
-const TABS_FULL = [
-  { key: 'home',    label: 'Home',    path: '/',        filled: HOME_ICON_FILLED,    stroke: HOME_ICON_STROKE },
-  { key: 'events',  label: 'Alerts',  path: '/alerts',  filled: EVENTS_ICON_FILLED,  stroke: EVENTS_ICON_STROKE },
-  { key: 'account', label: 'More',    path: '/account', filled: MORE_ICON_FILLED,    stroke: MORE_ICON_STROKE },
-];
-
-const TABS_TENANT = [
-  { key: 'home',    label: 'Home',    path: '/tenant',  filled: HOME_ICON_FILLED,    stroke: HOME_ICON_STROKE },
-  { key: 'events',  label: 'Alerts',  path: '/alerts',  filled: EVENTS_ICON_FILLED,  stroke: EVENTS_ICON_STROKE },
-  { key: 'account', label: 'More',    path: '/account', filled: MORE_ICON_FILLED,    stroke: MORE_ICON_STROKE },
-];
-
 export default function TabBar({ activeTab }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
@@ -68,12 +58,23 @@ export default function TabBar({ activeTab }) {
   const { persona, visibleSystems = [] } = userCtx;
   const isTenant = persona?.tabMode === 'tenant';
 
+  const TABS_FULL = [
+    { key: 'home',    label: t('tabs.home'),   path: '/',        filled: HOME_ICON_FILLED,   stroke: HOME_ICON_STROKE },
+    { key: 'events',  label: t('tabs.alerts'), path: '/alerts',  filled: EVENTS_ICON_FILLED, stroke: EVENTS_ICON_STROKE },
+    { key: 'account', label: t('tabs.more'),   path: '/account', filled: MORE_ICON_FILLED,   stroke: MORE_ICON_STROKE },
+  ];
+  const TABS_TENANT = [
+    { key: 'home',    label: t('tabs.home'),   path: '/tenant',  filled: HOME_ICON_FILLED,   stroke: HOME_ICON_STROKE },
+    { key: 'events',  label: t('tabs.alerts'), path: '/alerts',  filled: EVENTS_ICON_FILLED, stroke: EVENTS_ICON_STROKE },
+    { key: 'account', label: t('tabs.more'),   path: '/account', filled: MORE_ICON_FILLED,   stroke: MORE_ICON_STROKE },
+  ];
+
   // For single-system tenants, Home tab points directly to their system
   const tenantTabs = isTenant && visibleSystems.length === 1
     ? [
-        { key: 'home', label: 'Home', path: `/system/${visibleSystems[0].id}`, filled: HOME_ICON_FILLED, stroke: HOME_ICON_STROKE },
-        { key: 'events', label: 'Alerts', path: '/alerts', filled: EVENTS_ICON_FILLED, stroke: EVENTS_ICON_STROKE },
-        { key: 'account', label: 'More', path: '/account', filled: MORE_ICON_FILLED, stroke: MORE_ICON_STROKE },
+        { key: 'home',    label: t('tabs.home'),   path: `/system/${visibleSystems[0].id}`, filled: HOME_ICON_FILLED,   stroke: HOME_ICON_STROKE },
+        { key: 'events',  label: t('tabs.alerts'), path: '/alerts',                          filled: EVENTS_ICON_FILLED, stroke: EVENTS_ICON_STROKE },
+        { key: 'account', label: t('tabs.more'),   path: '/account',                         filled: MORE_ICON_FILLED,   stroke: MORE_ICON_STROKE },
       ]
     : TABS_TENANT;
 
