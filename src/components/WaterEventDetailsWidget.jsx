@@ -24,6 +24,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import IgnoreBottomSheet from './IgnoreBottomSheet';
 import TagBottomSheet from './TagBottomSheet';
@@ -64,12 +65,14 @@ const SEVERITY = {
   low:  { icon: '#F05C25', bg: '#F05C25' },
 };
 
-// State pill (top-right corner). Lifecycle phase only.
+// State pill (top-right corner). Lifecycle phase only. Label is a
+// translation-key suffix under water_event_widget.state_*; the component
+// resolves it via t() at render time.
 const STATE_PILL = {
-  warning: { bg: '#FCDEE6', color: '#A5455E', label: 'Warning' },
-  ongoing: { bg: '#FCDEE6', color: '#A5455E', label: 'Ongoing' },
-  shutoff: { bg: '#B22838', color: '#fff',    label: 'Shutoff' },
-  ignored: { bg: '#E6E8EC', color: '#6B7280', label: 'Ignored' },
+  warning: { bg: '#FCDEE6', color: '#A5455E', labelKey: 'state_warning' },
+  ongoing: { bg: '#FCDEE6', color: '#A5455E', labelKey: 'state_ongoing' },
+  shutoff: { bg: '#B22838', color: '#fff',    labelKey: 'state_shutoff' },
+  ignored: { bg: '#E6E8EC', color: '#6B7280', labelKey: 'state_ignored' },
 };
 
 function fmtDuration(ms) {
@@ -97,6 +100,7 @@ function fmtTimeShort(iso) {
 }
 
 export default function WaterEventDetailsWidget({ sys, readOnly = false, onAction, hideOnIt = false }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
@@ -198,7 +202,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
           <div style={{
             fontSize: 15, fontWeight: 700, color: '#14151A',
             lineHeight: 1.2, letterSpacing: '-0.1px',
-          }}>No active Water Events</div>
+          }}>{t('system_detail.water_event_widget.empty')}</div>
         </div>
       </div>
     );
@@ -210,8 +214,8 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   const ignoredInfo = isIgnored ? getIgnoredInfo(sys.id) : null;
   const ignoredActor = ignoredInfo?.ignoredBy || '';
   const ignoredDisplay = (ignoredActor && ignoredActor.toLowerCase() === currentActor.toLowerCase())
-    ? 'me'
-    : (ignoredActor.split(' ')[0] || ignoredActor || 'someone');
+    ? t('system_detail.water_event_widget.actor_me')
+    : (ignoredActor.split(' ')[0] || ignoredActor || t('system_detail.water_event_widget.actor_someone'));
   const ignoredTime = ignoredInfo?.ignoredAt ? fmtTimeShort(ignoredInfo.ignoredAt) : '';
 
   // Stateful palette.
@@ -227,13 +231,15 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   const parsedTs = computedEvent?.timestamp ? Date.parse(computedEvent.timestamp) : NaN;
   const startMs = Number.isFinite(parsedTs) ? parsedTs : (Date.now() - (3 * 3600000));
   const startedFmt = fmtDate(new Date(startMs).toISOString());
-  const sinceLabel = `${fmtDuration(Date.now() - startMs)} ago`;
+  const sinceLabel = t('system_detail.water_event_widget.since_ago', { duration: fmtDuration(Date.now() - startMs) });
 
   // Flow rate.
   const flowRate = sys.alert?.flowRate || sys.alert?.detail?.split('·')[1]?.trim();
 
   // Title.
-  const title = lifecycle.level === 'high' ? 'High Flow Event' : 'Low Flow Event';
+  const title = lifecycle.level === 'high'
+    ? t('system_detail.water_event_widget.title_high_flow')
+    : t('system_detail.water_event_widget.title_low_flow');
 
   // Action visibility (W17, W19, W27, W30 + W31 stand-down):
   //   Warning Standard:  Ignore + Notify-team-on-it (or Stand down when claimed by viewer)
@@ -309,7 +315,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
                 background: '#DEF2E1', color: '#0F6B2B',
               }}>
                 <MIcon name="front_hand" size={13} fill color="#0F6B2B" />
-                On it · {onItDisplay}
+                {t('system_detail.water_event_widget.pill_on_it', { actor: onItDisplay })}
               </span>
             )}
             {showIgnoredPill && (
@@ -320,7 +326,9 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
                 background: '#FFEDB3', color: '#8C5A0F',
               }}>
                 <MIcon name="flag" size={13} fill color="#8C5A0F" />
-                Ignored by {ignoredDisplay}{ignoredTime ? ` · ${ignoredTime}` : ''}
+                {ignoredTime
+                  ? t('system_detail.water_event_widget.pill_ignored_by_time', { actor: ignoredDisplay, time: ignoredTime })
+                  : t('system_detail.water_event_widget.pill_ignored_by', { actor: ignoredDisplay })}
               </span>
             )}
           </div>
@@ -338,7 +346,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 11.5, color: microLabelColor, lineHeight: 1.2, marginBottom: 2 }}>
-              Detected on
+              {t('system_detail.water_event_widget.detected_on')}
             </div>
             <div style={{ fontSize: 14.5, fontWeight: 700, color: dateColor, lineHeight: 1.25 }}>
               {startedFmt.date}
@@ -355,7 +363,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
             marginLeft: 6, flexShrink: 0,
             alignSelf: 'flex-start', marginTop: 4,
             fontVariantNumeric: 'tabular-nums',
-          }}>{statePill.label}</span>
+          }}>{t(`system_detail.water_event_widget.${statePill.labelKey}`)}</span>
         </div>
 
         {/* Bold title */}
@@ -369,7 +377,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
             fontSize: 12.5, color: subTextColor, marginTop: 6,
             fontVariantNumeric: 'tabular-nums',
           }}>
-            Flow rate <strong style={{ color: flowValueColor, fontWeight: 700 }}>{flowRate}</strong>
+            {t('system_detail.water_event_widget.flow_rate_prefix')} <strong style={{ color: flowValueColor, fontWeight: 700 }}>{flowRate}</strong>
           </div>
         )}
 
@@ -379,7 +387,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
             {showIgnoreBtn && (
               <ActionButton
                 icon="block"
-                label="Ignore this event"
+                label={t('system_detail.water_event_widget.actions.ignore')}
                 bg="#FBEAEF"
                 color="#A5455E"
                 onClick={() => setShowIgnore(true)}
@@ -388,7 +396,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
             {showOnItBtn && (
               <ActionButton
                 icon="front_hand"
-                label="Notify team I'm on it"
+                label={t('system_detail.water_event_widget.actions.on_it')}
                 bg="#EBF3FB"
                 color="#036AB5"
                 onClick={claimOnIt}
@@ -397,7 +405,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
             {showStandDownBtn && (
               <ActionButton
                 icon="back_hand"
-                label="Stand down"
+                label={t('system_detail.water_event_widget.actions.stand_down')}
                 bg="#EBF3FB"
                 color="#036AB5"
                 onClick={standDown}

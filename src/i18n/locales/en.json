@@ -69,19 +69,25 @@
       "info": "Info"
     },
     "water_event_widget": {
-      "detected_at": "Detected at",
-      "warning": "Warning",
-      "shutoff": "Shutoff",
-      "ongoing": "Ongoing",
-      "resolved": "Resolved",
-      "ignored": "Ignored",
-      "flow_rate": "Flow rate",
-      "duration": "Duration",
-      "volume": "Volume",
+      "empty": "No active Water Events",
+      "detected_on": "Detected on",
+      "state_warning": "Warning",
+      "state_ongoing": "Ongoing",
+      "state_shutoff": "Shutoff",
+      "state_ignored": "Ignored",
+      "title_high_flow": "High Flow Event",
+      "title_low_flow": "Low Flow Event",
+      "flow_rate_prefix": "Flow rate",
+      "since_ago": "{{duration}} ago",
+      "pill_on_it": "On it · {{actor}}",
+      "pill_ignored_by": "Ignored by {{actor}}",
+      "pill_ignored_by_time": "Ignored by {{actor}} · {{time}}",
+      "actor_me": "me",
+      "actor_someone": "someone",
       "actions": {
-        "ignore": "Ignore",
-        "on_it": "On it",
-        "tag": "Tag this Water Event"
+        "ignore": "Ignore this event",
+        "on_it": "Notify team I'm on it",
+        "stand_down": "Stand down"
       }
     },
     "health_widget": {

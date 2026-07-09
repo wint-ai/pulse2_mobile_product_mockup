@@ -69,19 +69,25 @@
       "info": "פרטים"
     },
     "water_event_widget": {
-      "detected_at": "זוהה בתאריך",
-      "warning": "אזהרה",
-      "shutoff": "סגירה אוטומטית",
-      "ongoing": "מתמשך",
-      "resolved": "נפתר",
-      "ignored": "התעלמו",
-      "flow_rate": "ספיקה",
-      "duration": "משך",
-      "volume": "נפח",
+      "empty": "אין אירועי מים פעילים",
+      "detected_on": "זוהה בתאריך",
+      "state_warning": "אזהרה",
+      "state_ongoing": "מתמשך",
+      "state_shutoff": "סגירה אוטומטית",
+      "state_ignored": "התעלמו",
+      "title_high_flow": "אירוע זרימה גבוהה",
+      "title_low_flow": "אירוע זרימה נמוכה",
+      "flow_rate_prefix": "ספיקה",
+      "since_ago": "לפני {{duration}}",
+      "pill_on_it": "מטפל · {{actor}}",
+      "pill_ignored_by": "התעלמו על ידי {{actor}}",
+      "pill_ignored_by_time": "התעלמו על ידי {{actor}} · {{time}}",
+      "actor_me": "אני",
+      "actor_someone": "מישהו",
       "actions": {
-        "ignore": "התעלם",
-        "on_it": "מטפל",
-        "tag": "תייג את האירוע"
+        "ignore": "התעלם מהאירוע",
+        "on_it": "הודע לצוות שאני מטפל",
+        "stand_down": "עצור טיפול"
       }
     },
     "health_widget": {
