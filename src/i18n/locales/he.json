@@ -51,7 +51,7 @@
       "info_button_aria": "מידע על מצב המערכות"
     },
     "status_overview": {
-      "title": "סקירת סטטוס",
+      "title": "סקירת המערכות",
       "n_total": "{{count}} בסך הכול",
       "communication": "תקשורת",
       "valves": "ברזים",
