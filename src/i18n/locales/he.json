@@ -285,7 +285,7 @@
       "state_warning": "אזהרה",
       "state_shutoff": "סגירה אוטומטית",
       "state_ongoing": "אירוע מתמשך",
-      "state_resolved": "נפתר",
+      "state_resolved": "האירוע הסתיים",
       "state_ignored": "סומן כלא רלוונטי",
       "valve_open": "הברז פתוח",
       "valve_closed": "הברז סגור",
