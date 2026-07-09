@@ -265,9 +265,9 @@
     "activity_on_this_system": "פעילות במערכת זו",
     "no_older_events": "אין אירועים ישנים יותר",
     "filters": {
-      "water": "מים",
-      "valve": "ברז",
-      "power": "חשמל",
+      "water": "אירועי מים",
+      "valve": "תקלות ברז",
+      "power": "מתח",
       "comms": "תקשורת",
       "all_water": "הכל",
       "high_flow": "קצב זרימה גבוה",
@@ -302,9 +302,9 @@
       }
     },
     "filters": {
-      "water": "מים",
-      "valve": "ברז",
-      "power": "חשמל",
+      "water": "אירועי מים",
+      "valve": "תקלות ברז",
+      "power": "מתח",
       "comms": "תקשורת",
       "clear": "נקה מסננים"
     },
