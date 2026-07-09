@@ -146,13 +146,28 @@
       "cubic_meters": "מ״ק"
     },
     "notifications": "התראות",
-    "push": "התראות דחיפה",
-    "push_desc": "בתוך האפליקציה ובמסך הנעילה",
+    "push": "התראות באפליקציה (הודעות פוש)",
+    "push_desc": "מוצגות במסך הנעילה ובאפליקציה",
     "sms": "SMS",
     "sms_desc": "הודעות טקסט",
     "sign_out": "התנתקות",
     "sign_out_confirm_title": "להתנתק מ-Wint?",
     "app_version": "Pulse 2.0 · v{{version}}",
+    "demo_only": "מצב הדגמה בלבד",
+    "switch_profile": "החלף פרופיל",
+    "switch_profile_desc": "מחוברים כעת בתור <strong>{{name}}</strong>. לחצו כדי לראות את האפליקציה בעיני משתמש אחר.",
+    "my_scope": "התחום שלי",
+    "scope_counts": {
+      "accounts": "חשבונות",
+      "locations": "מיקומים",
+      "systems": "מערכות"
+    },
+    "scope_permissions": {
+      "role": "תפקיד",
+      "full_access": "גישה מלאה",
+      "valve_control": "שליטה בברז",
+      "edit_policies": "עריכת מדיניות"
+    },
     "both_off_warning": "התראות SMS ודחיפה כבויות.",
     "both_off_modal": {
       "title": "לכבות את כל ההתראות?",

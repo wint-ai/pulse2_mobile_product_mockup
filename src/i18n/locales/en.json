@@ -153,6 +153,21 @@
     "sign_out": "Sign out",
     "sign_out_confirm_title": "Sign out of Wint?",
     "app_version": "Pulse 2.0 · v{{version}}",
+    "demo_only": "Demo only",
+    "switch_profile": "Switch profile",
+    "switch_profile_desc": "You're signed in as <strong>{{name}}</strong>. Tap to see the app as someone else.",
+    "my_scope": "My Scope",
+    "scope_counts": {
+      "accounts": "Accounts",
+      "locations": "Locations",
+      "systems": "Systems"
+    },
+    "scope_permissions": {
+      "role": "Role",
+      "full_access": "Full access",
+      "valve_control": "Valve control",
+      "edit_policies": "Edit policies"
+    },
     "both_off_warning": "SMS and Push notifications are OFF.",
     "both_off_modal": {
       "title": "Disable all notifications?",

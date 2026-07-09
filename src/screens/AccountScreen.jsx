@@ -158,7 +158,20 @@ export default function AccountScreen() {
   const [view, setView] = useState('main');
   const [pushOn, setPushOn] = useState(false);
   const [smsOn, setSmsOn] = useState(false);
-  const [units, setUnits] = useState('Liters');
+  // Store the units choice as a stable KEY, not a localized label, so the
+  // dropdown value keeps matching an option even when the language flips.
+  const [unitsKey, setUnitsKey] = useState('liters');
+  const unitsOptions = [
+    { key: 'liters',        label: t('more.units.liters') },
+    { key: 'gallons',       label: t('more.units.gallons') },
+    { key: 'cubic_meters',  label: t('more.units.cubic_meters') },
+  ];
+  const unitsLabel = (unitsOptions.find(u => u.key === unitsKey) || unitsOptions[0]).label;
+  const unitsLabels = unitsOptions.map(u => u.label);
+  function changeUnits(label) {
+    const target = unitsOptions.find(u => u.label === label);
+    if (target) setUnitsKey(target.key);
+  }
 
   const languageLabel = (SUPPORTED_LANGUAGES.find(l => l.code === i18n.language) || SUPPORTED_LANGUAGES[0]).label;
   const languageOptions = SUPPORTED_LANGUAGES.map(l => l.label);
@@ -266,14 +279,15 @@ export default function AccountScreen() {
                   fontSize: 9, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase',
                   padding: '2px 6px', borderRadius: 4,
                   background: '#7C3AED', color: '#fff',
-                }}>Demo only</span>
+                }}>{t('more.demo_only')}</span>
               </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: theme.text, letterSpacing: '-0.2px' }}>
-                Switch profile
+                {t('more.switch_profile')}
               </div>
-              <div style={{ fontSize: 12, color: theme.textTertiary, marginTop: 2, lineHeight: 1.4 }}>
-                You're signed in as <strong style={{ color: theme.text }}>{persona?.name || 'Wint demo'}</strong>. Tap to see the app as someone else.
-              </div>
+              <div
+                style={{ fontSize: 12, color: theme.textTertiary, marginTop: 2, lineHeight: 1.4 }}
+                dangerouslySetInnerHTML={{ __html: t('more.switch_profile_desc', { name: persona?.name || 'Wint demo' }) }}
+              />
             </div>
             <span className="material-symbols-outlined" style={{ fontSize: 22, color: theme.textTertiary, flexShrink: 0 }}>chevron_right</span>
           </div>
@@ -303,7 +317,7 @@ export default function AccountScreen() {
 
           {/* Scope */}
           <SectionCard theme={theme}>
-            <SectionTitle theme={theme}>My Scope</SectionTitle>
+            <SectionTitle theme={theme}>{t('more.my_scope')}</SectionTitle>
             <div style={{ padding: '4px 16px 14px' }}>
               {(() => {
                 const accountCount = new Set(visibleSystems.map(s => s.account)).size;
@@ -312,31 +326,31 @@ export default function AccountScreen() {
                   <div style={{ display: 'flex', gap: 16 }}>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 20, fontWeight: 700, color: theme.text }}>{accountCount}</div>
-                      <div style={{ fontSize: 12, color: theme.textTertiary }}>Accounts</div>
+                      <div style={{ fontSize: 12, color: theme.textTertiary }}>{t('more.scope_counts.accounts')}</div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 20, fontWeight: 700, color: theme.text }}>{locationCount}</div>
-                      <div style={{ fontSize: 12, color: theme.textTertiary }}>Locations</div>
+                      <div style={{ fontSize: 12, color: theme.textTertiary }}>{t('more.scope_counts.locations')}</div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 20, fontWeight: 700, color: theme.text }}>{visibleSystems.length}</div>
-                      <div style={{ fontSize: 12, color: theme.textTertiary }}>Systems</div>
+                      <div style={{ fontSize: 12, color: theme.textTertiary }}>{t('more.scope_counts.systems')}</div>
                     </div>
                   </div>
                 );
               })()}
               <div style={{ borderTop: theme.separator, marginTop: 10, paddingTop: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 14, color: theme.textTertiary }}>Role</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>Full access</span>
+                  <span style={{ fontSize: 14, color: theme.textTertiary }}>{t('more.scope_permissions.role')}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: theme.text }}>{t('more.scope_permissions.full_access')}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 14, color: theme.textTertiary }}>Valve control</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#A1D246' }}>Yes</span>
+                  <span style={{ fontSize: 14, color: theme.textTertiary }}>{t('more.scope_permissions.valve_control')}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#A1D246' }}>{t('common.yes')}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 14, color: theme.textTertiary }}>Edit policies</span>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: '#A1D246' }}>Yes</span>
+                  <span style={{ fontSize: 14, color: theme.textTertiary }}>{t('more.scope_permissions.edit_policies')}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: '#A1D246' }}>{t('common.yes')}</span>
                 </div>
               </div>
             </div>
@@ -358,7 +372,7 @@ export default function AccountScreen() {
                   <span className="material-symbols-outlined" style={{ fontSize: 20, color: theme.textTertiary }}>straighten</span>
                   <div style={{ fontSize: 15, fontWeight: 500, color: theme.text }}>{t('more.measurement_units')}</div>
                 </div>
-                <Dropdown value={units} options={[t('more.units.liters'), t('more.units.gallons'), t('more.units.cubic_meters')]} onChange={setUnits} theme={theme} />
+                <Dropdown value={unitsLabel} options={unitsLabels} onChange={changeUnits} theme={theme} />
               </div>
             </div>
           </SectionCard>
