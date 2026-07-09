@@ -1,4 +1,5 @@
 import { useCallback, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Phone from './components/Phone';
 import SwipeableView from './components/SwipeableView';
@@ -101,6 +102,7 @@ function WintLogo({ white = false, width = 120 }) {
 }
 
 function LoginGate({ children }) {
+  const { t } = useTranslation();
   const loginNavigate = useNavigate();
   const { setPersona } = useUserContext();
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('pulse2-auth') === 'true');
@@ -190,9 +192,9 @@ function LoginGate({ children }) {
         }}>
           <span className="material-symbols-outlined" style={{ fontSize: 16, fontVariationSettings: "'FILL' 1" }}>link</span>
           <div style={{ flex: 1, lineHeight: 1.3 }}>
-            Paired with push simulator
+            {t('login.paired_with_pusher')}
             <div style={{ fontSize: 10, opacity: 0.85, marginTop: 1, fontWeight: 500 }}>
-              Code <code style={{ background: 'rgba(255,255,255,0.18)', padding: '0 4px', borderRadius: 3 }}>{pairCode}</code> · Demo pushes will land here
+              {t('login.code_label')} <code style={{ background: 'rgba(255,255,255,0.18)', padding: '0 4px', borderRadius: 3 }}>{pairCode}</code> · {t('login.paired_desc')}
             </div>
           </div>
           <span
@@ -210,8 +212,8 @@ function LoginGate({ children }) {
 
       {/* Picker header */}
       <div style={{ padding: '20px 24px 4px' }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: '#14151A', letterSpacing: '-0.3px' }}>Sign in as</div>
-        <div style={{ fontSize: 13, color: '#717684', marginTop: 2 }}>Demo mode · pick a profile to continue</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: '#14151A', letterSpacing: '-0.3px' }}>{t('login.sign_in_as')}</div>
+        <div style={{ fontSize: 13, color: '#717684', marginTop: 2 }}>{t('login.demo_subline')}</div>
       </div>
 
       {/* Customer personas */}
@@ -235,8 +237,8 @@ function LoginGate({ children }) {
           >
             <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#717684', fontVariationSettings: "'FILL' 1" }}>qr_code_scanner</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#14151A' }}>Connect to push simulator</div>
-              <div style={{ fontSize: 11, color: '#717684', marginTop: 1 }}>Scan the QR shown on your laptop</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#14151A' }}>{t('login.connect_pusher')}</div>
+              <div style={{ fontSize: 11, color: '#717684', marginTop: 1 }}>{t('login.connect_pusher_desc')}</div>
             </div>
             <span style={{ fontSize: 16, color: '#D1D5DB' }}>›</span>
           </div>
@@ -260,27 +262,28 @@ function LoginGate({ children }) {
             className="material-symbols-outlined"
             style={{ fontSize: 18, color: '#036AB5', marginTop: 1, fontVariationSettings: "'FILL' 1", flexShrink: 0 }}
           >info</span>
-          <div style={{ fontSize: 13, color: '#14151A', lineHeight: 1.45 }}>
-            Press <span style={{ fontWeight: 700 }}>More</span> in the bottom tab bar at any time to switch to a different profile.
-          </div>
+          <div
+            style={{ fontSize: 13, color: '#14151A', lineHeight: 1.45 }}
+            dangerouslySetInnerHTML={{ __html: t('login.switch_profile_hint') }}
+          />
         </div>
 
         <div style={{ fontSize: 11, fontWeight: 700, color: '#9DA3AE', textTransform: 'uppercase', letterSpacing: '.5px', margin: '6px 4px 8px' }}>
-          Customer users
+          {t('login.customer_users')}
         </div>
         {PERSONAS.filter(p => !p.isWint).map(p => (
           <LoginPersonaCard key={p.id} persona={p} onSelect={handlePickPersona} />
         ))}
 
         <div style={{ fontSize: 11, fontWeight: 700, color: '#9DA3AE', textTransform: 'uppercase', letterSpacing: '.5px', margin: '18px 4px 8px' }}>
-          Wint staff
+          {t('login.wint_staff')}
         </div>
         {PERSONAS.filter(p => p.isWint).map(p => (
           <LoginPersonaCard key={p.id} persona={p} onSelect={handlePickPersona} />
         ))}
 
         <div style={{ fontSize: 12, color: '#9DA3AE', textAlign: 'center', marginTop: 20, lineHeight: 1.5 }}>
-          Pulse2 by Wint Water Intelligence · Demo prototype
+          {t('login.footer')}
         </div>
       </div>
 
@@ -299,6 +302,7 @@ function LoginGate({ children }) {
 // Bottom sheet — Connect to push simulator. Backdrop blur + sheet at bottom.
 // Submit accepts a 5-6 char code typed by the user (matching the laptop QR).
 function PairConnectSheet({ onSubmit, onCancel }) {
+  const { t } = useTranslation();
   const [code, setCode] = useState('');
   return (
     <div
@@ -322,13 +326,13 @@ function PairConnectSheet({ onSubmit, onCancel }) {
       >
         <div style={{ width: 36, height: 4, background: '#DEE0E3', borderRadius: 2, margin: '0 auto 14px' }}></div>
         <div style={{ padding: '0 20px' }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#14151A' }}>Connect to push simulator</div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#14151A' }}>{t('login.connect_pusher')}</div>
           <div style={{ fontSize: 12.5, color: '#717684', marginTop: 4, lineHeight: 1.45 }}>
-            Scan the QR shown on your laptop with your phone's camera, or type the code shown below it.
+            {t('login.connect_pusher_long_desc')}
           </div>
         </div>
         <div style={{ margin: '16px 20px 0' }}>
-          <div style={{ fontSize: 11, color: '#717684', fontWeight: 600, marginBottom: 6 }}>Enter code shown on laptop</div>
+          <div style={{ fontSize: 11, color: '#717684', fontWeight: 600, marginBottom: 6 }}>{t('login.enter_code')}</div>
           <input
             autoFocus
             value={code}
@@ -356,7 +360,7 @@ function PairConnectSheet({ onSubmit, onCancel }) {
               fontSize: 14, fontWeight: 600, color: '#4A4F5A',
               cursor: 'pointer', fontFamily: 'inherit',
             }}
-          >Cancel</button>
+          >{t('common.cancel')}</button>
           <button
             onClick={() => onSubmit(code)}
             disabled={!code.trim()}
@@ -369,7 +373,7 @@ function PairConnectSheet({ onSubmit, onCancel }) {
               cursor: code.trim() ? 'pointer' : 'not-allowed',
               fontFamily: 'inherit',
             }}
-          >Connect</button>
+          >{t('login.connect')}</button>
         </div>
       </div>
     </div>

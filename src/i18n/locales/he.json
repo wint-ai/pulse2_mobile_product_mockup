@@ -340,6 +340,22 @@
     "couldnt_refresh_desc": "מציג נתונים אחרונים · ננסה שוב",
     "updating": "מעדכן…"
   },
+  "login": {
+    "sign_in_as": "כניסה בתור",
+    "demo_subline": "מצב הדגמה · בחרו פרופיל להמשך",
+    "customer_users": "משתמשי לקוחות",
+    "wint_staff": "צוות Wint",
+    "footer": "Pulse2 של Wint Water Intelligence · הדגמת אב-טיפוס",
+    "switch_profile_hint": "לחצו על <span style=\"font-weight:700\">עוד</span> בסרגל התחתון כדי להחליף פרופיל בכל שלב.",
+    "paired_with_pusher": "מחובר לסימולטור התראות",
+    "code_label": "קוד",
+    "paired_desc": "הדגמות של התראות יגיעו לכאן",
+    "connect_pusher": "התחברות לסימולטור התראות",
+    "connect_pusher_desc": "סרקו את קוד ה-QR שמופיע על המחשב",
+    "connect_pusher_long_desc": "סרקו את קוד ה-QR שמופיע במחשב באמצעות מצלמת הטלפון, או הקלידו את הקוד המופיע מתחתיו.",
+    "enter_code": "הזינו את הקוד המופיע במחשב",
+    "connect": "התחבר"
+  },
   "ignore_sheet": {
     "title": "לסמן את האירוע כלא רלוונטי?",
     "warning_header": "⚠ סימון אירוע מים כלא רלוונטי הוא סופי.",

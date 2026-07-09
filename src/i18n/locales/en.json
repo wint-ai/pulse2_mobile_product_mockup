@@ -340,6 +340,22 @@
     "couldnt_refresh_desc": "Showing last known state · we'll keep trying",
     "updating": "Updating…"
   },
+  "login": {
+    "sign_in_as": "Sign in as",
+    "demo_subline": "Demo mode · pick a profile to continue",
+    "customer_users": "Customer users",
+    "wint_staff": "Wint staff",
+    "footer": "Pulse2 by Wint Water Intelligence · Demo prototype",
+    "switch_profile_hint": "Press <span style=\"font-weight:700\">More</span> in the bottom tab bar at any time to switch to a different profile.",
+    "paired_with_pusher": "Paired with push simulator",
+    "code_label": "Code",
+    "paired_desc": "Demo pushes will land here",
+    "connect_pusher": "Connect to push simulator",
+    "connect_pusher_desc": "Scan the QR shown on your laptop",
+    "connect_pusher_long_desc": "Scan the QR shown on your laptop with your phone's camera, or type the code shown below it.",
+    "enter_code": "Enter code shown on laptop",
+    "connect": "Connect"
+  },
   "ignore_sheet": {
     "title": "Ignore this Water Event?",
     "warning_header": "⚠ Ignoring this Water Event is final.",
