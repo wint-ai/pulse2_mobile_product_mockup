@@ -53,14 +53,23 @@ function parseStamp(stamp) {
   return { date, time: timePart || '', dateKey: datePart };
 }
 // dateGroupLabel is called at render time; caller passes `t` from useTranslation.
-function dateGroupLabel(dateKey, t) {
+// `lang` re-orders "Mon Day" to Hebrew's "Day Mon" and swaps the month token.
+const HE_MONTH_ABBR = ['ינו׳','פבר׳','מרץ','אפר׳','מאי','יונ׳','יול׳','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
+function localizeDateKey(dateKey, lang) {
+  if (!lang || !lang.startsWith('he')) return dateKey;
+  const [monthStr, dayStr] = dateKey.split(' ');
+  const idx = MONTHS.indexOf(monthStr);
+  if (idx < 0) return dateKey;
+  return `${dayStr} ${HE_MONTH_ABBR[idx]}`;
+}
+function dateGroupLabel(dateKey, t, lang) {
   // Mock "today" anchor at Mar 25 (matches lifeEvents baseDate).
   if (dateKey === 'Mar 25') return t('timeline.today');
   if (dateKey === 'Mar 24') return t('timeline.yesterday');
-  return `${dateKey} 2026`;
+  return `${localizeDateKey(dateKey, lang)} 2026`;
 }
-function fullDateLabel(dateKey, time) {
-  return `${dateKey}, 2026 · ${time}`;
+function fullDateLabel(dateKey, time, lang) {
+  return `${localizeDateKey(dateKey, lang)}, 2026 · ${time}`;
 }
 
 // classify() moved to src/utils/classifyEvent.js so it can be unit-tested.
@@ -79,7 +88,8 @@ function MIcon({ name, size = 18, color, fill = true, style = {} }) {
 
 // ─── Main component ───────────────────────────────────────────────────────
 export default function ActivityTab({ sys, focusEventId }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const { theme } = useTheme();
   // Re-render this tab when the pusher mutates localStorage (sim alerts,
   // ignored, on-it, tags) - otherwise the cached useMemo never sees pusher
@@ -326,7 +336,7 @@ export default function ActivityTab({ sys, focusEventId }) {
           }}>{sys?.name ? t('timeline.activity_on', { name: sys.name }) : t('timeline.activity_on_this_system')}</div>
           {groups.map(group => (
             <div key={group.dateKey}>
-              <DayHeader label={dateGroupLabel(group.dateKey, t)} theme={theme} />
+              <DayHeader label={dateGroupLabel(group.dateKey, t, lang)} theme={theme} />
               {group.items.map((r, idxInGroup) => (
                 <Row
                   key={r.id}
@@ -429,7 +439,8 @@ function DayHeader({ label, theme }) {
 
 // ─── Single event row — Variant A anatomy ────────────────────────────────
 function Row({ row, hasPanel, supportsTag, isExpanded, onToggle, isDayStart, theme, isNotifiedExpanded, toggleNotified, openTagSheet, tagBumper }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const r = row;
   const dotBg     = r.color + '1A';  // 10% alpha
   const dotBorder = r.color;
@@ -501,7 +512,7 @@ function Row({ row, hasPanel, supportsTag, isExpanded, onToggle, isDayStart, the
       {/* Content */}
       <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 11, color: theme.textTertiary, fontVariantNumeric: 'tabular-nums', lineHeight: 1.2 }}>
-          {fullDateLabel(r.dateKey, r.time)}
+          {fullDateLabel(r.dateKey, r.time, lang)}
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 2 }}>
           <div style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 700, color: theme.text, lineHeight: 1.3 }}>

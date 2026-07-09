@@ -14,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 import { getSystemById } from '../data/systems';
 import { getTag, getTags } from '../data/tagsStore';
 import { getIgnoredInfo } from '../data/ignoredIncidents';
+import { formatShortDate, formatDurationShort } from '../utils/locale';
 
 function MIcon({ name, size = 18, color, fill, style = {} }) {
   return (
@@ -29,24 +30,12 @@ function initials(name) {
   return name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
 }
 
-function fmtDuration(ms) {
-  if (ms < 0) ms = 0;
-  const min = Math.floor(ms / 60000);
-  if (min < 60) return `${min}m`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h < 24) return m ? `${h}h ${m}m` : `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
-
-function fmtDateShort(iso) {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · ${d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}`;
-}
 
 export default function WaterEventSummary({ event, onClick, highlight }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const fmtDateShort = (iso) => formatShortDate(iso, lang);
+  const fmtDuration = (ms) => formatDurationShort(ms, lang);
   const { theme } = useTheme();
   const sys = event.system ? getSystemById(event.system) : null;
   const isHigh = event.type === 'leak-high';

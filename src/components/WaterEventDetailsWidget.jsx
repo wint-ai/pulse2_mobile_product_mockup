@@ -33,6 +33,7 @@ import { getTags, addTag, removeTagAt } from '../data/tagsStore';
 import { getCurrentActor } from '../data/currentUser';
 import { computeActiveEvents } from '../data/events';
 import { isInvestigating, getInvestigatingInfo, startInvestigating, stopInvestigating } from '../data/investigatingStore';
+import { formatShortDate, formatDurationShort } from '../utils/locale';
 
 function MIcon({ name, size = 18, fill = false, color, style = {} }) {
   return (
@@ -75,32 +76,34 @@ const STATE_PILL = {
   ignored: { bg: '#E6E8EC', color: '#6B7280', labelKey: 'state_ignored' },
 };
 
-function fmtDuration(ms) {
-  if (ms < 0) ms = 0;
-  const min = Math.floor(ms / 60000);
-  if (min < 60) return `${min}m`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  if (h < 24) return m ? `${h}h ${m}m` : `${h}h`;
-  return `${Math.floor(h / 24)}d`;
-}
-
-function fmtDate(iso) {
+// Locale-aware date+time split. Uses formatShortDate's month lookup so
+// month names follow the current i18n language.
+function fmtDate(iso, lang) {
   if (!iso) return { date: '-', time: '' };
   const d = new Date(iso);
+  const short = formatShortDate(iso, lang); // "9 יולי · 15:21" or "Jul 9 · 15:21"
+  const [datePart, timePart] = short.split(' · ');
+  // Append year for the widget's detected-on lockup.
+  const year = d.getFullYear();
+  const isHe = lang && lang.startsWith('he');
   return {
-    date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-    time: d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    date: isHe ? `${datePart}, ${year}` : `${datePart}, ${year}`,
+    time: timePart || '',
   };
 }
 
 function fmtTimeShort(iso) {
   if (!iso) return '-';
-  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  const d = new Date(iso);
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
 }
 
 export default function WaterEventDetailsWidget({ sys, readOnly = false, onAction, hideOnIt = false }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const fmtDuration = (ms) => formatDurationShort(ms, lang);
   const { theme } = useTheme();
   // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
@@ -230,7 +233,7 @@ export default function WaterEventDetailsWidget({ sys, readOnly = false, onActio
   })();
   const parsedTs = computedEvent?.timestamp ? Date.parse(computedEvent.timestamp) : NaN;
   const startMs = Number.isFinite(parsedTs) ? parsedTs : (Date.now() - (3 * 3600000));
-  const startedFmt = fmtDate(new Date(startMs).toISOString());
+  const startedFmt = fmtDate(new Date(startMs).toISOString(), lang);
   const sinceLabel = t('system_detail.water_event_widget.since_ago', { duration: fmtDuration(Date.now() - startMs) });
 
   // Flow rate.
