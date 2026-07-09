@@ -12,6 +12,7 @@
 // Expandable panel reveals Notified (collapsed-by-default) + On it.
 
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getLifeEventsForSystem } from '../../data/lifeEvents';
 import { useTheme } from '../../context/ThemeContext';
 import TagBottomSheet from '../../components/TagBottomSheet';
@@ -29,11 +30,12 @@ const C_OK    = '#5C9E1A';   // Resolution-state green check badge
 // peer category, which hid the fact that the row is multi-select.
 // Empty selection IS "show all"; the explicit reset lives in a "Clear x"
 // chip that appears above the pill row only when filters are active.
+// `labelKey` resolves via t(`timeline.filters.<key>`) inside the component.
 const FILTERS = [
-  { key: 'water', label: 'Water', color: C_HIGH  },
-  { key: 'valve', label: 'Valve', color: C_VALVE },
-  { key: 'power', label: 'Power', color: C_POWER },
-  { key: 'conn',  label: 'Comms', color: C_CONN  },
+  { key: 'water', labelKey: 'water', color: C_HIGH  },
+  { key: 'valve', labelKey: 'valve', color: C_VALVE },
+  { key: 'power', labelKey: 'power', color: C_POWER },
+  { key: 'conn',  labelKey: 'comms', color: C_CONN  },
 ];
 
 // Months / parse helper — mock timestamps are "MMM D, HH:MM" strings,
@@ -50,10 +52,11 @@ function parseStamp(stamp) {
   const date = new Date(2026, month, day, hh, mm);
   return { date, time: timePart || '', dateKey: datePart };
 }
-function dateGroupLabel(dateKey) {
+// dateGroupLabel is called at render time; caller passes `t` from useTranslation.
+function dateGroupLabel(dateKey, t) {
   // Mock "today" anchor at Mar 25 (matches lifeEvents baseDate).
-  if (dateKey === 'Mar 25') return 'Today';
-  if (dateKey === 'Mar 24') return 'Yesterday';
+  if (dateKey === 'Mar 25') return t('timeline.today');
+  if (dateKey === 'Mar 24') return t('timeline.yesterday');
   return `${dateKey} 2026`;
 }
 function fullDateLabel(dateKey, time) {
@@ -76,6 +79,7 @@ function MIcon({ name, size = 18, color, fill = true, style = {} }) {
 
 // ─── Main component ───────────────────────────────────────────────────────
 export default function ActivityTab({ sys, focusEventId }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   // Re-render this tab when the pusher mutates localStorage (sim alerts,
   // ignored, on-it, tags) - otherwise the cached useMemo never sees pusher
@@ -261,7 +265,7 @@ export default function ActivityTab({ sys, focusEventId }) {
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4,
             }}>
               {active && <span className="material-symbols-outlined" style={{ fontSize: 14, color: f.color }}>check</span>}
-              {f.label}
+              {t(`timeline.filters.${f.labelKey}`)}
             </button>
           );
         })}
@@ -287,9 +291,9 @@ export default function ActivityTab({ sys, focusEventId }) {
           flexShrink: 0,
         }}>
           {[
-            { key: 'all',  label: 'All water', color: '#DB4670' },
-            { key: 'high', label: 'High Flow', color: '#DB4670' },
-            { key: 'low',  label: 'Low Flow',  color: '#F05C25' },
+            { key: 'all',  label: t('timeline.filters.all_water'), color: '#DB4670' },
+            { key: 'high', label: t('timeline.filters.high_flow'), color: '#DB4670' },
+            { key: 'low',  label: t('timeline.filters.low_flow'),  color: '#F05C25' },
           ].map(s => {
             const active = waterSub === s.key;
             return (
@@ -319,10 +323,10 @@ export default function ActivityTab({ sys, focusEventId }) {
             fontSize: 10, fontWeight: 700,
             color: theme.textTertiary,
             textTransform: 'uppercase', letterSpacing: '.5px',
-          }}>Activity on {sys?.name || 'this system'}</div>
+          }}>{sys?.name ? t('timeline.activity_on', { name: sys.name }) : t('timeline.activity_on_this_system')}</div>
           {groups.map(group => (
             <div key={group.dateKey}>
-              <DayHeader label={dateGroupLabel(group.dateKey)} theme={theme} />
+              <DayHeader label={dateGroupLabel(group.dateKey, t)} theme={theme} />
               {group.items.map((r, idxInGroup) => (
                 <Row
                   key={r.id}
@@ -360,7 +364,7 @@ export default function ActivityTab({ sys, focusEventId }) {
           )}
           {!hasMore && filtered.length > BATCH && (
             <div style={{ padding: '16px 14px 22px', textAlign: 'center', fontSize: 12, color: theme.textTertiary }}>
-              No older events
+              {t('timeline.no_older_events')}
             </div>
           )}
         </div>

@@ -175,6 +175,22 @@
     "back_to_my_scope": "חזרה לתחום שלי",
     "all_root": "הכל"
   },
+  "timeline": {
+    "today": "היום",
+    "yesterday": "אתמול",
+    "activity_on": "פעילות ב-{{name}}",
+    "activity_on_this_system": "פעילות במערכת זו",
+    "no_older_events": "אין אירועים ישנים יותר",
+    "filters": {
+      "water": "מים",
+      "valve": "ברז",
+      "power": "חשמל",
+      "comms": "תקשורת",
+      "all_water": "הכל",
+      "high_flow": "זרימה גבוהה",
+      "low_flow": "זרימה נמוכה"
+    }
+  },
   "alerts": {
     "tabs": {
       "active": "פעילות",

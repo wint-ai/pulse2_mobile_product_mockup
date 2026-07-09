@@ -175,6 +175,22 @@
     "back_to_my_scope": "Back to My Scope",
     "all_root": "All"
   },
+  "timeline": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "activity_on": "Activity on {{name}}",
+    "activity_on_this_system": "Activity on this system",
+    "no_older_events": "No older events",
+    "filters": {
+      "water": "Water",
+      "valve": "Valve",
+      "power": "Power",
+      "comms": "Comms",
+      "all_water": "All water",
+      "high_flow": "High Flow",
+      "low_flow": "Low Flow"
+    }
+  },
   "alerts": {
     "tabs": {
       "active": "Active",
