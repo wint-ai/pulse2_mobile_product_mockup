@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import TabBar from '../../components/TabBar';
 import { useDataRefresh } from '../../utils/useDataRefresh';
 import StatusWidgetsMobile from '../../components/StatusWidgetsMobile';
@@ -55,6 +56,7 @@ function ombreBarBackground(hasSystems, arcPct) {
 
 // ── Tab 1: Status — health gauge, breakdown, insights ──
 function StatusTab({ systems, theme, navigate }) {
+  const { t } = useTranslation();
   const [showInfo, setShowInfo] = useState(false);
   const dk = theme.mode === 'dark' || theme.mode === 'ocean' || theme.mode === 'gradient' || theme.mode === 'midnight';
 
@@ -195,7 +197,7 @@ function StatusTab({ systems, theme, navigate }) {
               fontSize: 26, fontWeight: 800, color: theme.text,
               letterSpacing: '-0.8px', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
             }}>{hasSystems ? rawPct : 0}%</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: theme.textTertiary, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Healthy</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: theme.textTertiary, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{t('home.systems_health.healthy')}</span>
           </div>
           <div style={{
             height: 12,
@@ -210,11 +212,11 @@ function StatusTab({ systems, theme, navigate }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '8px 16px 10px' }}>
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: theme.text, lineHeight: 1, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums' }}>{total.toLocaleString()}</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: theme.textTertiary, marginTop: 3, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Systems</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: theme.textTertiary, marginTop: 3, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{t('home.systems_health.systems')}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: 18, fontWeight: 800, color: reqAttColor, lineHeight: 1, letterSpacing: '-0.3px', fontVariantNumeric: 'tabular-nums' }}>{requireAttention}</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: theme.textTertiary, marginTop: 3, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Require attention</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: theme.textTertiary, marginTop: 3, lineHeight: 1.2, textTransform: 'uppercase', letterSpacing: '0.4px' }}>{t('home.systems_health.require_attention')}</div>
           </div>
         </div>
 
@@ -245,43 +247,43 @@ function StatusTab({ systems, theme, navigate }) {
             {
               key: 'comm',
               icon: 'wifi',
-              title: 'Communication',
+              title: t('home.status_overview.communication'),
               segments: [
-                { key: 'offline', label: 'Offline', count: offlineList.length, tint: 'bad',   pct: total ? (offlineList.length / total) * 100 : 0, alertFilter: 'offline' },
-                { key: 'online',  label: 'Online',  count: onlineList.length,  tint: 'good',  pct: total ? (onlineList.length / total) * 100 : 0, kpi: 'comm-online' },
+                { key: 'offline', label: t('home.status_overview.offline'), count: offlineList.length, tint: 'bad',   pct: total ? (offlineList.length / total) * 100 : 0, alertFilter: 'offline' },
+                { key: 'online',  label: t('home.status_overview.online'),  count: onlineList.length,  tint: 'good',  pct: total ? (onlineList.length / total) * 100 : 0, kpi: 'comm-online' },
               ],
             },
             {
               key: 'valves',
               icon: 'valve',
-              title: 'Valves',
+              title: t('home.status_overview.valves'),
               segments: [
-                { key: 'errors',  label: 'Errors',   count: valveFaultList.length,  tint: 'bad',     pct: total ? (valveFaultList.length / total) * 100 : 0, alertFilter: 'valve-error' },
-                { key: 'open',    label: 'Open',     count: valveOpenList.length,   tint: 'good',    pct: total ? (valveOpenList.length / total) * 100 : 0, kpi: 'valve-open' },
-                { key: 'closed',  label: 'Closed',   count: valveClosedList.length, tint: 'neutral', pct: total ? (valveClosedList.length / total) * 100 : 0, kpi: 'valve-closed' },
-                { key: 'noValve', label: 'No valve', count: noValveList.length,     tint: 'empty',   pct: total ? (noValveList.length / total) * 100 : 0, kpi: 'valve-na' },
+                { key: 'errors',  label: t('home.status_overview.errors'),   count: valveFaultList.length,  tint: 'bad',     pct: total ? (valveFaultList.length / total) * 100 : 0, alertFilter: 'valve-error' },
+                { key: 'open',    label: t('home.status_overview.open'),     count: valveOpenList.length,   tint: 'good',    pct: total ? (valveOpenList.length / total) * 100 : 0, kpi: 'valve-open' },
+                { key: 'closed',  label: t('home.status_overview.closed'),   count: valveClosedList.length, tint: 'neutral', pct: total ? (valveClosedList.length / total) * 100 : 0, kpi: 'valve-closed' },
+                { key: 'noValve', label: t('home.status_overview.no_valve'), count: noValveList.length,     tint: 'empty',   pct: total ? (noValveList.length / total) * 100 : 0, kpi: 'valve-na' },
               ],
             },
             {
               key: 'power',
               icon: 'bolt',
-              title: 'External Power',
+              title: t('home.status_overview.external_power'),
               segments: [
-                { key: 'unplug',  label: 'Unplugged', count: acLostList.length,  tint: 'bad',   pct: total ? (acLostList.length / total) * 100 : 0, alertFilter: 'power-lost' },
-                { key: 'ac',      label: 'On AC',     count: onACList.length,    tint: 'good',  pct: total ? (onACList.length / total) * 100 : 0, kpi: 'power-ac' },
-                { key: 'battery', label: 'Battery',   count: batteryList.length, tint: 'warn',  pct: total ? (batteryList.length / total) * 100 : 0, kpi: 'power-battery' },
+                { key: 'unplug',  label: t('home.status_overview.unplugged'), count: acLostList.length,  tint: 'bad',   pct: total ? (acLostList.length / total) * 100 : 0, alertFilter: 'power-lost' },
+                { key: 'ac',      label: t('home.status_overview.on_ac'),     count: onACList.length,    tint: 'good',  pct: total ? (onACList.length / total) * 100 : 0, kpi: 'power-ac' },
+                { key: 'battery', label: t('home.status_overview.battery'),   count: batteryList.length, tint: 'warn',  pct: total ? (batteryList.length / total) * 100 : 0, kpi: 'power-battery' },
               ],
             },
             {
               key: 'recipients',
               icon: 'group',
-              title: 'Notification recipients',
+              title: t('home.status_overview.notification_recipients'),
               segments: [
                 // Missing recipients routes to the Systems list (not the Alerts
                 // list) - config gaps are inventory-shaped, not incident-shaped,
                 // and the Alerts pill rail no longer has a Configuration pill.
-                { key: 'miss', label: 'Missing',    count: noRecipLocations,   tint: 'bad',  pct: allLocations ? (noRecipLocations / allLocations) * 100 : 0,   kpi: 'recipients-missing' },
-                { key: 'reg',  label: 'Registered', count: withRecipLocations, tint: 'good', pct: allLocations ? (withRecipLocations / allLocations) * 100 : 0, kpi: 'recipients-registered' },
+                { key: 'miss', label: t('home.status_overview.missing'),    count: noRecipLocations,   tint: 'bad',  pct: allLocations ? (noRecipLocations / allLocations) * 100 : 0,   kpi: 'recipients-missing' },
+                { key: 'reg',  label: t('home.status_overview.registered'), count: withRecipLocations, tint: 'good', pct: allLocations ? (withRecipLocations / allLocations) * 100 : 0, kpi: 'recipients-registered' },
               ],
             },
           ]}
@@ -816,6 +818,7 @@ let _persistedHomeTab = 0;
 
 // ── Main component ──
 export default function HomeUnified() {
+  const { t } = useTranslation();
   useDataRefresh();
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -887,7 +890,7 @@ export default function HomeUnified() {
   // until per-floor contacts is a real product feature.
   const INFO_TAB_LEVELS = new Set(['Building', 'Tower', 'Terminal', 'Mall', 'Campus']);
   const isLocationScope = !!selectedScope && INFO_TAB_LEVELS.has(selectedScope.levelType);
-  const TABS = isLocationScope ? ['Overview', 'Info'] : ['Overview'];
+  const TABS = isLocationScope ? [t('home.overview_tab'), t('home.info_tab')] : [t('home.overview_tab')];
 
   // Reset the persisted tab if it points at a tab we no longer render.
   useEffect(() => {
@@ -916,11 +919,11 @@ export default function HomeUnified() {
             <>
               {hasNextLevel && (
                 <>
-                  {locationsBelow} location{locationsBelow !== 1 ? 's' : ''}
+                  {t('home.counts_locations', { count: locationsBelow })}
                   <span style={{ margin: '0 6px', opacity: 0.6 }}>·</span>
                 </>
               )}
-              Total {totalSystems.toLocaleString()} system{totalSystems !== 1 ? 's' : ''}
+              {t('home.counts_systems', { count: totalSystems, formatted: totalSystems.toLocaleString() })}
             </>
           }
         />

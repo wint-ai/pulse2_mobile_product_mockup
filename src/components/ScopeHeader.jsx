@@ -10,6 +10,7 @@
 // + tint differs (Home = home_work in brand blue; Alerts = notifications_active
 // in red). Locked 2026-06-15.
 
+import { useTranslation } from 'react-i18next';
 import { useUserContext } from '../context/UserContext';
 import CompactBreadcrumb from './CompactBreadcrumb';
 import { getAncestorScopes } from '../utils/ancestorScopes';
@@ -30,12 +31,13 @@ export default function ScopeHeader({
   subLine = null,
   onDrawerOpen,
 }) {
+  const { t } = useTranslation();
   const { visibleSystems = [], selectedScope, setSelectedScope, clearSelectedScope } = useUserContext() || {};
   const scopedSystems = selectedScope?.systems || visibleSystems;
   // Title fallback rule (intentionally simpler than before): scope name when
-  // scoped; else literal 'My Systems'. NO account-name fallback - that was
+  // scoped; else the translated "My Systems". NO account-name fallback - that was
   // causing Alerts to show an account name while Home showed 'My Systems'.
-  const pageTitle = selectedScope?.name || 'My Systems';
+  const pageTitle = selectedScope?.name || t('home.title_default');
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', padding: '12px 14px' }}>
@@ -43,8 +45,8 @@ export default function ScopeHeader({
         onClick={onDrawerOpen}
         style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0, cursor: 'pointer' }}
         role="button"
-        aria-label="Switch location"
-        title="Switch location"
+        aria-label={t('home.switch_location')}
+        title={t('home.switch_location')}
       >
         {/* Badge - the only piece that differs per page (icon + tint) */}
         <div style={{
