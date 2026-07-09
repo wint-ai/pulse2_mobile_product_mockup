@@ -107,10 +107,22 @@
         "closed": "Closed",
         "opening": "Opening…",
         "closing": "Closing…",
+        "sending_command": "Sending command…",
         "verifying_closed": "Verifying Closed",
+        "verifying_no_flow": "Valve closed - checking water has stopped",
         "middle": "Middle",
         "unknown": "Unknown",
-        "disconnected": "Disconnected"
+        "open_uncertain": "Open (?)",
+        "closed_uncertain": "Closed (?)"
+      },
+      "errors": {
+        "indicator_failure": "Valve error - indicator failure",
+        "flow_detected": "Valve Error - flow detected while closed",
+        "indicator_failure_on_open": "Valve error - indicator failure on open",
+        "indicator_failure_on_close": "Valve error - indicator failure on close",
+        "unexpected_position_change": "Valve Error - unexpected change of position",
+        "disconnected": "Disconnected",
+        "disconnected_verification_paused": "Disconnected - verification paused"
       },
       "actions": {
         "open": "Open",

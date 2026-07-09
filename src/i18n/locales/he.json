@@ -107,10 +107,22 @@
         "closed": "סגור",
         "opening": "נפתח…",
         "closing": "נסגר…",
+        "sending_command": "שולח פקודה…",
         "verifying_closed": "מאמת סגירה",
+        "verifying_no_flow": "ברז נסגר - בודק שהזרימה נעצרה",
         "middle": "אמצע",
         "unknown": "לא ידוע",
-        "disconnected": "מנותק"
+        "open_uncertain": "פתוח (?)",
+        "closed_uncertain": "סגור (?)"
+      },
+      "errors": {
+        "indicator_failure": "שגיאת ברז - כשל בחיווי מצב",
+        "flow_detected": "שגיאת ברז - זוהתה זרימה כשהברז סגור",
+        "indicator_failure_on_open": "שגיאת ברז - כשל בחיווי במהלך פתיחה",
+        "indicator_failure_on_close": "שגיאת ברז - כשל בחיווי במהלך סגירה",
+        "unexpected_position_change": "שגיאת ברז - שינוי מצב לא צפוי",
+        "disconnected": "מנותק",
+        "disconnected_verification_paused": "מנותק - אימות הושהה"
       },
       "actions": {
         "open": "פתח",

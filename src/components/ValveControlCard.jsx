@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { getActivePolicy } from '../data/systemDetails';
 
@@ -65,89 +66,87 @@ function Spinner({ color, size = 22 }) {
 //
 // Returns: { iconBg, iconColor, glyph | spinner, badge?, positionLabel,
 //            errorLabel, actions, actionsDisabled?, progressBar? }
+// Position + error labels are stored as translation-key SUFFIXES; the
+// component resolves them via t() at render time.
 function getStateConfig(state) {
   switch (state) {
     // ─── Steady states (no error) — neutral chrome (locked round 6) ───
     case 'open':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, glyph: 'valve',
-        positionLabel: 'Open', errorLabel: null, actions: ['close'] };
+        positionKey: 'open', errorKey: null, actions: ['close'] };
     case 'closed':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, glyph: 'valve', badge: 'lock',
-        positionLabel: 'Closed', errorLabel: null, actions: ['open'] };
+        positionKey: 'closed', errorKey: null, actions: ['open'] };
 
     // ─── Just-clicked (UI-only, waiting for device confirm) — neutral chrome,
     //     spinner conveys "sending" ───
     case 'sending-close':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, spinner: true, spinnerColor: BRAND.neutral,
-        positionLabel: 'Sending command…', errorLabel: null,
+        positionKey: 'sending_command', errorKey: null,
         actions: ['close'], actionsDisabled: true, progressBar: true };
     case 'sending-open':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, spinner: true, spinnerColor: BRAND.neutral,
-        positionLabel: 'Sending command…', errorLabel: null,
+        positionKey: 'sending_command', errorKey: null,
         actions: ['open'], actionsDisabled: true, progressBar: true };
 
     // ─── In-motion (device confirmed) — neutral chrome, spinner conveys motion ───
     case 'closing':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, spinner: true, spinnerColor: BRAND.neutral,
-        positionLabel: 'Closing…', errorLabel: null,
+        positionKey: 'closing', errorKey: null,
         actions: ['open'], progressBar: true }; // reverse action so user can cancel
     case 'opening':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, spinner: true, spinnerColor: BRAND.neutral,
-        positionLabel: 'Opening…', errorLabel: null,
+        positionKey: 'opening', errorKey: null,
         actions: ['close'], progressBar: true };
     case 'verifying':
       return { iconBg: BRAND.neutralBg, iconColor: BRAND.neutral, spinner: true, spinnerColor: BRAND.neutral,
-        positionLabel: 'Valve closed - checking water has stopped', errorLabel: null,
+        positionKey: 'verifying_no_flow', errorKey: null,
         actions: ['open'], progressBar: true };
 
     // ─── Always-paired-with-error per PRD §2.1 / §4.1 / §4.2 ───
-    // All error states use the `valve` glyph + red `!` badge so the user
-    // sees both "this is a valve" + "something's wrong" at a glance.
-    // The specific error TYPE is in errorLabel text.
-    // (Middle / Unknown are RED in round 6 - they're always errored anyway.)
     case 'middle':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Middle', errorLabel: 'Valve error - indicator failure',
+        positionKey: 'middle', errorKey: 'indicator_failure',
         actions: ['open', 'close'] };
     case 'unknown':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Unknown', errorLabel: 'Valve error - indicator failure',
+        positionKey: 'unknown', errorKey: 'indicator_failure',
         actions: ['open', 'close'] };
 
     // ─── Open/Closed with error → "(?)" suffix per PRD §8.1.1 ───
     case 'open-error-flow':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Open (?)', errorLabel: 'Valve Error - flow detected while closed',
+        positionKey: 'open_uncertain', errorKey: 'flow_detected',
         actions: ['close'] };
     case 'closed-error-flow':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Closed (?)', errorLabel: 'Valve Error - flow detected while closed',
+        positionKey: 'closed_uncertain', errorKey: 'flow_detected',
         actions: ['open'] };
     case 'open-error-indicator':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Open (?)', errorLabel: 'Valve error - indicator failure on open',
+        positionKey: 'open_uncertain', errorKey: 'indicator_failure_on_open',
         actions: ['close'] };
     case 'closed-error-indicator':
     case 'error':  // legacy generic — map to Closed + Indicator error
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Closed (?)', errorLabel: 'Valve error - indicator failure on close',
+        positionKey: 'closed_uncertain', errorKey: 'indicator_failure_on_close',
         actions: ['open'] };
     case 'open-error-unexpected':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Open (?)', errorLabel: 'Valve Error - unexpected change of position',
+        positionKey: 'open_uncertain', errorKey: 'unexpected_position_change',
         actions: ['close'] };
     case 'closed-error-unexpected':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: 'Closed (?)', errorLabel: 'Valve Error - unexpected change of position',
+        positionKey: 'closed_uncertain', errorKey: 'unexpected_position_change',
         actions: ['open'] };
 
     // ─── Disconnected — no actions per PRD §8.1 ───
     case 'disconnected':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, glyph: 'valve', badge: 'error',
-        positionLabel: null, errorLabel: 'Disconnected', actions: [] };
+        positionKey: null, errorKey: 'disconnected', actions: [] };
     case 'verifying-disconnected':
       return { iconBg: BRAND.errorBg, iconColor: BRAND.error, spinner: true, spinnerColor: BRAND.error,
-        positionLabel: 'Verifying Closed', errorLabel: 'Disconnected - verification paused',
+        positionKey: 'verifying_closed', errorKey: 'disconnected_verification_paused',
         actions: [], progressBar: true };
 
     default:
@@ -195,6 +194,7 @@ const TRANSIENT_STATES = new Set([
 ]);
 
 export default function ValveControlCard({ sys, tenantMode }) {
+  const { t } = useTranslation();
   const { theme } = useTheme();
   const [valveState, setValveState] = useState(sys?.valve || 'closed');
   const [showConfirm, setShowConfirm] = useState(false);
@@ -303,7 +303,7 @@ export default function ValveControlCard({ sys, tenantMode }) {
   const isMultiAction = vs.actions && vs.actions.length === 2;
 
   const renderActionButton = (action, compact = false) => {
-    const label = action === 'open' ? 'Open' : 'Close';
+    const label = t(`system_detail.valve_widget.actions.${action}`);
     const isDisabled = vs.actionsDisabled;
     return (
       <button
@@ -357,21 +357,21 @@ export default function ValveControlCard({ sys, tenantMode }) {
 
           {/* Text — title + position + (optional) error */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 600, color: BRAND.navy }}>Valve Status</div>
-            {vs.positionLabel && (
+            <div style={{ fontSize: 15, fontWeight: 600, color: BRAND.navy }}>{t('system_detail.valve_widget.title')}</div>
+            {vs.positionKey && (
               <div style={{ fontSize: 14, color: BRAND.body, marginTop: 2, lineHeight: 1.4 }}>
-                {vs.positionLabel}
+                {t(`system_detail.valve_widget.position.${vs.positionKey}`)}
               </div>
             )}
-            {vs.errorLabel && (
+            {vs.errorKey && (
               <div style={{ fontSize: 14, color: BRAND.error, fontWeight: 600, marginTop: 2, lineHeight: 1.4 }}>
-                {vs.errorLabel}
+                {t(`system_detail.valve_widget.errors.${vs.errorKey}`)}
               </div>
             )}
             {isOffline && (
               <div style={{ fontSize: 13, color: BRAND.mute2, marginTop: 4, lineHeight: 1.4, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: BRAND.mute2, fontVariationSettings: "'FILL' 0" }}>wifi_off</span>
-                System is offline
+                {t('offline.system_offline')}
               </div>
             )}
             {/* Auto-shutoff policy indicator. Locked round 6:
@@ -382,13 +382,13 @@ export default function ValveControlCard({ sys, tenantMode }) {
             {autoShutoff === 'Enabled' && (
               <div style={{ fontSize: 12.5, color: '#7a8189', marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 5, lineHeight: 1.4 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#7a8189', fontVariationSettings: "'FILL' 0", lineHeight: 1 }}>shield</span>
-                Auto-shutoff enabled
+                {t('system_detail.valve_widget.auto_shutoff_enabled')}
               </div>
             )}
             {autoShutoff === 'Disabled' && (
               <div style={{ fontSize: 12.5, color: '#B85C00', marginTop: 4, display: 'inline-flex', alignItems: 'center', gap: 5, lineHeight: 1.4 }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#B85C00', fontVariationSettings: "'FILL' 0", lineHeight: 1 }}>shield</span>
-                Auto-shutoff disabled
+                {t('system_detail.valve_widget.auto_shutoff_disabled')}
               </div>
             )}
           </div>
