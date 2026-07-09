@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TAG_GROUPS } from '../data/tagTaxonomy';
 
 /**
@@ -24,6 +25,7 @@ import { TAG_GROUPS } from '../data/tagTaxonomy';
  */
 
 export default function IgnoreBottomSheet({ onClose, onConfirm }) {
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(null);
   const [detail, setDetail] = useState('');
   const [moreOpen, setMoreOpen] = useState({ wrong: false, expected: false });
@@ -52,7 +54,7 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
           cursor: 'pointer', fontFamily: 'inherit', lineHeight: 1.2,
           whiteSpace: 'nowrap',
         }}
-      >{chip}</button>
+      >{t(`tag_common.chips.${chip}`, chip)}</button>
     );
   }
 
@@ -68,7 +70,7 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
           fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
           cursor: 'pointer', lineHeight: 1.2, whiteSpace: 'nowrap',
         }}
-      >{isOpen ? 'Less…  ⌃' : 'More…  ⌄'}</button>
+      >{isOpen ? `${t('tag_common.less')}  ⌃` : `${t('tag_common.more')}  ⌄`}</button>
     );
   }
 
@@ -93,7 +95,7 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
 
         {/* Title row */}
         <div style={{ display: 'flex', alignItems: 'center', fontSize: 16, fontWeight: 700, color: '#14151A', marginBottom: 8 }}>
-          Ignore this Water Event?
+          {t('ignore_sheet.title')}
           <span
             onClick={() => onClose?.()}
             className="material-symbols-outlined"
@@ -108,11 +110,11 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
           borderRadius: '0 8px 8px 0', padding: '8px 11px',
           fontSize: 12.5, color: '#8C5A0F', lineHeight: 1.5, margin: '4px 0 12px',
         }}>
-          <b style={{ color: '#553a08' }}>⚠ Ignoring this Water Event is final.</b>
+          <b style={{ color: '#553a08' }}>{t('ignore_sheet.warning_header')}</b>
           <ul style={{ margin: '4px 0 0', paddingLeft: 16 }}>
-            <li>It moves to History.</li>
-            <li>No more notifications will be sent about it.</li>
-            <li>The valve (if any) will not be automatically closed.</li>
+            <li>{t('ignore_sheet.warning_bullet_history')}</li>
+            <li>{t('ignore_sheet.warning_bullet_no_notify')}</li>
+            <li>{t('ignore_sheet.warning_bullet_no_shutoff')}</li>
           </ul>
         </div>
 
@@ -125,8 +127,8 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
               textTransform: 'uppercase', letterSpacing: '.4px',
               marginBottom: 7,
             }}>
-              {group.label}
-              <span style={{ color: '#9DA3AE', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}> (optional)</span>
+              {t(`tag_common.groups.${group.id}`, group.label)}
+              <span style={{ color: '#9DA3AE', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}> {t('tag_common.group_label_optional')}</span>
             </div>
 
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
@@ -145,11 +147,11 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
                 {group.id === 'expected' && (
                   <>
                     <div style={{ borderTop: '1px solid #E8ECF0', margin: '10px 0 8px' }} />
-                    <div style={{ fontSize: 12, color: '#717684', marginBottom: 4 }}>Not in the list? Type it:</div>
+                    <div style={{ fontSize: 12, color: '#717684', marginBottom: 4 }}>{t('tag_common.other_prompt')}</div>
                     <input
                       value={otherText}
                       onChange={e => setOtherText(e.target.value)}
-                      placeholder="Describe in your own words…"
+                      placeholder={t('tag_common.other_placeholder')}
                       style={{
                         width: '100%', padding: '8px 10px', fontSize: 13,
                         border: '1px solid #DEE0E3', borderRadius: 8,
@@ -169,11 +171,11 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
         {/* Detail field — revealed once a chip is picked */}
         {selected && (
           <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 12, color: '#717684', marginBottom: 4 }}>Add detail (optional):</div>
+            <div style={{ fontSize: 12, color: '#717684', marginBottom: 4 }}>{t('ignore_sheet.detail_label')}</div>
             <input
               value={detail}
               onChange={e => setDetail(e.target.value)}
-              placeholder="e.g. left cell, sink in lobby…"
+              placeholder={t('ignore_sheet.detail_placeholder')}
               style={{
                 width: '100%', padding: '8px 10px', fontSize: 13,
                 border: '1px solid #DEE0E3', borderRadius: 8,
@@ -196,7 +198,7 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
               border: '1px solid #E2E6EB',
               fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
             }}
-          >Cancel</button>
+          >{t('ignore_sheet.cancel')}</button>
           <button
             onClick={commit}
             style={{
@@ -204,7 +206,7 @@ export default function IgnoreBottomSheet({ onClose, onConfirm }) {
               background: '#a5455e', color: '#fff', border: 'none',
               fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
             }}
-          >Ignore</button>
+          >{t('ignore_sheet.confirm')}</button>
         </div>
       </div>
     </div>

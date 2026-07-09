@@ -429,6 +429,7 @@ function DayHeader({ label, theme }) {
 
 // ─── Single event row — Variant A anatomy ────────────────────────────────
 function Row({ row, hasPanel, supportsTag, isExpanded, onToggle, isDayStart, theme, isNotifiedExpanded, toggleNotified, openTagSheet, tagBumper }) {
+  const { t } = useTranslation();
   const r = row;
   const dotBg     = r.color + '1A';  // 10% alpha
   const dotBorder = r.color;
@@ -539,11 +540,13 @@ function Row({ row, hasPanel, supportsTag, isExpanded, onToggle, isDayStart, the
                 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 12, color: theme.textSecondary }}>add</span>
-                Tag
+                {t('timeline.tag')}
               </span>
             ) : (
-              tagList.map((t, i) => {
-                const label = t.chip === 'Other' && t.chipOther ? t.chipOther : (t.chip || t.chipOther || '');
+              tagList.map((tag, i) => {
+                const label = tag.chip === 'Other' && tag.chipOther
+                  ? tag.chipOther
+                  : (tag.chip ? t(`tag_common.chips.${tag.chip}`, tag.chip) : (tag.chipOther || ''));
                 return (
                   <span
                     key={i}
@@ -583,6 +586,7 @@ function Row({ row, hasPanel, supportsTag, isExpanded, onToggle, isDayStart, the
 // receive it), not by recipient. Method rows with zero recipients are
 // omitted entirely (no empty "SMS - none" placeholders).
 function ExpandedPanel({ row, theme, isNotifiedExpanded, toggleNotified, supportsTag, tagList, openTagSheet }) {
+  const { t } = useTranslation();
   const r = row;
   const recipients = r.notifications || [];
 
@@ -614,7 +618,7 @@ function ExpandedPanel({ row, theme, isNotifiedExpanded, toggleNotified, support
         <span style={{
           fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px',
           color: theme.textTertiary,
-        }}>Recipients</span>
+        }}>{t('timeline.recipients')}</span>
         <div style={{
           flex: 1, minWidth: 0,
           fontSize: 12.5, color: theme.textSecondary,
@@ -623,11 +627,11 @@ function ExpandedPanel({ row, theme, isNotifiedExpanded, toggleNotified, support
           {/* Folded-state summary line - no envelope, no chips (N3, N7).
               Just the count + a hint to expand. */}
           {!isNotifiedExpanded && (
-            <span><b style={{ color: theme.text }}>{recipients.length}</b> {recipients.length === 1 ? 'recipient' : 'recipients'}</span>
+            <span><b style={{ color: theme.text }}>{recipients.length}</b> {t('timeline.recipients_count', { count: recipients.length })}</span>
           )}
         </div>
         <div style={{ fontSize: 11.5, fontWeight: 600, color: '#036AB5', whiteSpace: 'nowrap' }}>
-          {isNotifiedExpanded ? 'Hide ↑' : 'Show ↓'}
+          {isNotifiedExpanded ? `${t('timeline.hide')} ↑` : `${t('timeline.show')} ↓`}
         </div>
       </div>
 
@@ -670,19 +674,19 @@ function ExpandedPanel({ row, theme, isNotifiedExpanded, toggleNotified, support
             <span style={{
               fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px',
               color: theme.textTertiary, flex: 1,
-            }}>Tags{tagList.length > 0 ? ` (${tagList.length})` : ''}</span>
+            }}>{t('timeline.tags_section')}{tagList.length > 0 ? ` (${tagList.length})` : ''}</span>
             {tagList.length > 0 && (
               <span
                 onClick={(e) => { e.stopPropagation(); openTagSheet(r.id); }}
                 style={{ fontSize: 11, fontWeight: 600, color: '#036AB5', cursor: 'pointer' }}
-              >Edit</span>
+              >{t('timeline.edit')}</span>
             )}
           </div>
 
           {tagList.length === 0 ? (
             <div style={{ marginTop: 6 }}>
               <div style={{ fontSize: 12, color: theme.textTertiary, fontStyle: 'italic', marginBottom: 8 }}>
-                Not tagged yet.
+                {t('timeline.not_tagged_yet')}
               </div>
               <span
                 onClick={(e) => { e.stopPropagation(); openTagSheet(r.id); }}
@@ -694,16 +698,18 @@ function ExpandedPanel({ row, theme, isNotifiedExpanded, toggleNotified, support
                 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 14, color: '#fff' }}>add</span>
-                Tag the cause
+                {t('timeline.tag_the_cause')}
               </span>
             </div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 6 }}>
-              {tagList.map((t, i) => {
-                const label = t.chip === 'Other' && t.chipOther ? t.chipOther : (t.chip || t.chipOther || '');
-                const attrDate = t.addedAt ? new Date(t.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
-                const attrTime = t.addedAt ? new Date(t.addedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : null;
-                const sub = [t.addedBy && `by ${t.addedBy}`, attrDate && `${attrDate} ${attrTime}`].filter(Boolean).join(' · ');
+              {tagList.map((tag, i) => {
+                const label = tag.chip === 'Other' && tag.chipOther
+                  ? tag.chipOther
+                  : (tag.chip ? t(`tag_common.chips.${tag.chip}`, tag.chip) : (tag.chipOther || ''));
+                const attrDate = tag.addedAt ? new Date(tag.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+                const attrTime = tag.addedAt ? new Date(tag.addedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }) : null;
+                const sub = [tag.addedBy && `${t('timeline.by')} ${tag.addedBy}`, attrDate && `${attrDate} ${attrTime}`].filter(Boolean).join(' · ');
                 return (
                   <div key={i} style={{
                     padding: '4px 10px', borderRadius: 14,

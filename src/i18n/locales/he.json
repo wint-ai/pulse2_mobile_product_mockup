@@ -264,6 +264,17 @@
     "activity_on": "פעילות ב-{{name}}",
     "activity_on_this_system": "פעילות במערכת זו",
     "no_older_events": "אין אירועים ישנים יותר",
+    "tag": "תיוג",
+    "tag_the_cause": "תיוג הסיבה",
+    "tags_section": "תיוגים",
+    "edit": "עריכה",
+    "not_tagged_yet": "עדיין לא תויג.",
+    "recipients": "נמענים",
+    "recipients_count_one": "נמען",
+    "recipients_count_other": "נמענים",
+    "hide": "הסתר",
+    "show": "הצג",
+    "by": "על ידי",
     "filters": {
       "water": "אירועי מים",
       "valve": "ברזים",
@@ -328,5 +339,56 @@
     "couldnt_refresh": "לא ניתן לרענן את הנתונים",
     "couldnt_refresh_desc": "מציג נתונים אחרונים · ננסה שוב",
     "updating": "מעדכן…"
+  },
+  "ignore_sheet": {
+    "title": "לסמן את האירוע כלא רלוונטי?",
+    "warning_header": "⚠ סימון אירוע מים כלא רלוונטי הוא סופי.",
+    "warning_bullet_history": "האירוע יעבור להיסטוריה.",
+    "warning_bullet_no_notify": "לא יישלחו על כך התראות נוספות.",
+    "warning_bullet_no_shutoff": "הברז (אם קיים) לא ייסגר אוטומטית.",
+    "detail_label": "פרטים נוספים (אופציונלי):",
+    "detail_placeholder": "לדוגמה: אגף שמאלי, כיור בלובי…",
+    "cancel": "ביטול",
+    "confirm": "סמן כלא רלוונטי"
+  },
+  "tag_sheet": {
+    "title": "תיוג אירוע המים",
+    "pitch": "המערכת לומדת - ככל שתתייגו יותר, הדוחות ישתפרו.",
+    "currently_tagged": "תויג כעת ({{count}})",
+    "already_tagged": "כבר תויג",
+    "remove_tag_aria": "הסר תיוג {{name}}",
+    "add": "הוסף",
+    "done": "סיום"
+  },
+  "tag_common": {
+    "group_label_optional": "(אופציונלי)",
+    "more": "עוד…",
+    "less": "פחות…",
+    "other_prompt": "לא מופיע ברשימה? הקלידו:",
+    "other_placeholder": "תארו במילים שלכם…",
+    "groups": {
+      "wrong": "משהו השתבש?",
+      "expected": "שימוש רגיל"
+    },
+    "chips": {
+      "Broken pipe": "צנרת שבורה",
+      "Stuck/running toilet": "אסלה תקועה / דולפת",
+      "Leaking fixture": "אביזר דולף",
+      "Appliance leak": "נזילה ממכשיר",
+      "Faulty valve": "תקלת ברז",
+      "HVAC / cooling water issue": "תקלה במערכת קירור / מיזוג",
+      "Backflow / sewage": "זרימה חוזרת / ביוב",
+      "Fire system discharge": "הפעלת מערכת כיבוי אש",
+      "Irrigation": "השקיה",
+      "Cleaning": "ניקיון",
+      "Faucet/hose left on": "ברז / צינור נשארו פתוחים",
+      "Shower/bath": "מקלחת / אמבטיה",
+      "Pool/spa filling": "מילוי בריכה / ג'קוזי",
+      "Construction work": "עבודות בנייה",
+      "HVAC routine top-up": "מילוי שגרתי במערכת מיזוג",
+      "Building maintenance": "תחזוקת הבניין",
+      "Fire system test": "בדיקת מערכת כיבוי אש",
+      "Industrial / lab use": "שימוש תעשייתי / מעבדתי"
+    }
   }
 }

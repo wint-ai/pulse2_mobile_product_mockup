@@ -264,6 +264,17 @@
     "activity_on": "Activity on {{name}}",
     "activity_on_this_system": "Activity on this system",
     "no_older_events": "No older events",
+    "tag": "Tag",
+    "tag_the_cause": "Tag the cause",
+    "tags_section": "Tags",
+    "edit": "Edit",
+    "not_tagged_yet": "Not tagged yet.",
+    "recipients": "Recipients",
+    "recipients_count_one": "recipient",
+    "recipients_count_other": "recipients",
+    "hide": "Hide",
+    "show": "Show",
+    "by": "by",
     "filters": {
       "water": "Water",
       "valve": "Valve",
@@ -328,5 +339,56 @@
     "couldnt_refresh": "Couldn't refresh data",
     "couldnt_refresh_desc": "Showing last known state · we'll keep trying",
     "updating": "Updating…"
+  },
+  "ignore_sheet": {
+    "title": "Ignore this Water Event?",
+    "warning_header": "⚠ Ignoring this Water Event is final.",
+    "warning_bullet_history": "It moves to History.",
+    "warning_bullet_no_notify": "No more notifications will be sent about it.",
+    "warning_bullet_no_shutoff": "The valve (if any) will not be automatically closed.",
+    "detail_label": "Add detail (optional):",
+    "detail_placeholder": "e.g. left cell, sink in lobby…",
+    "cancel": "Cancel",
+    "confirm": "Ignore"
+  },
+  "tag_sheet": {
+    "title": "Tag this Water Event",
+    "pitch": "The system learns, your reports get better.",
+    "currently_tagged": "Currently tagged ({{count}})",
+    "already_tagged": "Already tagged",
+    "remove_tag_aria": "Remove tag {{name}}",
+    "add": "Add",
+    "done": "Done"
+  },
+  "tag_common": {
+    "group_label_optional": "(optional)",
+    "more": "More…",
+    "less": "Less…",
+    "other_prompt": "Not in the list? Type it:",
+    "other_placeholder": "Describe in your own words…",
+    "groups": {
+      "wrong": "Was something wrong?",
+      "expected": "Expected use"
+    },
+    "chips": {
+      "Broken pipe": "Broken pipe",
+      "Stuck/running toilet": "Stuck/running toilet",
+      "Leaking fixture": "Leaking fixture",
+      "Appliance leak": "Appliance leak",
+      "Faulty valve": "Faulty valve",
+      "HVAC / cooling water issue": "HVAC / cooling water issue",
+      "Backflow / sewage": "Backflow / sewage",
+      "Fire system discharge": "Fire system discharge",
+      "Irrigation": "Irrigation",
+      "Cleaning": "Cleaning",
+      "Faucet/hose left on": "Faucet/hose left on",
+      "Shower/bath": "Shower/bath",
+      "Pool/spa filling": "Pool/spa filling",
+      "Construction work": "Construction work",
+      "HVAC routine top-up": "HVAC routine top-up",
+      "Building maintenance": "Building maintenance",
+      "Fire system test": "Fire system test",
+      "Industrial / lab use": "Industrial / lab use"
+    }
   }
 }

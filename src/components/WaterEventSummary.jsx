@@ -233,7 +233,11 @@ export default function WaterEventSummary({ event, onClick, highlight }) {
       {(isResolved || isIgnored) && (() => {
         const eventTags = event.id ? getTags(event.id) : [];
         const isTagged = eventTags.length > 0;
-        const labels = eventTags.map(t => t.chip === 'Other' && t.chipOther ? t.chipOther : (t.chip || t.chipOther || '')).filter(Boolean);
+        const labels = eventTags.map(tag => {
+          if (tag.chip === 'Other' && tag.chipOther) return tag.chipOther;
+          if (tag.chip) return t(`tag_common.chips.${tag.chip}`, tag.chip);
+          return tag.chipOther || '';
+        }).filter(Boolean);
         return (
           <div style={{
             padding: '6px 12px 11px',

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TAG_GROUPS } from '../data/tagTaxonomy';
 
 /**
@@ -26,11 +27,11 @@ import { TAG_GROUPS } from '../data/tagTaxonomy';
  * @param {function} onRemove      — called with the index to remove
  */
 
-function tagDisplay(t) {
-  if (!t) return '';
-  if (t.chip === 'Other' && t.chipOther) return t.chipOther;
-  const head = t.chip || t.chipOther || '';
-  return t.detail ? `${head} · ${t.detail}` : head;
+function tagDisplay(tag, tr) {
+  if (!tag) return '';
+  if (tag.chip === 'Other' && tag.chipOther) return tag.chipOther;
+  const head = tag.chip ? tr(`tag_common.chips.${tag.chip}`, tag.chip) : (tag.chipOther || '');
+  return tag.detail ? `${head} · ${tag.detail}` : head;
 }
 
 export default function TagBottomSheet({
@@ -39,6 +40,7 @@ export default function TagBottomSheet({
   onAdd,
   onRemove,
 }) {
+  const { t } = useTranslation();
   // Per-group More expansion state. Each group's More button toggles only
   // that group's hidden chips, independently of the other group.
   const [moreOpen, setMoreOpen] = useState({ wrong: false, expected: false });
@@ -78,8 +80,8 @@ export default function TagBottomSheet({
           cursor: isApplied ? 'not-allowed' : 'pointer',
           lineHeight: 1.2, whiteSpace: 'nowrap',
         }}
-        title={isApplied ? 'Already tagged' : undefined}
-      >{chip}</button>
+        title={isApplied ? t('tag_sheet.already_tagged') : undefined}
+      >{t(`tag_common.chips.${chip}`, chip)}</button>
     );
   }
 
@@ -95,7 +97,7 @@ export default function TagBottomSheet({
           fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
           cursor: 'pointer', lineHeight: 1.2, whiteSpace: 'nowrap',
         }}
-      >{isOpen ? 'Less…  ⌃' : 'More…  ⌄'}</button>
+      >{isOpen ? `${t('tag_common.less')}  ⌃` : `${t('tag_common.more')}  ⌄`}</button>
     );
   }
 
@@ -120,7 +122,7 @@ export default function TagBottomSheet({
 
         {/* Title row */}
         <div style={{ display: 'flex', alignItems: 'center', fontSize: 16, fontWeight: 700, color: '#14151A', marginBottom: 4 }}>
-          Tag this Water Event
+          {t('tag_sheet.title')}
           <span
             onClick={() => onClose?.()}
             className="material-symbols-outlined"
@@ -132,28 +134,28 @@ export default function TagBottomSheet({
             motivation the user saw in the End-of-Event push that may have
             led them here. */}
         <div style={{ fontSize: 12.5, color: '#4A4F5A', marginBottom: 12, lineHeight: 1.45 }}>
-          The system learns, your reports get better.
+          {t('tag_sheet.pitch')}
         </div>
 
         {/* ─── Currently tagged ─── */}
         {currentTags.length > 0 && (
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#717684', textTransform: 'uppercase', letterSpacing: '.4px', marginBottom: 6 }}>
-              Currently tagged ({currentTags.length})
+              {t('tag_sheet.currently_tagged', { count: currentTags.length })}
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {currentTags.map((t, i) => (
+              {currentTags.map((tag, i) => (
                 <span key={i} style={{
                   display: 'inline-flex', alignItems: 'center', gap: 2,
                   padding: '5px 4px 5px 11px', borderRadius: 18,
                   background: 'rgba(11,149,248,0.10)',
                   color: '#036AB5', fontSize: 13, fontWeight: 600, lineHeight: 1.2,
                 }}>
-                  {tagDisplay(t)}
+                  {tagDisplay(tag, t)}
                   <button
                     onClick={() => onRemove?.(i)}
-                    aria-label={`Remove tag ${tagDisplay(t)}`}
-                    title="Remove"
+                    aria-label={t('tag_sheet.remove_tag_aria', { name: tagDisplay(tag, t) })}
+                    title={t('tag_sheet.remove_tag_aria', { name: tagDisplay(tag, t) })}
                     style={{
                       width: 22, height: 22, borderRadius: '50%',
                       background: 'transparent', border: 'none',
@@ -177,8 +179,8 @@ export default function TagBottomSheet({
               textTransform: 'uppercase', letterSpacing: '.4px',
               marginBottom: 7,
             }}>
-              {group.label}
-              <span style={{ color: '#9DA3AE', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}> (optional)</span>
+              {t(`tag_common.groups.${group.id}`, group.label)}
+              <span style={{ color: '#9DA3AE', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}> {t('tag_common.group_label_optional')}</span>
             </div>
 
             {/* Always-visible chips + per-group More toggle */}
@@ -199,13 +201,13 @@ export default function TagBottomSheet({
                 {group.id === 'expected' && (
                   <>
                     <div style={{ borderTop: '1px solid #E8ECF0', margin: '10px 0 8px' }} />
-                    <div style={{ fontSize: 12, color: '#717684', marginBottom: 4 }}>Not in the list? Type it:</div>
+                    <div style={{ fontSize: 12, color: '#717684', marginBottom: 4 }}>{t('tag_common.other_prompt')}</div>
                     <div style={{ display: 'flex', gap: 6 }}>
                       <input
                         value={otherText}
                         onChange={e => setOtherText(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') commitOther(); }}
-                        placeholder="Describe in your own words…"
+                        placeholder={t('tag_common.other_placeholder')}
                         style={{
                           flex: 1, padding: '8px 10px', fontSize: 13,
                           border: '1px solid #DEE0E3', borderRadius: 8,
@@ -226,7 +228,7 @@ export default function TagBottomSheet({
                           fontWeight: 700, fontSize: 13, fontFamily: 'inherit',
                           cursor: otherText.trim() ? 'pointer' : 'not-allowed',
                         }}
-                      >Add</button>
+                      >{t('tag_sheet.add')}</button>
                     </div>
                   </>
                 )}
@@ -245,7 +247,7 @@ export default function TagBottomSheet({
               background: '#14151A', color: '#fff', border: 'none',
               fontWeight: 700, fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
             }}
-          >Done</button>
+          >{t('tag_sheet.done')}</button>
         </div>
       </div>
     </div>
