@@ -10,7 +10,7 @@ import { PERSONAS } from './data/personas';
 import PersonaSelect from './screens/PersonaSelect';
 import ControlPanel from './screens/ControlPanel';
 import PushNotifications from './components/PushNotifications';
-import SplashScreen, { shouldShowSplash } from './components/SplashScreen';
+import SplashScreen from './components/SplashScreen';
 import HomeManager from './screens/home/HomeManager';
 import HomeUnified from './screens/home/HomeUnified';
 import HomeClear from './screens/home/HomeClear';
@@ -99,6 +99,89 @@ function WintLogo({ white = false, width = 120 }) {
     ? `${import.meta.env.BASE_URL}wint-logo-white.svg`
     : `${import.meta.env.BASE_URL}wint-logo.svg`;
   return <img src={src} alt="WINT" style={{ width, height: 'auto' }} />;
+}
+
+// Shared demo password. Cleared to sessionStorage after a correct entry so the
+// user isn't re-challenged on every navigation within the session.
+const DEMO_PASSWORD = 'WINT2026';
+const PASSWORD_SESSION_KEY = 'pulse2-demo-pw-ok';
+
+function PasswordGate({ children }) {
+  const { t } = useTranslation();
+  const [ok, setOk] = useState(() => sessionStorage.getItem(PASSWORD_SESSION_KEY) === '1');
+  const [entered, setEntered] = useState('');
+  const [error, setError] = useState(false);
+
+  function submit() {
+    if (entered === DEMO_PASSWORD) {
+      sessionStorage.setItem(PASSWORD_SESSION_KEY, '1');
+      setOk(true);
+    } else {
+      setError(true);
+    }
+  }
+
+  if (ok) return children;
+
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0,
+      background: '#fff',
+      fontFamily: 'Inter, -apple-system, sans-serif',
+      maxWidth: 500, width: '100%', margin: '0 auto',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '32px 24px',
+    }}>
+      <div style={{ marginBottom: 16 }}>
+        <WintLogo width={110} />
+      </div>
+      <div style={{ height: 3, width: 90, background: 'linear-gradient(90deg, #0B95F8, #4CC9F0)', borderRadius: 2, marginBottom: 28 }} />
+
+      <div style={{ fontSize: 18, fontWeight: 700, color: '#14151A', letterSpacing: '-0.3px', marginBottom: 6 }}>
+        {t('password_gate.title')}
+      </div>
+      <div style={{ fontSize: 13, color: '#717684', marginBottom: 22, textAlign: 'center', lineHeight: 1.45 }}>
+        {t('password_gate.subline')}
+      </div>
+
+      <input
+        type="password"
+        autoFocus
+        value={entered}
+        onChange={(e) => { setEntered(e.target.value); setError(false); }}
+        onKeyDown={(e) => { if (e.key === 'Enter') submit(); }}
+        placeholder={t('password_gate.placeholder')}
+        style={{
+          width: '100%', maxWidth: 320,
+          padding: '13px 16px', fontSize: 16, fontFamily: 'inherit',
+          border: `1.5px solid ${error ? '#DB4670' : '#DEE0E3'}`,
+          borderRadius: 10, outline: 'none',
+          color: '#14151A', background: '#fff',
+          textAlign: 'center', letterSpacing: 2,
+          boxSizing: 'border-box',
+        }}
+      />
+      {error && (
+        <div style={{ marginTop: 10, fontSize: 13, color: '#DB4670', fontWeight: 500 }}>
+          {t('password_gate.error')}
+        </div>
+      )}
+
+      <button
+        onClick={submit}
+        disabled={!entered}
+        style={{
+          marginTop: 18, width: '100%', maxWidth: 320,
+          padding: 13, borderRadius: 10,
+          background: entered ? '#0B95F8' : '#E8EAED',
+          color: entered ? '#fff' : '#9DA3AE',
+          border: 'none',
+          fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
+          cursor: entered ? 'pointer' : 'not-allowed',
+        }}
+      >{t('password_gate.submit')}</button>
+    </div>
+  );
 }
 
 function LoginGate({ children }) {
@@ -445,11 +528,13 @@ function AppShell() {
     <ThemeProvider>
       <UserProvider>
         <Phone>
-          <PushNotifications>
-            <LoginGate>
-              <AppRoutes />
-            </LoginGate>
-          </PushNotifications>
+          <PasswordGate>
+            <PushNotifications>
+              <LoginGate>
+                <AppRoutes />
+              </LoginGate>
+            </PushNotifications>
+          </PasswordGate>
           <SplashController />
         </Phone>
       </UserProvider>
@@ -458,9 +543,10 @@ function AppShell() {
 }
 
 function SplashController() {
-  const [show, setShow] = useState(() => shouldShowSplash());
-  // Listen for explicit triggers (fired by LoginGate on every successful
-  // login — option C: animated splash plays after auth, not just on cold load).
+  // Splash plays ONLY after profile selection (option C locked 2026-07-13):
+  // cold app load shows the password gate + persona picker directly, no
+  // splash. LoginGate fires `wint-trigger-splash` after successful pick.
+  const [show, setShow] = useState(false);
   useEffect(() => {
     const handler = () => setShow(true);
     window.addEventListener('wint-trigger-splash', handler);

@@ -340,6 +340,13 @@
     "couldnt_refresh_desc": "מציג נתונים אחרונים · ננסה שוב",
     "updating": "מעדכן…"
   },
+  "password_gate": {
+    "title": "הזינו סיסמה להדגמה",
+    "subline": "זוהי תצוגה מקדימה פרטית של אפליקציית Pulse2.",
+    "placeholder": "סיסמה",
+    "submit": "המשך",
+    "error": "סיסמה שגויה."
+  },
   "login": {
     "sign_in_as": "כניסה בתור",
     "demo_subline": "מצב הדגמה · בחרו פרופיל להמשך",

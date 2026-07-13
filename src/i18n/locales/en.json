@@ -340,6 +340,13 @@
     "couldnt_refresh_desc": "Showing last known state · we'll keep trying",
     "updating": "Updating…"
   },
+  "password_gate": {
+    "title": "Enter demo password",
+    "subline": "This is a private preview of the Pulse2 mobile app.",
+    "placeholder": "Password",
+    "submit": "Continue",
+    "error": "Incorrect password."
+  },
   "login": {
     "sign_in_as": "Sign in as",
     "demo_subline": "Demo mode · pick a profile to continue",
