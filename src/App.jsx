@@ -25,6 +25,16 @@ import EventHistory from './screens/EventHistory';
 import AccountScreen from './screens/AccountScreen';
 import KPIDetailScreen from './screens/kpi/KPIDetailScreen';
 import TenantPropertiesList from './screens/home/TenantPropertiesList';
+import TechHome from './screens/technician/TechHome';
+import TechLocations from './screens/technician/TechLocations';
+import TechHistory from './screens/technician/TechHistory';
+import TechSearch from './screens/technician/TechSearch';
+import TechWSDetail from './screens/technician/TechWSDetail';
+import TechCUDetail from './screens/technician/TechCUDetail';
+import TechPhotos from './screens/technician/TechPhotos';
+import TechSyncQueue from './screens/technician/TechSyncQueue';
+import TechNotifications from './screens/technician/TechNotifications';
+import TechProfile from './screens/technician/TechProfile';
 
 const TAB_ORDER = ['/', '/systems', '/alerts', '/account'];
 
@@ -53,6 +63,15 @@ function SystemsRouter() {
   return <HomeUnified />;
 }
 
+/* Home router — technicians go to /tech, everyone else gets HomeUnified */
+function HomeRouter() {
+  const { persona } = useUserContext() || {};
+  if (persona?.tabMode === 'technician') {
+    return <Navigate to="/tech" replace />;
+  }
+  return <HomeUnified />;
+}
+
 function AppRoutes() {
   return (
       <Routes>
@@ -60,7 +79,7 @@ function AppRoutes() {
         <Route path="/select" element={<PersonaSelect />} />
 
         {/* Home variants */}
-        <Route path="/" element={<HomeUnified />} />
+        <Route path="/" element={<HomeRouter />} />
         <Route path="/home-clear" element={<HomeClear />} />
         <Route path="/tenant" element={<TenantHome />} />
         <Route path="/home-multi" element={<HomeMultiAccount />} />
@@ -86,6 +105,18 @@ function AppRoutes() {
 
         {/* Account */}
         <Route path="/account" element={<AccountScreen />} />
+
+        {/* Technician routes */}
+        <Route path="/tech" element={<TechHome />} />
+        <Route path="/tech/locations" element={<TechLocations />} />
+        <Route path="/tech/history" element={<TechHistory />} />
+        <Route path="/tech/search" element={<TechSearch />} />
+        <Route path="/tech/ws/:wsId" element={<TechWSDetail />} />
+        <Route path="/tech/ws/:wsId/photos" element={<TechPhotos />} />
+        <Route path="/tech/cu/:cuId" element={<TechCUDetail />} />
+        <Route path="/tech/sync" element={<TechSyncQueue />} />
+        <Route path="/tech/notifications" element={<TechNotifications />} />
+        <Route path="/tech/profile" element={<TechProfile />} />
 
         {/* Default — go to home */}
         <Route path="*" element={<Navigate to="/" replace />} />

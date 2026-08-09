@@ -60,6 +60,48 @@ const TABS_TENANT = [
   { key: 'account', label: 'More',    path: '/account', filled: MORE_ICON_FILLED,    stroke: MORE_ICON_STROKE },
 ];
 
+// Technician icons
+const LOCATION_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/>
+  </svg>
+);
+const LOCATION_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+    <circle cx="12" cy="9" r="2.5"/>
+  </svg>
+);
+const HISTORY_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13 3a9 9 0 00-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 117 7 6.97 6.97 0 01-4.95-2.05l-1.41 1.41A8.96 8.96 0 0013 21a9 9 0 000-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+  </svg>
+);
+const HISTORY_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 7v5l3.5 2"/>
+  </svg>
+);
+const SEARCH_ICON_FILLED = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+  </svg>
+);
+const SEARCH_ICON_STROKE = (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <circle cx="10" cy="10" r="6"/>
+    <path d="M14.5 14.5L20 20"/>
+  </svg>
+);
+
+const TABS_TECHNICIAN = [
+  { key: 'home',      label: 'Home',      path: '/tech',           filled: HOME_ICON_FILLED,     stroke: HOME_ICON_STROKE },
+  { key: 'locations', label: 'Locations', path: '/tech/locations', filled: LOCATION_ICON_FILLED, stroke: LOCATION_ICON_STROKE },
+  { key: 'history',   label: 'History',   path: '/tech/history',   filled: HISTORY_ICON_FILLED,  stroke: HISTORY_ICON_STROKE },
+  { key: 'search',    label: 'Search',    path: '/tech/search',    filled: SEARCH_ICON_FILLED,   stroke: SEARCH_ICON_STROKE },
+];
+
 export default function TabBar({ activeTab }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,6 +109,7 @@ export default function TabBar({ activeTab }) {
   const userCtx = useUserContext() || {};
   const { persona, visibleSystems = [] } = userCtx;
   const isTenant = persona?.tabMode === 'tenant';
+  const isTechnician = persona?.tabMode === 'technician';
 
   // For single-system tenants, Home tab points directly to their system
   const tenantTabs = isTenant && visibleSystems.length === 1
@@ -77,7 +120,7 @@ export default function TabBar({ activeTab }) {
       ]
     : TABS_TENANT;
 
-  const tabs = isTenant ? tenantTabs : TABS_FULL;
+  const tabs = isTechnician ? TABS_TECHNICIAN : isTenant ? tenantTabs : TABS_FULL;
 
   return (
     <div

@@ -137,6 +137,25 @@ export const PERSONAS = [
   // ── WINT STAFF ─────────────────────────────────────────────────────────────
 
   DEFAULT_PERSONA,
+
+  // ── TECHNICIANS ──────────────────────────────────────────────────────────────
+
+  {
+    id: 'technician-1',
+    name: 'David Levy',
+    role: 'Field Technician',
+    sub: 'Hilton Hotels & Marriott',
+    description: 'Certified field technician assigned to Hilton Hotels and Marriott. Handles CU pairing, VMA pairing, TSO, and WiFi setup.',
+    email: 'david.levy@wint.ai',
+    phone: '+972521234567',
+    icon: '\uD83D\uDD27',
+    color: '#0D9488',
+    bg: '#F0FDFA',
+    isWint: true,
+    homePath: '/tech',
+    tabMode: 'technician',
+    systemFilter: () => false, // Technician uses separate data layer
+  },
 ];
 
 export function getPersonaById(id) {
