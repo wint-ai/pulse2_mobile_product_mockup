@@ -3,25 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { TAG_GROUPS } from '../data/tagTaxonomy';
 
 /**
- * Chip-based Ignore bottom sheet — matches ignore-tag-flows.html Phone 3a/3b
- * (the locked canonical reference).
- *
- * 2026-06-04 — refactored to two-group taxonomy per PRD 14 § 5.1 +
- * PRD 15 § 5.3 / § 5.4:
- *   • Warning block at top (consequences of ignoring).
- *   • Group A — Was something wrong? (5 visible + 3 More)
- *   • Group B — Expected use (6 visible + 4 More + Other free-text)
- *   • Per-group More expansion (independent state per group).
- *   • Same chip set as the Tag bottom sheet — NO chip exclusions.
- *     Broken pipe is intentionally available; the warning block is the
- *     only safeguard (PRD 14 § 5.1.3, PRD 14 § 9 non-goals).
- *   • Single-chip selection (vs Tag sheet's multi-tag) — at ignore time the
- *     user picks the one reason; further tags can be added later via the
- *     closed-event Tag sheet (PRD 15 § 4).
- *   • The Ignore button is always enabled — tag is optional.
- *
- * @param {function} onClose  — dismiss without ignoring.
- * @param {function} onConfirm — called with { chip, chipOther, detail }.
+ * Chip-based Ignore bottom sheet.
+ * Authoritative source: https://wintai.atlassian.net/wiki/spaces/PM/pages/1735098835/Ignore+-+in+Pulse+2
+ * Tag chip taxonomy: docs/PRD/15-tag.md (in the sandbox repo).
  */
 
 export default function IgnoreBottomSheet({ onClose, onConfirm }) {
